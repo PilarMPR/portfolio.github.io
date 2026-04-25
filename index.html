@@ -643,7 +643,7 @@ function handleTap() {
     tapTimer = setTimeout(function() { 
       tapCount = 0; 
       logo.textContent = 'PMPR';
-    }, 500);
+    }, 1000); // 1 second window
   }
   if (tapCount >= 6) {
     tapCount = 0;
@@ -652,6 +652,14 @@ function handleTap() {
     openEditor();
   }
 }
+
+// Keyboard shortcut: Ctrl+Shift+E (or Cmd+Shift+E on Mac)
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'e') {
+    e.preventDefault();
+    togglePanel();
+  }
+});
 
 function openEditor() {
   document.getElementById('edit-panel').classList.add('open');

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Case Study</title>
+<link id="font-link" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+     CASE STUDY PAGE — Soft Latte cozy theme
+     Mirrors the tokens used in index.html so customizations carry over.
+     ============================================================================ */
+:root {
+  --bg: #F5EFE6;
+  --bg2: #EDE3D2;
+  --bg3: #E6DAC5;
+  --accent: #C2410C;
+  --white: #3B2F2A;
+  --muted: #8B7B6E;
+  --faint: #DCCFBE;
+  --text-rgb: 59,47,42;
+  --nav-bg: rgba(245,239,230,.85);
+  --lightbox-bg: rgba(59,47,42,.92);
+  --fd: 'Unbounded', sans-serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'DM Mono', monospace;
+  --fi: 'Instrument Serif', serif;
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:var(--fb); background:var(--bg); color:var(--white); -webkit-font-smoothing:antialiased; }
+a { color:inherit; text-decoration:none; }
+img { display:block; max-width:100%; }
+
+/* NAV */
+#nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  height:62px; display:flex; align-items:center;
+  padding:0 clamp(1.5rem,5vw,3.5rem); justify-content:space-between;
+  background:var(--nav-bg); backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--faint);
+}
+.nav-logo {
+  font-family:var(--fd); font-weight:900; font-size:.72rem; letter-spacing:.05em;
+}
+.nav-links { display:flex; gap:2rem; align-items:center; }
+.nav-links a {
+  font-family:var(--fm); font-size:.63rem; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--muted); transition:color .2s;
+}
+.nav-links a:hover { color:var(--white); }
+
+/* CASE STUDY LAYOUT */
+.case-study { padding-top:62px; min-height:100vh; background:var(--bg); }
+.cs-back {
+  display:inline-flex; align-items:center; gap:.6rem;
+  padding:clamp(1.25rem,3vw,2rem) clamp(1.5rem,5vw,3.5rem);
+  font-family:var(--fm); font-size:.65rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); transition:color .2s;
+}
+.cs-back:hover { color:var(--accent); }
+
+.cs-hero {
+  position:relative; height:clamp(220px,42vh,440px); background:var(--bg2); overflow:hidden;
+}
+.cs-hero img { width:100%; height:100%; object-fit:cover; filter:brightness(.78) saturate(.85) sepia(.08); }
+.cs-hero-grad {
+  position:absolute; inset:0;
+  background:linear-gradient(to top,var(--bg) 0%,rgba(var(--text-rgb),.35) 45%,transparent 100%);
+}
+.cs-hero-empty {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--fm); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+}
+.cs-hero-content {
+  position:absolute; bottom:0; left:0; right:0; padding:clamp(2rem,4vw,3.5rem);
+}
+.cs-kicker { font-family:var(--fm); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+.cs-title {
+  font-family:var(--fd); font-weight:900;
+  font-size:clamp(2rem,5vw,4.5rem); letter-spacing:-.035em; line-height:.9; margin-bottom:1rem;
+}
+.cs-tags { display:flex; gap:.35rem; flex-wrap:wrap; }
+.tag {
+  display:inline-block; font-family:var(--fm); font-size:.52rem; letter-spacing:.1em;
+  text-transform:uppercase; padding:.2rem .55rem; border-radius:2px;
+}
+.tag-accent { background:rgba(194,65,12,.15); color:var(--accent); border:1px solid rgba(194,65,12,.35); }
+
+.cs-facts {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--faint);
+}
+.cs-fact { background:var(--bg2); padding:1.25rem clamp(1.5rem,4vw,2.5rem); }
+.cs-fact-lbl { font-family:var(--fm); font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(var(--text-rgb),.5); margin-bottom:.35rem; }
+.cs-fact-val { font-family:var(--fd); font-weight:700; font-size:.85rem; }
+.cs-fact-val.empty { color:var(--muted); font-weight:400; font-style:italic; font-size:.8rem; }
+
+.cs-content {
+  padding:clamp(3rem,5vw,5rem) clamp(1.5rem,5vw,3.5rem);
+  display:grid; grid-template-columns:1fr 260px; gap:clamp(2rem,4vw,3.5rem);
+  max-width:1300px; margin:0 auto;
+}
+.cs-main h3 {
+  font-family:var(--fd); font-weight:700; font-size:clamp(1.1rem,1.8vw,1.4rem);
+  letter-spacing:-.02em; margin-bottom:1rem; margin-top:2.5rem;
+}
+.cs-main h3:first-child { margin-top:0; }
+.cs-main p {
+  color:rgba(var(--text-rgb),.78); line-height:1.82;
+  font-size:.98rem; margin-bottom:1rem; white-space:pre-wrap;
+}
+.cs-main p.empty { color:var(--muted); font-style:italic; }
+
+.cs-gallery { margin-top:1.5rem; display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+.cs-gallery img {
+  width:100%; height:240px; object-fit:cover; border-radius:6px;
+  border:1px solid var(--faint); cursor:zoom-in;
+  transition:transform .35s var(--ease), filter .35s var(--ease);
+}
+.cs-gallery img:hover { transform:translateY(-2px); filter:brightness(1.05); }
+
+.cs-sidebar { position:sticky; top:82px; align-self:start; }
+.cs-widget {
+  background:var(--bg2); border:1px solid var(--faint);
+  padding:1.25rem; margin-bottom:1rem; border-radius:6px;
+}
+.cs-widget-title {
+  font-family:var(--fm); font-size:.56rem; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--accent);
+  margin-bottom:1rem; padding-bottom:.6rem; border-bottom:1px solid var(--faint);
+}
+.cs-tools { display:flex; flex-wrap:wrap; gap:.35rem; }
+.cs-tool {
+  font-family:var(--fm); font-size:.6rem; padding:.32rem .6rem;
+  background:var(--bg3); border:1px solid var(--faint); border-radius:3px; color:var(--muted);
+}
+.cs-tools-empty { font-family:var(--fm); font-size:.6rem; color:var(--muted); font-style:italic; }
+
+.cs-foot {
+  padding:clamp(2rem,4vw,3rem) clamp(1.5rem,5vw,3.5rem) clamp(3rem,5vw,4rem);
+  display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  flex-wrap:wrap; border-top:1px solid var(--faint); margin-top:2rem;
+}
+.cs-foot-prev, .cs-foot-next {
+  font-family:var(--fm); font-size:.62rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); transition:color .2s;
+}
+.cs-foot-prev:hover, .cs-foot-next:hover { color:var(--accent); }
+.cs-foot-disabled { color:var(--faint); pointer-events:none; opacity:.5; }
+
+/* LIGHTBOX (gallery image zoom) */
+.lightbox {
+  position:fixed; inset:0; background:var(--lightbox-bg); z-index:9999;
+  display:none; align-items:center; justify-content:center; cursor:zoom-out;
+}
+.lightbox.show { display:flex; }
+.lightbox img { max-width:90vw; max-height:90vh; object-fit:contain; border-radius:4px; }
+.lightbox-close { position:absolute; top:1.5rem; right:1.5rem; font-size:1.5rem; color:#F5EFE6; cursor:pointer; }
+
+/* MISSING-PROJECT FALLBACK */
+.cs-missing {
+  min-height:60vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:3rem;
+}
+.cs-missing h2 { font-family:var(--fd); font-weight:900; font-size:clamp(1.5rem,3vw,2.5rem); letter-spacing:-.02em; }
+.cs-missing p { color:var(--muted); }
+.cs-missing a {
+  font-family:var(--fm); font-size:.65rem; letter-spacing:.12em; text-transform:uppercase;
+  padding:.75rem 1.5rem; border:1px solid var(--accent); color:var(--accent); border-radius:3px; transition:all .2s;
+}
+.cs-missing a:hover { background:var(--accent); color:var(--bg); }
+
+@media(max-width:900px) {
+  .cs-content { grid-template-columns:1fr; }
+  .cs-sidebar { position:static; }
+  .cs-facts { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" id="nav-logo" href="index.html">PMPR</a>
+  <div class="nav-links">
+    <a href="index.html#work">Work</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+</nav>
+
+<main class="case-study" id="cs-root">
+  <!-- Rendered by JS -->
+</main>
+
+<div id="lightbox" class="lightbox" onclick="this.classList.remove('show')"></div>
+
+<script>
+/* ============================================================================
+     CASE STUDY RENDER
+     ============================================================================ */
+function getQueryParam(name) {
+  var m = window.location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function loadData() {
+  try {
+    var s = localStorage.getItem('portfolioData');
+    if (s) return JSON.parse(s);
+  } catch (e) {}
+  return null;
+}
+
+function applyTheme(data) {
+  if (!data || !data.colors) return;
+  var c = data.colors;
+  var r = document.documentElement;
+  r.style.setProperty('--bg', c.bg);
+  r.style.setProperty('--bg2', c.bg2);
+  r.style.setProperty('--bg3', c.bg2);
+  r.style.setProperty('--accent', c.accent);
+  r.style.setProperty('--white', c.white);
+
+  // Derive text-rgb from text color
+  var hex = (c.white || '#3B2F2A').replace('#','');
+  if (hex.length === 3) hex = hex.split('').map(function(ch){return ch+ch}).join('');
+  var rr = parseInt(hex.substr(0,2),16);
+  var gg = parseInt(hex.substr(2,2),16);
+  var bb = parseInt(hex.substr(4,2),16);
+  r.style.setProperty('--text-rgb', rr + ',' + gg + ',' + bb);
+
+  // Nav bg
+  var bhex = (c.bg || '#F5EFE6').replace('#','');
+  if (bhex.length === 3) bhex = bhex.split('').map(function(ch){return ch+ch}).join('');
+  var br = parseInt(bhex.substr(0,2),16);
+  var bgg = parseInt(bhex.substr(2,2),16);
+  var bbb = parseInt(bhex.substr(4,2),16);
+  r.style.setProperty('--nav-bg', 'rgba(' + br + ',' + bgg + ',' + bbb + ',.85)');
+  r.style.setProperty('--lightbox-bg', 'rgba(' + rr + ',' + gg + ',' + bb + ',.92)');
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+function renderFact(label, value) {
+  var hasValue = value && String(value).trim();
+  var valHtml = hasValue
+    ? '<div class="cs-fact-val">' + escapeHtml(value) + '</div>'
+    : '<div class="cs-fact-val empty">—</div>';
+  return '<div class="cs-fact"><div class="cs-fact-lbl">' + label + '</div>' + valHtml + '</div>';
+}
+
+function renderSection(title, body) {
+  var hasBody = body && String(body).trim();
+  if (hasBody) {
+    return '<h3>' + title + '</h3><p>' + escapeHtml(body) + '</p>';
+  }
+  return '<h3>' + title + '</h3><p class="empty">Coming soon — this section hasn\u2019t been written yet.</p>';
+}
+
+function renderTools(toolsStr) {
+  var trimmed = (toolsStr || '').trim();
+  if (!trimmed) {
+    return '<span class="cs-tools-empty">Not specified yet</span>';
+  }
+  var arr = trimmed.split(',').map(function(t){ return t.trim(); }).filter(Boolean);
+  return arr.map(function(t){ return '<span class="cs-tool">' + escapeHtml(t) + '</span>'; }).join('');
+}
+
+function renderGallery(gallery) {
+  if (!gallery || gallery.length === 0) return '';
+  var imgs = gallery.map(function(g) {
+    return '<img src="' + g + '" alt="Screenshot" onclick="openLightbox(this.src)">';
+  }).join('');
+  return '<h3>Gallery</h3><div class="cs-gallery">' + imgs + '</div>';
+}
+
+function openLightbox(src) {
+  var lb = document.getElementById('lightbox');
+  lb.innerHTML = '<div class="lightbox-close">×</div><img src="' + src + '">';
+  lb.classList.add('show');
+}
+
+function renderMissing(reason) {
+  document.getElementById('cs-root').innerHTML =
+    '<div class="cs-missing">' +
+      '<h2>Project not found</h2>' +
+      '<p>' + escapeHtml(reason) + '</p>' +
+      '<a href="index.html#work">← Back to work</a>' +
+    '</div>';
+}
+
+function renderCaseStudy() {
+  var data = loadData();
+  applyTheme(data);
+
+  // Update nav logo with name initials if available
+  if (data && data.name) {
+    var initials = data.name.split(/\s+/).map(function(p){ return p[0] || ''; }).join('').toUpperCase().slice(0,4);
+    if (initials) document.getElementById('nav-logo').textContent = initials;
+    document.title = data.name + ' — Case Study';
+  }
+
+  var idx = parseInt(getQueryParam('project'), 10);
+  if (isNaN(idx)) {
+    renderMissing('No project specified in the URL.');
+    return;
+  }
+
+  if (!data || !data.projects || !data.projects[idx]) {
+    renderMissing('This project hasn\u2019t been added yet. Open the editor on the home page to create it.');
+    return;
+  }
+
+  var p = data.projects[idx];
+  if (data.name) document.title = p.name + ' — ' + data.name;
+
+  var heroImg = p.image
+    ? '<img src="' + p.image + '" alt="' + escapeHtml(p.name) + '">'
+    : '<div class="cs-hero-empty">No hero image yet</div>';
+
+  var prevIdx = idx - 1;
+  var nextIdx = idx + 1;
+  var hasPrev = data.projects[prevIdx];
+  var hasNext = data.projects[nextIdx];
+
+  var html =
+    '<a class="cs-back" href="index.html#work">← Back to Work</a>' +
+    '<div class="cs-hero">' +
+      heroImg +
+      '<div class="cs-hero-grad"></div>' +
+      '<div class="cs-hero-content">' +
+        '<div class="cs-kicker">' + escapeHtml(p.category || 'Project') + '</div>' +
+        '<h1 class="cs-title">' + escapeHtml(p.name || 'Untitled') + '</h1>' +
+        (p.category ? '<div class="cs-tags"><span class="tag tag-accent">' + escapeHtml(p.category) + '</span></div>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="cs-facts">' +
+      renderFact('Role', p.role) +
+      renderFact('Team', p.team) +
+      renderFact('Duration', p.duration) +
+      renderFact('Platform', p.platform) +
+    '</div>' +
+    '<div class="cs-content">' +
+      '<div class="cs-main">' +
+        renderSection('Overview', p.overview) +
+        renderSection('Challenges & Solutions', p.challenge) +
+        renderSection('Results & Feedback', p.result) +
+        renderGallery(p.gallery) +
+      '</div>' +
+      '<aside class="cs-sidebar">' +
+        '<div class="cs-widget">' +
+          '<div class="cs-widget-title">Tools Used</div>' +
+          '<div class="cs-tools">' + renderTools(p.tools) + '</div>' +
+        '</div>' +
+        (p.excerpt ? '<div class="cs-widget"><div class="cs-widget-title">Summary</div><p style="font-family:var(--fi);font-style:italic;font-size:.95rem;color:rgba(var(--text-rgb),.8);line-height:1.55;margin:0;">' + escapeHtml(p.excerpt) + '</p></div>' : '') +
+      '</aside>' +
+    '</div>' +
+    '<div class="cs-foot">' +
+      (hasPrev
+        ? '<a class="cs-foot-prev" href="case-study.html?project=' + prevIdx + '">← ' + escapeHtml(data.projects[prevIdx].name || 'Previous') + '</a>'
+        : '<span class="cs-foot-prev cs-foot-disabled">← Previous</span>') +
+      (hasNext
+        ? '<a class="cs-foot-next" href="case-study.html?project=' + nextIdx + '">' + escapeHtml(data.projects[nextIdx].name || 'Next') + ' →</a>'
+        : '<span class="cs-foot-next cs-foot-disabled">Next →</span>') +
+    '</div>';
+
+  document.getElementById('cs-root').innerHTML = html;
+}
+
+renderCaseStudy();
+</script>
+</body>
+</html>

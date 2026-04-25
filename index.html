@@ -10,12 +10,10 @@
      CSS VARIABLES (THEME)
      ============================================================================ */
 :root {
-  --bg: #09090f;
-  --bg2: #111118;
-  --bg3: #16161f;
-  --accent: #ff5533;
-  --accent2: #ff7a5c;
-  --white: #edeae0;
+  --bg: #3C3F40;
+  --bg2: #2A2C2D;
+  --accent: #737B0F;
+  --white: #D0D7D9;
   --muted: #55536a;
   --faint: #1e1e2c;
   --fd: 'Unbounded', sans-serif;
@@ -107,8 +105,8 @@ body.panel-open { margin-left:420px; }
 
 .ep-select {
   width:100%; font-family:var(--fb); font-size:.9rem;
-  background:#111118; border:1px solid #33334a;
-  color:#edeae0; padding:.65rem .8rem; border-radius:4px;
+  background:#2A2C2D; border:1px solid #33334a;
+  color:#D0D7D9; padding:.65rem .8rem; border-radius:4px;
   -webkit-appearance:menulist; appearance:menulist;
 }
 
@@ -469,33 +467,33 @@ h1 span { display:block; }
           <div class="ep-field">
             <label class="ep-label">Background</label>
             <div style="display:flex; gap:.5rem; align-items:center;">
-              <input type="color" id="in-bg" value="#09090f" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
-              <input type="text" class="ep-input" id="in-bg-hex" value="#09090f" oninput="document.getElementById('in-bg').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+              <input type="color" id="in-bg" value="#3C3F40" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-bg-hex" value="#3C3F40" oninput="document.getElementById('in-bg').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
             </div>
           </div>
           <div class="ep-field">
             <label class="ep-label">Surface</label>
             <div style="display:flex; gap:.5rem; align-items:center;">
-              <input type="color" id="in-bg2" value="#111118" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
-              <input type="text" class="ep-input" id="in-bg2-hex" value="#111118" oninput="document.getElementById('in-bg2').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+              <input type="color" id="in-bg2" value="#2A2C2D" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-bg2-hex" value="#2A2C2D" oninput="document.getElementById('in-bg2').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
             </div>
           </div>
           <div class="ep-field">
             <label class="ep-label">Accent</label>
             <div style="display:flex; gap:.5rem; align-items:center;">
-              <input type="color" id="in-accent" value="#ff5533" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
-              <input type="text" class="ep-input" id="in-accent-hex" value="#ff5533" oninput="document.getElementById('in-accent').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+              <input type="color" id="in-accent" value="#737B0F" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-accent-hex" value="#737B0F" oninput="document.getElementById('in-accent').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
             </div>
           </div>
           <div class="ep-field">
             <label class="ep-label">Text</label>
             <div style="display:flex; gap:.5rem; align-items:center;">
-              <input type="color" id="in-white" value="#edeae0" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
-              <input type="text" class="ep-input" id="in-white-hex" value="#edeae0" oninput="document.getElementById('in-white').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+              <input type="color" id="in-white" value="#D0D7D9" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-white-hex" value="#D0D7D9" oninput="document.getElementById('in-white').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
             </div>
           </div>
         </div>
-        <p style="font-size:.55rem; color:var(--muted); margin-top:.75rem;">Click the color box or type a hex code (e.g. #ff5533)</p>
+        <p style="font-size:.55rem; color:var(--muted); margin-top:.75rem;">Click the color box or type a hex code (e.g. #737B0F)</p>
       </div>
       </div>
       <div class="ep-section">
@@ -1183,7 +1181,7 @@ function load() {
      ============================================================================ */
 function downloadHtml() {
   var d = data;
-  var c = d.colors || { bg: '#09090f', bg2: '#111118', accent: '#ff5533', white: '#edeae0' };
+  var c = d.colors || { bg: '#3C3F40', bg2: '#2A2C2D', accent: '#737B0F', white: '#D0D7D9' };
   var n = d.name || 'Portfolio';
   var parts = n.split(' ');
   var nh = '';

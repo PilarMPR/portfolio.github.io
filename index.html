@@ -48,7 +48,10 @@ ul { list-style:none; }
 .nav-logo {
   font-family:var(--fd); font-weight:900; font-size:.72rem;
   letter-spacing:.05em; cursor:pointer;
+  user-select:none; -webkit-tap-highlight-color:transparent;
+  transition:color .15s;
 }
+.nav-logo.tap { color:var(--accent); }
 .nav-links { display:flex; gap:2rem; align-items:center; }
 .nav-links a {
   font-family:var(--fm); font-size:.63rem; letter-spacing:.13em;
@@ -382,8 +385,9 @@ h1 span { display:block; }
      NAVIGATION
      ============================================================================ -->
 <nav id="nav">
-  <span class="nav-logo" onclick="handleTap()">PMPR</span>
+  <span class="nav-logo" id="nav-logo">PMPR</span>
   <div class="nav-links">
+    <a href="javascript:void(0)" onclick="openEditor()">Edit</a>
     <a href="#work">Work</a>
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
@@ -396,7 +400,7 @@ h1 span { display:block; }
 <div id="edit-panel">
   <div class="ep-header">
     <span class="ep-title">Editor</span>
-    <span class="ep-close" onclick="togglePanel()">Close</span>
+    <span class="ep-close" onclick="closeEditor()">Close</span>
   </div>
   
   <div class="ep-tabs">
@@ -630,17 +634,26 @@ var data = {
 
 var tapCount = 0, tapTimer = null;
 
-/* ============================================================================
-     TAP TRIGGER (6 taps to open editor)
-     ============================================================================ */
 function handleTap() {
   tapCount++;
-  if (tapCount === 1) tapTimer = setTimeout(function() { tapCount = 0; }, 600);
+  if (tapCount === 1) {
+    tapTimer = setTimeout(function() { tapCount = 0; }, 400);
+  }
   if (tapCount >= 6) {
     tapCount = 0;
     clearTimeout(tapTimer);
-    togglePanel();
+    openEditor();
   }
+}
+
+function openEditor() {
+  document.getElementById('edit-panel').classList.add('open');
+  document.body.classList.add('panel-open');
+}
+
+function closeEditor() {
+  document.getElementById('edit-panel').classList.remove('open');
+  document.body.classList.remove('panel-open');
 }
 
 function togglePanel() {
@@ -655,6 +668,8 @@ function init() {
   load();
   render();
   setupTabs();
+  // Set up logo click handler
+  document.getElementById('nav-logo').addEventListener('click', handleTap);
 }
 
 function setupTabs() {

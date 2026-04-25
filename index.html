@@ -636,12 +636,19 @@ var tapCount = 0, tapTimer = null;
 
 function handleTap() {
   tapCount++;
+  var logo = document.getElementById('nav-logo');
+  logo.textContent = 'TAP ' + (6 - tapCount);
+  
   if (tapCount === 1) {
-    tapTimer = setTimeout(function() { tapCount = 0; }, 400);
+    tapTimer = setTimeout(function() { 
+      tapCount = 0; 
+      logo.textContent = 'PMPR';
+    }, 500);
   }
   if (tapCount >= 6) {
     tapCount = 0;
     clearTimeout(tapTimer);
+    logo.textContent = 'PMPR';
     openEditor();
   }
 }
@@ -654,6 +661,16 @@ function openEditor() {
 function closeEditor() {
   document.getElementById('edit-panel').classList.remove('open');
   document.body.classList.remove('panel-open');
+  tapCount = 0;
+}
+
+function togglePanel() {
+  var panel = document.getElementById('edit-panel');
+  if (panel.classList.contains('open')) {
+    closeEditor();
+  } else {
+    openEditor();
+  }
 }
 
 function togglePanel() {

@@ -52,6 +52,22 @@ img { display:block; max-width:100%; }
 }
 .nav-links a:hover { color:var(--white); }
 
+/* Hamburger button (hidden on desktop, shown on mobile) */
+.nav-burger {
+  display:none; background:none; border:none; cursor:pointer;
+  padding:.4rem; width:36px; height:36px; flex-direction:column;
+  justify-content:center; align-items:center; gap:5px;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-burger span {
+  display:block; width:22px; height:1.5px;
+  background:var(--white); border-radius:1px;
+  transition:transform .3s var(--ease), opacity .2s var(--ease);
+}
+.nav-burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity:0; }
+.nav-burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+
 /* CASE STUDY LAYOUT */
 .case-study { padding-top:62px; min-height:100vh; background:var(--bg); }
 .cs-back {
@@ -171,10 +187,52 @@ img { display:block; max-width:100%; }
 }
 .cs-missing a:hover { background:var(--accent); color:var(--bg); }
 
-@media(max-width:900px) {
-  .cs-content { grid-template-columns:1fr; }
+/* ---------- Tablet (≤900px) */
+@media (max-width:900px) {
+  .cs-content { grid-template-columns:1fr; gap:2.5rem; }
   .cs-sidebar { position:static; }
   .cs-facts { grid-template-columns:repeat(2,1fr); }
+}
+
+/* ---------- Phone (≤600px): hamburger nav, single-col facts, tighter */
+@media (max-width:600px) {
+  /* Nav: hamburger */
+  .nav-links {
+    position:fixed; top:62px; left:0; right:0;
+    flex-direction:column; gap:0; align-items:stretch;
+    background:var(--bg); border-bottom:1px solid var(--faint);
+    max-height:0; overflow:hidden;
+    transition:max-height .3s var(--ease);
+  }
+  .nav-links.open { max-height:60vh; }
+  .nav-links a {
+    padding:1.1rem clamp(1.5rem,5vw,3.5rem);
+    font-size:.72rem; letter-spacing:.16em;
+    border-top:1px solid var(--faint);
+  }
+  .nav-burger { display:flex; }
+  body.nav-open { overflow:hidden; }
+
+  .cs-back { padding:1rem 1.25rem; }
+  .cs-hero { height:clamp(180px,38vh,300px); }
+  .cs-title { font-size:clamp(1.7rem,8vw,2.6rem); margin-bottom:.75rem; }
+  .cs-hero-content { padding:1.5rem 1.25rem; }
+  .cs-facts { grid-template-columns:1fr; gap:1px; }
+  .cs-fact { padding:1rem 1.25rem; }
+  .cs-content { padding:2.5rem 1.25rem; gap:2rem; }
+  .cs-main h3 { font-size:1.15rem; margin-top:2rem; }
+  .cs-gallery { grid-template-columns:1fr; }
+  .cs-gallery img { height:200px; }
+  .cs-foot { padding:1.5rem 1.25rem 2.5rem; flex-direction:column; align-items:stretch; gap:.75rem; }
+  .cs-foot-prev, .cs-foot-next { text-align:left; }
+}
+
+/* ---------- Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:.01ms !important;
+    transition-duration:.01ms !important;
+  }
 }
 </style>
 </head>
@@ -183,11 +241,14 @@ img { display:block; max-width:100%; }
 <!-- NAV -->
 <nav id="nav">
   <a class="nav-logo" id="nav-logo" href="index.html">PMPR</a>
-  <div class="nav-links">
+  <div class="nav-links" id="nav-links">
     <a href="index.html#work">Work</a>
     <a href="index.html#about">About</a>
     <a href="index.html#contact">Contact</a>
   </div>
+  <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleBurger()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <main class="case-study" id="cs-root">
@@ -200,6 +261,30 @@ img { display:block; max-width:100%; }
 /* ============================================================================
      CASE STUDY RENDER
      ============================================================================ */
+function toggleBurger() {
+  var burger = document.getElementById('nav-burger');
+  var links = document.getElementById('nav-links');
+  var isOpen = burger.classList.toggle('open');
+  links.classList.toggle('open', isOpen);
+  burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  document.body.classList.toggle('nav-open', isOpen);
+}
+
+function closeBurger() {
+  var burger = document.getElementById('nav-burger');
+  var links = document.getElementById('nav-links');
+  if (burger && burger.classList.contains('open')) {
+    burger.classList.remove('open');
+    links.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeBurger();
+});
+
 function getQueryParam(name) {
   var m = window.location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
   return m ? decodeURIComponent(m[1]) : null;
@@ -375,6 +460,11 @@ function renderCaseStudy() {
 }
 
 renderCaseStudy();
+
+// Auto-close mobile nav when a link is clicked
+document.querySelectorAll('#nav-links a').forEach(function(a) {
+  a.addEventListener('click', closeBurger);
+});
 </script>
 </body>
 </html>

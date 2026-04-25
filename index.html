@@ -107,14 +107,25 @@ body.panel-open { margin-left:420px; }
 
 .ep-select {
   width:100%; font-family:var(--fb); font-size:.9rem;
-  background:var(--bg2); border:1px solid var(--faint);
-  color:var(--white); padding:.65rem .8rem; border-radius:4px;
+  background:#111118; border:1px solid #33334a;
+  color:#edeae0; padding:.65rem .8rem; border-radius:4px;
+  -webkit-appearance:menulist; appearance:menulist;
 }
 
 .ep-colors { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
 .ep-color { display:flex; align-items:center; gap:.5rem; }
-.ep-color input[type="color"] { width:36px; height:36px; border:none; border-radius:4px; cursor:pointer; }
-.ep-color label { font-family:var(--fm); font-size:.5rem; color:var(--muted); }
+.ep-color input[type="color"] { 
+  width:48px; height:48px; 
+  border:2px solid var(--faint); border-radius:6px; 
+  cursor:pointer; padding:0;
+  background:none;
+}
+.ep-color input[type="color"]:hover {
+  border-color:var(--accent);
+}
+.ep-color input[type="color"]::-webkit-color-swatch-wrapper { padding:2px; }
+.ep-color input[type="color"]::-webkit-color-swatch { border-radius:3px; border:none; }
+.ep-color label { font-family:var(--fm); font-size:.55rem; color:var(--muted); }
 
 .ep-upload {
   border:2px dashed var(--faint); border-radius:6px;
@@ -387,7 +398,7 @@ h1 span { display:block; }
 <nav id="nav">
   <span class="nav-logo" id="nav-logo">PMPR</span>
   <div class="nav-links">
-    <a href="javascript:void(0)" onclick="openEditor()">Edit</a>
+    <a href="javascript:void(0)" onclick="openEditor()" style="color:var(--accent)">Edit</a>
     <a href="#work">Work</a>
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
@@ -407,6 +418,7 @@ h1 span { display:block; }
     <button class="ep-tab active" data-tab="profile">Profile</button>
     <button class="ep-tab" data-tab="projects">Projects</button>
     <button class="ep-tab" data-tab="design">Design</button>
+    <button class="ep-tab" data-tab="layout">Layout</button>
   </div>
   
   <div class="ep-content">
@@ -450,25 +462,132 @@ h1 span { display:block; }
       <button class="ep-add-btn" onclick="addProject()">+ Add Project</button>
     </div>
     
-    <!-- DESIGN TAB -->
+<!-- DESIGN TAB -->
     <div class="ep-pane" id="pane-design">
       <div class="ep-section">
         <div class="ep-section-title">Colors</div>
-        <div class="ep-colors">
-          <div class="ep-color"><input type="color" id="in-bg" value="#09090f" onchange="updateColors()"><label>Background</label></div>
-          <div class="ep-color"><input type="color" id="in-bg2" value="#111118" onchange="updateColors()"><label>Surface</label></div>
-          <div class="ep-color"><input type="color" id="in-accent" value="#ff5533" onchange="updateColors()"><label>Accent</label></div>
-          <div class="ep-color"><input type="color" id="in-white" value="#edeae0" onchange="updateColors()"><label>Text</label></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="ep-field">
+            <label class="ep-label">Background</label>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+              <input type="color" id="in-bg" value="#09090f" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-bg-hex" value="#09090f" oninput="document.getElementById('in-bg').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+            </div>
+          </div>
+          <div class="ep-field">
+            <label class="ep-label">Surface</label>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+              <input type="color" id="in-bg2" value="#111118" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-bg2-hex" value="#111118" oninput="document.getElementById('in-bg2').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+            </div>
+          </div>
+          <div class="ep-field">
+            <label class="ep-label">Accent</label>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+              <input type="color" id="in-accent" value="#ff5533" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-accent-hex" value="#ff5533" oninput="document.getElementById('in-accent').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+            </div>
+          </div>
+          <div class="ep-field">
+            <label class="ep-label">Text</label>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+              <input type="color" id="in-white" value="#edeae0" oninput="updateColors()" style="width:48px;height:48px;cursor:pointer;">
+              <input type="text" class="ep-input" id="in-white-hex" value="#edeae0" oninput="document.getElementById('in-white').value=this.value;updateColors()" style="flex:1;font-family:var(--fm);font-size:.8rem;">
+            </div>
+          </div>
         </div>
+        <p style="font-size:.55rem; color:var(--muted); margin-top:.75rem;">Click the color box or type a hex code (e.g. #ff5533)</p>
+      </div>
       </div>
       <div class="ep-section">
-        <div class="ep-section-title">Font</div>
-        <select class="ep-select" id="in-font" onchange="updateFont()">
+        <div class="ep-section-title">Font (Display / Headings)</div>
+        <select class="ep-select" id="in-font" onchange="updateFont()" style="font-size:1rem;padding:.75rem;">
           <option value="unbounded">Unbounded</option>
           <option value="space">Space Grotesk</option>
           <option value="outfit">Outfit</option>
           <option value="syne">Syne</option>
+          <option value="clash">Clash Display</option>
+          <option value="satoshi">Satoshi</option>
+          <option value="general">General Sans</option>
+          <option value="archer">Archer Pro</option>
+          <option value="circular">Circular</option>
+          <option value="gilroy">Gilroy</option>
+          <option value="cabinet">Cabinet Grotesk</option>
+          <option value="monument">Monument Extended</option>
+          <option value="pp">PP Neue Machina</option>
+          <option value="Bw">Bw</option>
+          <option value="integral">Integral</option>
+          <option value="switzer">Switzer</option>
         </select>
+        <div style="margin-top:1rem;padding:1rem;background:var(--bg2);border-radius:4px;">
+          <p style="font-size:1.5rem;font-weight:700;margin-bottom:.5rem;" id="font-preview">Preview: The quick brown fox</p>
+          <p style="font-size:.65rem;color:var(--muted);">This is how your heading font will look</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- LAYOUT TAB -->
+    <div class="ep-pane" id="pane-layout">
+      <div class="ep-section">
+        <div class="ep-section-title">Hero Layout</div>
+        <div class="ep-field">
+          <label class="ep-label">Hero Style</label>
+          <select class="ep-select" id="in-hero-layout" onchange="updateLayout()">
+            <option value="modern">Modern (Full viewport height)</option>
+            <option value="classic">Classic (Centered, less dramatic)</option>
+            <option value="minimal">Minimal (Compact header)</option>
+          </select>
+        </div>
+        
+        <div class="ep-field">
+          <label class="ep-label">Hero Content Position</label>
+          <select class="ep-select" id="in-hero-align" onchange="updateLayout()">
+            <option value="center">Center</option>
+            <option value="left">Left aligned</option>
+          </select>
+        </div>
+        
+        <div class="ep-field">
+          <label class="ep-label">Show Glow Effect</label>
+          <select class="ep-select" id="in-hero-glow" onchange="updateLayout()">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="ep-section">
+        <div class="ep-section-title">Projects Grid</div>
+        <div class="ep-field">
+          <label class="ep-label">Columns</label>
+          <select class="ep-select" id="in-projects-cols" onchange="updateLayout()">
+            <option value="1">1 column</option>
+            <option value="2">2 columns</option>
+            <option value="3">3 columns</option>
+          </select>
+        </div>
+        
+        <div class="ep-field">
+          <label class="ep-label">Aspect Ratio</label>
+          <select class="ep-select" id="in-projects-aspect" onchange="updateLayout()">
+            <option value="5/4">Tall (5:4)</option>
+            <option value="16/9">Wide (16:9)</option>
+            <option value="1/1">Square (1:1)</option>
+            <option value="4/3">Classic (4:3)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="ep-section">
+        <div class="ep-section-title">About Section</div>
+        <div class="ep-field">
+          <label class="ep-label">Photo Position</label>
+          <select class="ep-select" id="in-about-photo" onchange="updateLayout()">
+            <option value="right">Right side</option>
+            <option value="left">Left side (before bio)</option>
+            <option value="hidden">Hide photo</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -657,7 +776,7 @@ function handleTap() {
 document.addEventListener('keydown', function(e) {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'e') {
     e.preventDefault();
-    togglePanel();
+    openEditor();
   }
 });
 
@@ -681,11 +800,6 @@ function togglePanel() {
   }
 }
 
-function togglePanel() {
-  document.getElementById('edit-panel').classList.toggle('open');
-  document.body.classList.toggle('panel-open');
-}
-
 /* ============================================================================
      INITIALIZATION
      ============================================================================ */
@@ -693,8 +807,6 @@ function init() {
   load();
   render();
   setupTabs();
-  // Set up logo click handler
-  document.getElementById('nav-logo').addEventListener('click', handleTap);
 }
 
 function setupTabs() {
@@ -733,6 +845,12 @@ function updateColors() {
     accent: document.getElementById('in-accent').value,
     white: document.getElementById('in-white').value
   };
+  // Also update the hex text inputs
+  document.getElementById('in-bg-hex').value = data.colors.bg;
+  document.getElementById('in-bg2-hex').value = data.colors.bg2;
+  document.getElementById('in-accent-hex').value = data.colors.accent;
+  document.getElementById('in-white-hex').value = data.colors.white;
+  
   var r = document.querySelector(':root');
   r.style.setProperty('--bg', data.colors.bg);
   r.style.setProperty('--bg2', data.colors.bg2);
@@ -743,20 +861,107 @@ function updateColors() {
 
 function updateFont() {
   var font = document.getElementById('in-font').value;
+  updateLayout();
   var fonts = {
     'unbounded': "https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap",
     'space': "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap",
     'outfit': "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap",
-    'syne': "https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap"
+    'syne': "https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap",
+    'clash': "https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600&display=swap",
+    'satoshi': "https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@400,500,600&display=swap",
+    'general': "https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap",
+    'cabinet': "https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap",
+    'monument': "https://api.fontshare.com/v2/css?f[]=monument-extended@400&display=swap",
+    'pp': "https://api.fontshare.com/v2/css?f[]=pp-neue-machina@400,500;700&display=swap"
   };
   var families = {
     'unbounded': "'Unbounded', sans-serif",
     'space': "'Space Grotesk', sans-serif",
     'outfit': "'Outfit', sans-serif",
-    'syne': "'Syne', sans-serif"
+    'syne': "'Syne', sans-serif",
+    'clash': "'Clash Display', sans-serif",
+    'satoshi': "'Satoshi', sans-serif",
+    'general': "'General Sans', sans-serif",
+    'cabinet': "'Cabinet Grotesk', sans-serif",
+    'monument': "'Monument Extended', sans-serif",
+    'pp': "'PP Neue Machina', sans-serif",
+    'archer': "'Archer Pro', sans-serif",
+    'circular': "'Circular', sans-serif",
+    'gilroy': "'Gilroy', sans-serif"
   };
-  document.getElementById('font-link').href = fonts[font] || fonts['unbounded'];
-  document.querySelector(':root').style.setProperty('--fd', families[font] || families['unbounded']);
+  
+  var fontUrl = fonts[font] || fonts['unbounded'];
+  var fontFamily = families[font] || families['unbounded'];
+  
+  document.getElementById('font-link').href = fontUrl;
+  document.querySelector(':root').style.setProperty('--fd', fontFamily);
+  
+  // Update preview
+  document.getElementById('font-preview').style.fontFamily = fontFamily;
+}
+
+function updateLayout() {
+  // Store layout preferences
+  data.layout = data.layout || {};
+  data.layout.hero = document.getElementById('in-hero-layout').value;
+  data.layout.heroAlign = document.getElementById('in-hero-align').value;
+  data.layout.heroGlow = document.getElementById('in-hero-glow').value;
+  data.layout.projectsCols = document.getElementById('in-projects-cols').value;
+  data.layout.projectsAspect = document.getElementById('in-projects-aspect').value;
+  data.layout.aboutPhoto = document.getElementById('in-about-photo').value;
+  
+  // Apply hero styles
+  var hero = document.getElementById('hero');
+  var heroInner = document.querySelector('.hero-inner');
+  
+  // Hero layout
+  if (data.layout.hero === 'modern') {
+    hero.style.minHeight = '100dvh';
+    hero.style.justifyContent = 'center';
+  } else if (data.layout.hero === 'classic') {
+    hero.style.minHeight = 'auto';
+    hero.style.padding = '8rem clamp(1.5rem,5vw,3.5rem) 6rem';
+    hero.style.justifyContent = 'center';
+    heroInner.style.maxWidth = '800px';
+    heroInner.style.margin = '0 auto';
+    heroInner.style.textAlign = 'center';
+  } else if (data.layout.hero === 'minimal') {
+    hero.style.minHeight = 'auto';
+    hero.style.padding = '6rem clamp(1.5rem,5vw,3.5rem) 4rem';
+    hero.style.justifyContent = 'flex-start';
+  }
+  
+  // Hide/show glow
+  var glow = document.getElementById('hero::before') || document.querySelector('#hero::before');
+  // We'll handle this differently - via a CSS class
+  if (data.layout.heroGlow === 'no') {
+    document.querySelector('#hero').style.background = 'none';
+  }
+  
+  // Projects grid columns
+  var projects = document.querySelector('.projects');
+  projects.style.gridTemplateColumns = 'repeat(' + data.layout.projectsCols + ', 1fr)';
+  var aspect = data.layout.projectsAspect.split('/');
+  projects.style.aspectRatio = aspect[0] / aspect[1];
+  
+  // About photo position
+  var photoWrap = document.querySelector('.photo');
+  var aboutGrid = document.querySelector('.ab-grid');
+  if (data.layout.aboutPhoto === 'right') {
+    aboutGrid.style.gridTemplateColumns = '1fr 340px';
+    aboutGrid.style.display = 'grid';
+    photoWrap.style.order = '0';
+  } else if (data.layout.aboutPhoto === 'left') {
+    aboutGrid.style.gridTemplateColumns = '340px 1fr';
+    aboutGrid.style.display = 'grid';
+    photoWrap.style.order = '-1';
+  } else if (data.layout.aboutPhoto === 'hidden') {
+    aboutGrid.style.gridTemplateColumns = '1fr';
+    photoWrap.style.display = 'none';
+  }
+  
+  // Force re-render
+  render();
 }
 
 function handleImg(input, key) {
@@ -848,16 +1053,44 @@ function renderProjects() {
   data.projects.forEach(function(p, i) {
     lhtml += '<div class="ep-project"><div class="ep-proj-header"><span class="ep-proj-title">Project ' + (i + 1) + '</span><button class="ep-proj-del" onclick="delProject(' + i + ')">×</button></div>' +
       '<div class="ep-field"><label class="ep-label">Name</label><input class="ep-input" value="' + p.name + '" oninput="upProj(' + i + ',\'name\',this.value)"></div>' +
-      '<div class="ep-field"><label class="ep-label">Category</label><input class="ep-input" value="' + p.category + '" oninput="upProj(' + i + ',\'category\',this.value)"></div>' +
-      '<div class="ep-field"><label class="ep-label">Excerpt</label><textarea class="ep-textarea" oninput="upProj(' + i + ',\'excerpt\',this.value)">' + p.excerpt + '</textarea></div>' +
-      '<div class="ep-field"><label class="ep-label">Hero Image</label><input type="file" accept="image/*" onchange="upProjImg(' + i + ',this)"></div></div>';
+      '<div class="ep-field"><label class="ep-label">Category/Genre</label><input class="ep-input" value="' + p.category + '" oninput="upProj(' + i + ',\'category\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Excerpt (short description)</label><textarea class="ep-textarea" style="min-height:50px" oninput="upProj(' + i + ',\'excerpt\',this.value)">' + p.excerpt + '</textarea></div>' +
+      '<div class="ep-field"><label class="ep-label">Hero Image</label><input type="file" accept="image/*" onchange="upProjImg(' + i + ',this)"></div>' +
+      '<hr style="border:none;border-top:1px solid var(--faint);margin:1rem 0">' +
+      '<div class="ep-section-title" style="font-size:.65rem;margin-bottom:.75rem">Case Study Details</div>' +
+      '<div class="ep-field"><label class="ep-label">My Role</label><input class="ep-input" value="' + (p.role || '') + '" placeholder="e.g. Lead Designer, Systems Designer" oninput="upProj(' + i + ',\'role\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Team Size</label><input class="ep-input" value="' + (p.team || '') + '" placeholder="e.g. 5 people" oninput="upProj(' + i + ',\'team\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Duration</label><input class="ep-input" value="' + (p.duration || '') + '" placeholder="e.g. 6 months" oninput="upProj(' + i + ',\'duration\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Platform</label><input class="ep-input" value="' + (p.platform || '') + '" placeholder="e.g. Mobile, PC, Console" oninput="upProj(' + i + ',\'platform\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Overview</label><textarea class="ep-textarea" placeholder="What is this project about?" oninput="upProj(' + i + ',\'overview\',this.value)">' + (p.overview || '') + '</textarea></div>' +
+      '<div class="ep-field"><label class="ep-label">Challenges & Solutions</label><textarea class="ep-textarea" placeholder="Problems you faced and how you solved them..." oninput="upProj(' + i + ',\'challenge\',this.value)">' + (p.challenge || '') + '</textarea></div>' +
+      '<div class="ep-field"><label class="ep-label">Results / Feedback</label><textarea class="ep-textarea" placeholder="Metrics, awards, quotes..." oninput="upProj(' + i + ',\'result\',this.value)">' + (p.result || '') + '</textarea></div>' +
+      '<div class="ep-field"><label class="ep-label">Tools Used (comma separated)</label><input class="ep-input" value="' + (p.tools || '') + '" placeholder="Unity, Figma, Excel" oninput="upProj(' + i + ',\'tools\',this.value)"></div>' +
+      '<div class="ep-field"><label class="ep-label">Gallery Images (for case study)</label><input type="file" accept="image/*" multiple onchange="upProjGallery(' + i + ',this)" style="margin-bottom:.5rem">' +
+      '<div id="gallery-preview-' + i + '" style="display:flex;flex-wrap:wrap;gap:.5rem;">' + 
+        (p.gallery && p.gallery.length > 0 ? p.gallery.map(function(g, gi) { return '<img src="' + g + '" style="width:60px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--faint);">'; }).join('') : '<span style="font-size:.55rem;color:var(--muted)">No images uploaded yet</span>') + 
+      '</div></div>';
   });
   list.innerHTML = lhtml;
 }
 
 function addProject() {
   if (!data.projects) data.projects = [];
-  data.projects.push({ name: 'New Project', category: 'Category', excerpt: 'Description...', image: '' });
+  data.projects.push({ 
+    name: 'New Project', 
+    category: 'Category', 
+    excerpt: 'Brief description...', 
+    image: '',
+    role: '',
+    team: '',
+    duration: '',
+    platform: '',
+    overview: '',
+    challenge: '',
+    result: '',
+    tools: '',
+    gallery: []
+  });
   renderProjects();
 }
 
@@ -880,6 +1113,27 @@ function upProjImg(i, inp) {
       render();
     };
     r.readAsDataURL(inp.files[0]);
+  }
+}
+
+function upProjGallery(i, inp) {
+  if (inp.files && inp.files.length > 0) {
+    var gallery = [];
+    var loaded = 0;
+    for (var f = 0; f < inp.files.length; f++) {
+      var r = new FileReader();
+      r.onload = (function(imgData) {
+        return function(e) {
+          gallery.push(e.target.result);
+          loaded++;
+          if (loaded === inp.files.length) {
+            data.projects[i].gallery = gallery;
+            render();
+          }
+        };
+      })();
+      r.readAsDataURL(inp.files[f]);
+    }
   }
 }
 

@@ -1093,6 +1093,8 @@ function init() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeBurger();
   });
+  // Edit mode: tap logo 6 times
+  document.getElementById('nav-logo').addEventListener('click', handleTap);
 }
 
 function setupTabs() {

@@ -631,10 +631,29 @@ body.editing #edit-panel { transform:none; }
 .ep-head-title::before { content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; box-shadow:0 0 8px var(--accent); animation:blink 2s ease infinite; }
 .ep-exit { font-family:var(--fm); font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; background:transparent; border:1px solid rgba(255,255,255,.2); color:#b8ad9a; padding:.32rem .7rem; border-radius:3px; cursor:pointer; transition:all .15s; }
 .ep-exit:hover { border-color:var(--accent); color:var(--accent); }
-.ep-tabs { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid rgba(255,255,255,.12); flex-shrink:0; }
+.ep-tabs { display:grid; grid-template-columns:1fr 1fr 1fr; border-bottom:1px solid rgba(255,255,255,.12); flex-shrink:0; }
 .ep-tab { font-family:var(--fm); font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.7rem; text-align:center; cursor:pointer; color:#b8ad9a; background:none; border:none; border-bottom:2px solid transparent; transition:color .15s, border-color .15s; }
 .ep-tab.active { color:#fff; border-bottom-color:var(--accent); }
 .ep-body { flex:1; overflow-y:auto; overscroll-behavior:contain; }
+/* Design tab (Figma-style inspector) */
+.ep-dsn-label { font-family:var(--fm); font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; color:#8a8072; padding:.9rem .3rem .5rem; }
+.ep-presets { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; }
+.ep-preset { display:flex; align-items:center; gap:.5rem; padding:.45rem .5rem; background:#2b271f; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:all .15s; }
+.ep-preset:hover { border-color:rgba(200,64,46,.6); }
+.ep-preset.active { border-color:var(--accent); background:rgba(200,64,46,.16); }
+.ep-preset-sw { display:flex; flex-shrink:0; }
+.ep-preset-sw i { width:9px; height:18px; display:block; }
+.ep-preset-sw i:first-child { border-radius:3px 0 0 3px; }
+.ep-preset-sw i:last-child { border-radius:0 3px 3px 0; }
+.ep-preset-name { font-family:var(--fm); font-size:.56rem; letter-spacing:.02em; color:#c7bdac; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ep-color-row { display:flex; align-items:center; gap:.6rem; padding:.38rem .3rem; }
+.ep-color-row > label { font-family:var(--fm); font-size:.6rem; letter-spacing:.03em; color:#c7bdac; flex:1; }
+.ep-swatch { position:relative; width:34px; height:24px; border-radius:5px; border:1px solid rgba(255,255,255,.22); overflow:hidden; flex-shrink:0; cursor:pointer; }
+.ep-swatch input[type=color] { position:absolute; inset:-8px; width:160%; height:180%; border:none; padding:0; background:none; cursor:pointer; }
+.ep-hex { width:82px; font-family:var(--fm); font-size:.62rem; text-transform:uppercase; background:#17140f; border:1px solid rgba(255,255,255,.14); color:#e8dfca; border-radius:4px; padding:.38rem .45rem; }
+.ep-hex:focus { outline:none; border-color:var(--accent); }
+.ep-select { width:100%; font-family:var(--fm); font-size:.62rem; background:#17140f; border:1px solid rgba(255,255,255,.14); color:#e8dfca; border-radius:5px; padding:.5rem; margin-bottom:.45rem; cursor:pointer; }
+.ep-select:focus { outline:none; border-color:var(--accent); }
 .ep-tab-pane { display:none; padding:.75rem; }
 .ep-tab-pane.active { display:block; }
 .ep-section-item { display:flex; align-items:center; gap:.6rem; padding:.7rem .85rem; border-radius:6px; border:1px solid transparent; margin-bottom:.35rem; cursor:pointer; transition:all .18s; position:relative; }
@@ -1384,6 +1403,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
   <div class="ep-tabs">
     <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
     <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
+    <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
   </div>
 
   <div class="ep-body">
@@ -1416,6 +1436,19 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
       <button class="ep-add-btn" onclick="insertDividerBlock()">
         <span class="ep-add-btn-icon">—</span>
         <span class="ep-add-btn-label">Divider</span>
+      </button>
+    </div>
+
+    <!-- DESIGN TAB -->
+    <div class="ep-tab-pane" id="tab-design">
+      <div class="ep-dsn-label">Theme presets</div>
+      <div id="ep-presets" class="ep-presets"></div>
+      <div class="ep-dsn-label">Colors — click a swatch</div>
+      <div id="ep-colors"></div>
+      <div class="ep-dsn-label">Fonts</div>
+      <div id="ep-fonts"></div>
+      <button class="ep-add-btn" style="justify-content:center;margin-top:.7rem" onclick="resetTheme()">
+        <span class="ep-add-btn-label">↺ Reset to default</span>
       </button>
     </div>
   </div>
@@ -1572,6 +1605,7 @@ function toggleEdit() {
 
   if (editing) {
     buildSectionList();
+    renderDesignTab();
   } else {
     // Clear focus
     document.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
@@ -2204,6 +2238,131 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
 });
 
+/* ─── DESIGN / THEME EDITOR ────────────── */
+const PRESETS = {
+  'Notebook':  { bg:'#f4efe3', text:'#24211b', accent:'#c8402e', blue:'#2f5c8f', yellow:'#f4d24a', green:'#4f7a4a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
+  'Blueprint': { bg:'#e4ecf2', text:'#152435', accent:'#1f6feb', blue:'#16405f', yellow:'#f2c14e', green:'#2f8f6a', fd:'Space Grotesk', fb:'Space Grotesk' },
+  'Midnight':  { bg:'#1f1b16', text:'#efe6d4', accent:'#e0553f', blue:'#83a8d8', yellow:'#e6c14a', green:'#7bb06a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
+  'Rosé':      { bg:'#f6ebe6', text:'#2b2320', accent:'#c05678', blue:'#6a7bb0', yellow:'#f0c667', green:'#6a9a72', fd:'Fraunces', fb:'Space Grotesk' },
+  'Forest':    { bg:'#eceee2', text:'#20261d', accent:'#b5622e', blue:'#456a58', yellow:'#dabf47', green:'#3f7a4a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
+  'Mono':      { bg:'#eeeae4', text:'#1c1c1c', accent:'#141414', blue:'#3b3b3b', yellow:'#e6e0d0', green:'#4a4a4a', fd:'Archivo Black', fb:'Inter' },
+};
+const THEME_DEFAULT = Object.assign({}, PRESETS['Notebook']);
+const COLOR_ROWS = [
+  { key:'bg',     label:'Paper' },
+  { key:'text',   label:'Ink / text' },
+  { key:'accent', label:'Accent (pen)' },
+  { key:'blue',   label:'Blue ink' },
+  { key:'yellow', label:'Highlighter' },
+  { key:'green',  label:'Approved' },
+];
+const DISPLAY_FONTS = [
+  { n:'Bricolage Grotesque', w:'400;500;700;800' }, { n:'Space Grotesk', w:'400;500;700' },
+  { n:'Syne', w:'400;700;800' }, { n:'Unbounded', w:'400;700;900' },
+  { n:'Archivo Black', w:'400' }, { n:'Fraunces', w:'400;600;800' },
+];
+const BODY_FONTS = [
+  { n:'Space Grotesk', w:'400;500;700' }, { n:'Inter', w:'400;500;700' },
+  { n:'DM Sans', w:'400;500;700' }, { n:'Work Sans', w:'400;500;600' },
+];
+const _loadedFonts = new Set(['Bricolage Grotesque','Space Grotesk','JetBrains Mono','Caveat']);
+function ensureFont(name, weights) {
+  if (_loadedFonts.has(name)) return;
+  _loadedFonts.add(name);
+  const l = document.createElement('link');
+  l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=' + name.replace(/ /g,'+') + ':wght@' + (weights||'400;700') + '&display=swap';
+  document.head.appendChild(l);
+}
+/* colour helpers */
+function _hex(h){ h=h.replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)}; }
+function _toHex(r,g,b){ const t=v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0'); return '#'+t(r)+t(g)+t(b); }
+function _mix(a,b,t){ const x=_hex(a),y=_hex(b); return _toHex(x.r+(y.r-x.r)*t, x.g+(y.g-x.g)*t, x.b+(y.b-x.b)*t); }
+function _shade(h,amt){ return _mix(h, amt>=0?'#ffffff':'#000000', Math.abs(amt)); }
+function _lum(h){ const c=_hex(h); return (0.299*c.r+0.587*c.g+0.114*c.b)/255; }
+function _rgba(h,a){ const c=_hex(h); return `rgba(${c.r},${c.g},${c.b},${a})`; }
+function computeVars(t){
+  const dark = _lum(t.bg) < 0.4;
+  const s = dark ? 1 : -1;
+  return {
+    '--bg': t.bg,
+    '--bg2': _shade(t.bg, s*0.05),
+    '--bg3': _shade(t.bg, s*0.10),
+    '--card-bg': _shade(t.bg, s*0.03),
+    '--card-bg2': _shade(t.bg, s*0.07),
+    '--text': t.text, '--white': t.text,
+    '--muted': _mix(t.text, t.bg, 0.40),
+    '--faint': _shade(t.bg, dark ? 0.16 : -0.20),
+    '--accent': t.accent, '--accent2': _shade(t.accent, 0.10),
+    '--blue': t.blue,
+    '--yellow': t.yellow, '--sticky': _shade(t.yellow, 0.08),
+    '--green': t.green,
+    '--grid': _rgba(t.text, 0.05), '--grid2': _rgba(t.text, 0.085),
+  };
+}
+function applyTheme(t){
+  const vars = computeVars(t), root = document.documentElement.style;
+  for (const k in vars) root.setProperty(k, vars[k]);
+  if (t.fd) { ensureFont(t.fd, (DISPLAY_FONTS.find(f=>f.n===t.fd)||{}).w); root.setProperty('--fd', "'"+t.fd+"', sans-serif"); }
+  if (t.fb) { ensureFont(t.fb, (BODY_FONTS.find(f=>f.n===t.fb)||{}).w); root.setProperty('--fb', "'"+t.fb+"', sans-serif"); }
+}
+let currentTheme = Object.assign({}, THEME_DEFAULT);
+function saveTheme(){ try { localStorage.setItem('pmpr_theme', JSON.stringify(currentTheme)); } catch(e){} }
+function loadTheme(){
+  try { const raw = localStorage.getItem('pmpr_theme'); if (raw){ currentTheme = Object.assign({}, THEME_DEFAULT, JSON.parse(raw)); applyTheme(currentTheme); } } catch(e){}
+}
+function _matchesPreset(name){ const p=PRESETS[name]; return COLOR_ROWS.every(r=>(currentTheme[r.key]||'').toLowerCase()===p[r.key].toLowerCase()); }
+function renderDesignTab(){
+  const pv = document.getElementById('ep-presets');
+  if (pv) {
+    pv.innerHTML = '';
+    Object.keys(PRESETS).forEach(name => {
+      const p = PRESETS[name];
+      const el = document.createElement('div');
+      el.className = 'ep-preset' + (_matchesPreset(name) ? ' active' : '');
+      el.innerHTML = `<span class="ep-preset-sw"><i style="background:${p.bg}"></i><i style="background:${p.accent}"></i><i style="background:${p.text}"></i></span><span class="ep-preset-name">${name}</span>`;
+      el.onclick = () => applyPreset(name);
+      pv.appendChild(el);
+    });
+  }
+  const cv = document.getElementById('ep-colors');
+  if (cv) {
+    cv.innerHTML = '';
+    COLOR_ROWS.forEach(row => {
+      const val = currentTheme[row.key] || '#000000';
+      const r = document.createElement('div');
+      r.className = 'ep-color-row';
+      r.innerHTML = `<label>${row.label}</label>
+        <span class="ep-swatch"><input type="color" value="${val}" data-ck="${row.key}"></span>
+        <input class="ep-hex" value="${val.toUpperCase()}" data-hk="${row.key}" spellcheck="false" maxlength="7">`;
+      cv.appendChild(r);
+    });
+    cv.querySelectorAll('input[type=color]').forEach(inp => inp.addEventListener('input', e => setColor(e.target.dataset.ck, e.target.value)));
+    cv.querySelectorAll('.ep-hex').forEach(inp => inp.addEventListener('change', e => {
+      let v = e.target.value.trim(); if (!v.startsWith('#')) v = '#'+v;
+      if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setColor(e.target.dataset.hk, v); else e.target.value = (currentTheme[e.target.dataset.hk]||'').toUpperCase();
+    }));
+  }
+  const fv = document.getElementById('ep-fonts');
+  if (fv) {
+    const opt = (list, sel) => list.map(f=>`<option value="${f.n}" ${f.n===sel?'selected':''}>${f.n}</option>`).join('');
+    fv.innerHTML = `<select class="ep-select" id="ep-fd">${opt(DISPLAY_FONTS, currentTheme.fd)}</select>
+                    <select class="ep-select" id="ep-fb">${opt(BODY_FONTS, currentTheme.fb)}</select>`;
+    fv.querySelector('#ep-fd').addEventListener('change', e => setFont('fd', e.target.value));
+    fv.querySelector('#ep-fb').addEventListener('change', e => setFont('fb', e.target.value));
+  }
+}
+function setColor(key, val){
+  currentTheme[key] = val; applyTheme(currentTheme); saveTheme();
+  const cv = document.getElementById('ep-colors'); if (!cv) return;
+  const c = cv.querySelector(`input[type=color][data-ck="${key}"]`); if (c) c.value = val;
+  const h = cv.querySelector(`.ep-hex[data-hk="${key}"]`); if (h) h.value = val.toUpperCase();
+  document.querySelectorAll('#ep-presets .ep-preset').forEach((el,i)=>el.classList.toggle('active', _matchesPreset(Object.keys(PRESETS)[i])));
+}
+function setFont(kind, name){ currentTheme[kind] = name; applyTheme(currentTheme); saveTheme(); }
+function applyPreset(name){ currentTheme = Object.assign({}, PRESETS[name]); applyTheme(currentTheme); saveTheme(); renderDesignTab(); }
+function resetTheme(){ document.documentElement.removeAttribute('style'); try{ localStorage.removeItem('pmpr_theme'); }catch(e){} currentTheme = Object.assign({}, THEME_DEFAULT); renderDesignTab(); }
+
 /* ─── PUBLISH TO GITHUB ────────────────── */
 /* Commits the current page (with your edits baked in) straight to the
    repo via the GitHub API. Your token lives only in this browser's
@@ -2313,6 +2472,7 @@ async function saveAndPublish() {
 }
 
 /* ─── BOOT ─────────────────────────────── */
+loadTheme();
 loadSaved();
 loadSavedImages();
 </script>

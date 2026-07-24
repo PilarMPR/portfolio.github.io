@@ -1421,7 +1421,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
   </div>
 
   <div class="ep-foot">
-    <button class="ep-foot-btn ep-foot-save" onclick="manualSave()">💾 Save to browser</button>
+    <button class="ep-foot-btn ep-foot-save" onclick="saveAndPublish()">💾 Save &amp; publish</button>
     <button class="ep-foot-btn ep-foot-export" onclick="exportHTML()">📥 Export HTML file</button>
   </div>
 </div>
@@ -2203,6 +2203,114 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft')  lbNav(-1, null);
   if (e.key === 'Escape') closeLightbox();
 });
+
+/* ─── PUBLISH TO GITHUB ────────────────── */
+/* Commits the current page (with your edits baked in) straight to the
+   repo via the GitHub API. Your token lives only in this browser's
+   localStorage and is never written into the published HTML. */
+const GH = { owner:'PilarMPR', repo:'portfolio.github.io', branch:'main', path:'index.html' };
+
+function ghToken(force) {
+  let t = localStorage.getItem('pmpr_gh_token');
+  if (!t || force) {
+    t = prompt(
+      'Paste a GitHub token to publish your changes to the live site.\n\n' +
+      'Make one (once) at github.com/settings/personal-access-tokens — "Fine-grained":\n' +
+      '  • Repository access → only ' + GH.owner + '/' + GH.repo + '\n' +
+      '  • Permissions → Contents → Read and write\n\n' +
+      'Stored only in this browser. Never added to your site.'
+    );
+    if (t) { t = t.trim(); localStorage.setItem('pmpr_gh_token', t); }
+  }
+  return t && t.trim();
+}
+
+function utf8ToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; const CH = 0x8000;
+  for (let i = 0; i < bytes.length; i += CH) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  return btoa(bin);
+}
+
+/* Serialize the live document with all edits baked in, keeping the
+   in-page editor fully working so you can keep editing + re-publishing. */
+function buildPublishHTML() {
+  const clone = document.documentElement.cloneNode(true);
+
+  // Bake saved case-study text edits + gallery images into their templates
+  clone.querySelectorAll('template[id^="cs-"]').forEach(tpl => {
+    const id = tpl.id.slice(3);
+    const saved = localStorage.getItem('pmpr_cs_content_' + id);
+    if (saved) tpl.innerHTML = saved;
+    tpl.content.querySelectorAll('[data-cs-img]').forEach(item => {
+      const src = localStorage.getItem('pmpr_cs_' + item.dataset.csImg);
+      if (!src) return;
+      let img = item.querySelector('img');
+      if (!img) {
+        img = document.createElement('img');
+        item.insertBefore(img, item.firstChild);
+        item.classList.remove('sh-gal-ph');
+        item.querySelector('span')?.remove();
+      }
+      img.src = src;
+    });
+  });
+
+  // Neutralize transient edit/UI state (edits themselves stay in the DOM)
+  clone.querySelector('body')?.classList.remove('editing');
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+  clone.querySelector('#modal-overlay')?.classList.remove('open');
+  const mb = clone.querySelector('#modal-body'); if (mb) mb.innerHTML = '';
+  clone.querySelector('#lightbox')?.classList.remove('open');
+  clone.querySelector('#fmt-bar')?.classList.remove('show');
+  clone.querySelector('#cs-edit-notice')?.remove();
+  clone.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
+  const cur = clone.querySelector('#cursor'); if (cur) { cur.className = ''; cur.removeAttribute('style'); }
+
+  return '<!DOCTYPE html>\n' + clone.outerHTML;
+}
+
+async function ghPublish(token) {
+  const { owner, repo, branch, path } = GH;
+  const api = 'https://api.github.com';
+  const H = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' };
+  const j = async res => { if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 160)); return res.json(); };
+
+  const ref = await j(await fetch(`${api}/repos/${owner}/${repo}/git/ref/heads/${branch}`, { headers: H }));
+  const headSha = ref.object.sha;
+  const commit = await j(await fetch(`${api}/repos/${owner}/${repo}/git/commits/${headSha}`, { headers: H }));
+  const blob = await j(await fetch(`${api}/repos/${owner}/${repo}/git/blobs`, { method: 'POST', headers: H,
+    body: JSON.stringify({ content: utf8ToB64(buildPublishHTML()), encoding: 'base64' }) }));
+  const tree = await j(await fetch(`${api}/repos/${owner}/${repo}/git/trees`, { method: 'POST', headers: H,
+    body: JSON.stringify({ base_tree: commit.tree.sha, tree: [{ path, mode: '100644', type: 'blob', sha: blob.sha }] }) }));
+  const nc = await j(await fetch(`${api}/repos/${owner}/${repo}/git/commits`, { method: 'POST', headers: H,
+    body: JSON.stringify({ message: 'Update portfolio content via in-page editor', tree: tree.sha, parents: [headSha] }) }));
+  await j(await fetch(`${api}/repos/${owner}/${repo}/git/refs/heads/${branch}`, { method: 'PATCH', headers: H,
+    body: JSON.stringify({ sha: nc.sha }) }));
+  return nc.sha;
+}
+
+async function saveAndPublish() {
+  autoSave(); // always keep a local copy first
+  const btn = document.querySelector('.ep-foot-save');
+  const set = t => { if (btn) btn.textContent = t; };
+  const token = ghToken(false);
+  if (!token) { set('✓ Saved locally'); setTimeout(() => set('💾 Save & publish'), 2200); return; }
+  set('⏳ Publishing…');
+  try {
+    await ghPublish(token);
+    set('✓ Published! (live in ~1 min)');
+  } catch (e) {
+    if (/^(401|403)/.test(e.message)) {
+      localStorage.removeItem('pmpr_gh_token');
+      alert('GitHub rejected the token (' + e.message + ').\nClick "Save & publish" again to enter a new one.');
+    } else {
+      alert('Publish failed: ' + e.message + '\n\nYour changes are still saved in this browser.');
+    }
+    set('⚠ Retry publish');
+  }
+  setTimeout(() => set('💾 Save & publish'), 3000);
+}
 
 /* ─── BOOT ─────────────────────────────── */
 loadSaved();

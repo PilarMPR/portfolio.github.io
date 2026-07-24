@@ -34,6 +34,49 @@ Each project has:
 
 Reorder with the up/down buttons. Up to as many projects as you want, though the SPEC targets 4.
 
+### Dev Log
+
+Where you explain how each game was actually built. Every project has its own log of entries — one per system, feature or decision — shown at the bottom of its case study.
+
+**To write one:** editor → **Dev Log** tab → pick the project → **New dev entry**. A full-screen form opens.
+
+Each entry has a fixed skeleton, so they all read consistently:
+
+| Field | What goes in it |
+|---|---|
+| Title | Becomes the entry's URL |
+| Discipline / Phase / When | Systems, Combat, Economy… · Concept → Postmortem · e.g. "Q2 2024" |
+| Summary | One line — the hook shown in the entry list |
+| Header image or clip | Image, GIF or short MP4/WebM |
+| **Problem** | What needed solving |
+| **Approach** | What you designed, and how you iterated |
+| **Result** | What changed, with evidence |
+| Tools & tech | Comma separated |
+
+Below that, add as many free blocks as you want, in any order: text, image, GIF/video, gallery, pull quote, **core-loop diagram**, before/after, **table** (for balance and economy tuning), bullet list, code/formula.
+
+#### Links you can share
+
+Every entry has its own address:
+
+```
+yoursite.com/#/hot-potato/dev/round-timer-tuning
+```
+
+Paste that into an application and it opens straight to that entry. **Copy link to this entry** at the bottom of any entry copies it for you. The link is generated from the title and follows it while you edit — once the entry has been published, the link freezes so nothing you've already sent out breaks.
+
+#### Private entries
+
+Toggle any entry to 🔒 **Private** (top-right of the editor). Private entries are visible to you in the browser but are stripped out completely when you publish — they never reach GitHub.
+
+> **They live only in this browser.** Clear your browser data and they're gone. Use **Export private entries** to save a JSON backup, and **Restore from backup** to bring it back or move it to another machine.
+
+#### Images and clips
+
+Uploads in dev entries are **not** base64'd into the page. They're held in the browser and committed as real files under `assets/<project>/` when you hit **Save & publish** — one commit, page and media together. Until you publish, a badge in the Dev Log tab tells you how many files are still browser-only.
+
+GitHub Pages takes about a minute to deploy, so freshly published images fall back to your local copy in the meantime instead of showing as broken.
+
 ### Design
 - **Theme presets:** one click to apply Soft Latte (default cozy light), Warm Cabin, Forest Dusk, Ghibli Pastel, or Original Dark.
 - **Custom colors:** picker + hex input for background, surface, accent, and text. Text color drives all the secondary opacity tones automatically.

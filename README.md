@@ -164,5 +164,36 @@ Both exclude private entries. Export gives you a single self-contained page — 
 - One stylesheet and one script shared by every page, so they're cached across navigation
 - Each page declares its own `window.PAGE` context (role, path, base) — that's how the same script drives the landing page and the project pages
 - Works fully offline once the fonts are cached
-- Responsive (single column under 900px)
 - Theme system uses CSS variables; the text color drives all derivative `rgba()` shades automatically via `--text-rgb`
+
+### Responsive
+
+Four breakpoints, defined at the bottom of `shared/portfolio.css`. They live
+at the end of the file on purpose — later rules win by source order, so
+nothing there needs an inflated selector to take effect.
+
+| | Width | What changes |
+|---|---|---|
+| wide | 1100px | Two-column layouts loosen up; the floating "← All work" link drops |
+| stack | 900px | Everything goes to one column. The editor drawer becomes a bottom sheet |
+| phone | 620px | Hamburger menu; 16px form fields; 44px tap targets |
+| small | 420px | Final tightening |
+
+Before adding a fifth, check whether intrinsic sizing solves it instead —
+`.sh-facts` uses `auto-fit` and reflows 4 → 1 columns with no query at all.
+
+Two things worth knowing if you change the layout:
+
+- `--nav-h` is the single source of truth for the header height. CSS uses it
+  and `navH()` in `site.js` reads it back, so scroll offsets can't drift out
+  of step with it. It is deliberately **not** a theme variable — `applyTheme()`
+  writes theme vars onto `documentElement.style`, which would override it.
+- The mobile menu's markup is static in all five pages rather than injected
+  by script. `buildPublishHTML()` serializes the live DOM, so anything the
+  script adds would be baked into the published page and then added again on
+  the next load. Any new UI state class needs clearing there too.
+
+On a small screen the editor panel docks to the bottom of the screen instead
+of the left edge, and collapses to a peek so you can see the page you're
+editing. Tap the handle or the "Edit mode" header to expand it; picking a
+section or field collapses it again so you land on what you selected.

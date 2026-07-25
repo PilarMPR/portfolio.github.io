@@ -43,7 +43,7 @@
 <article id="case-view">
 <div class="sh-hero">
     <!--📸 REPLACE src — 1600×560px+ gameplay screenshot -->
-    <img src="../assets/block-city/hero.jpg" alt="Block City">
+    <img src="../assets/block-city/hero.jpg" alt="Block City" width="1200" height="781" loading="eager" fetchpriority="high" decoding="async" />
     <div class="sh-hero-grad"></div>
     <div class="sh-hero-info">
       <div class="sh-tags"><span class="tag tag-accent">Educational</span><span class="tag tag-dim">City Builder · Freelance · 12 months</span></div>
@@ -57,7 +57,7 @@
     <div><div class="sh-fact-lbl">Timeline</div><div class="sh-fact-val">12 months (freelance)</div></div>
   </div>
   <div class="sh-content">
-    <main>
+    <div class="sh-body">
       <div class="sh-sec">
         <div class="sh-sec-lbl">Context</div>
         <h3 spellcheck="false" style="border-radius: 2px; outline: rgba(200, 64, 46, 0.25) dashed 1px; cursor: text;" contenteditable="false">What is Block City?</h3>
@@ -105,18 +105,28 @@
         <div class="sh-sec-lbl">Gallery</div>
         <div class="sh-gallery">
         <div class="sh-gal-featured" data-cs-img="bc-0" onclick="openGallery(this)">
-          <img src="../assets/block-city/card.jpg" alt="">
+          <img src="../assets/block-city/card.jpg" alt="" width="1080" height="1080" loading="lazy" decoding="async" />
           <div class="sh-gal-hint">🖼 3 images — click to view</div>
           <label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-0')"></label>
         </div>
         <!-- gallery data -->
-        <div class="sh-gal-item" data-cs-img="bc-0" data-cap="Key art" style="display:none"><img src="../assets/block-city/card.jpg" alt=""><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-0')"></label></div>
-        <div class="sh-gal-item" data-cs-img="bc-1" data-cap="Village map with UI" style="display:none"><img src="../assets/block-city/gallery-1.jpg" alt=""><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-1')"></label></div>
-        <div class="sh-gal-item" data-cs-img="bc-2" data-cap="Maths puzzle gameplay" style="display:none"><img src="../assets/block-city/gallery-2.gif" alt=""><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-2')"></label></div>
-        </div></div></main></div>
+        <div class="sh-gal-item" data-cs-img="bc-0" data-cap="Key art" style="display:none"><img src="../assets/block-city/card.jpg" alt="" width="1080" height="1080" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-0')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="bc-1" data-cap="Village map with UI" style="display:none"><img src="../assets/block-city/gallery-1.jpg" alt="" width="1200" height="702" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-1')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="bc-2" data-cap="Maths puzzle gameplay" style="display:none"><img src="../assets/block-city/gallery-2.gif" alt="" width="700" height="393" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'bc-2')"/></label></div>
         
-      
-    </article>
+        </div>
+      </div>
+    </div>
+    <aside class="sh-aside">
+      <div class="sh-widget"><div class="sh-widget-lbl">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool">Construct</span><span class="sh-tool">Google Sheets</span><span class="sh-tool">JSON</span><span class="sh-tool">Trello</span><span class="sh-tool">Adobe XD</span></div></div>
+      <div class="sh-widget"><div class="sh-widget-lbl">Role breakdown</div><ul class="sh-bullets"><li>All puzzle design</li><li>Economy &amp; balance</li><li>Construct implementation</li><li>JSON data pipelines</li><li>Production lead</li><li>GDD &amp; documentation</li></ul></div>
+    </aside>
+  </div>
+  <div class="sh-nav">
+    <a class="sh-nav-btn" href="hot-potato.html">← Hot Potato</a>
+    <a class="sh-nav-btn primary" href="healthy-jeart.html">Next: Healthy Jeart →</a>
+  </div>
+</article>
 
 <div id="entry-view" hidden=""></div>
 

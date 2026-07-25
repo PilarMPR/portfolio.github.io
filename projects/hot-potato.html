@@ -44,7 +44,7 @@
 <article id="case-view">
 <div class="sh-hero">
     <!--📸 REPLACE: wide hero/gameplay image, 1600×560px+ -->
-    <img src="../assets/hot-potato/hero.jpg" alt="Hot Potato"/>
+    <img src="../assets/hot-potato/hero.jpg" alt="Hot Potato" width="960" height="1200" loading="eager" fetchpriority="high" decoding="async" />
     <div class="sh-hero-grad"></div>
     <div class="sh-hero-info">
       <div class="sh-tags"><span class="tag tag-accent">Party Brawler</span><span class="tag tag-dim">Premium · In Development · 2023–present</span></div>
@@ -58,7 +58,7 @@
     <div><div class="sh-fact-lbl">Timeline</div><div class="sh-fact-val">2023 → Present</div></div>
   </div>
   <div class="sh-content">
-    <main>
+    <div class="sh-body">
       <div class="sh-sec">
         <div class="sh-sec-lbl">Context</div>
         <h3>What is Hot Potato?</h3>
@@ -129,18 +129,18 @@
         <div class="sh-sec-lbl">Gallery</div>
         <div class="sh-gallery">
         <div class="sh-gal-featured" data-cs-img="hp-0" onclick="openGallery(this)">
-          <img src="../assets/hot-potato/card.jpg" alt=""/>
+          <img src="../assets/hot-potato/card.jpg" alt="" width="1080" height="1350" loading="lazy" decoding="async" />
           <div class="sh-gal-hint">🖼 3 images — click to view</div>
           <label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-0')"/></label>
         </div>
         <!-- gallery data -->
-        <div class="sh-gal-item" data-cs-img="hp-0" data-cap="Key art — 3 awards" style="display:none"><img src="../assets/hot-potato/card.jpg" alt=""/><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-0')"/></label></div>
-        <div class="sh-gal-item" data-cs-img="hp-1" data-cap="Wild Alchemists at CYL Game Show" style="display:none"><img src="../assets/hot-potato/gallery-1.jpg" alt=""/><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-1')"/></label></div>
-        <div class="sh-gal-item" data-cs-img="hp-2" data-cap="Character art" style="display:none"><img src="../assets/hot-potato/gallery-2.jpg" alt=""/><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-2')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="hp-0" data-cap="Key art — 3 awards" style="display:none"><img src="../assets/hot-potato/card.jpg" alt="" width="1080" height="1350" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-0')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="hp-1" data-cap="Wild Alchemists at CYL Game Show" style="display:none"><img src="../assets/hot-potato/gallery-1.jpg" alt="" width="1200" height="1600" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-1')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="hp-2" data-cap="Character art" style="display:none"><img src="../assets/hot-potato/gallery-2.jpg" alt="" width="1200" height="798" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'hp-2')"/></label></div>
         
         </div>
       </div>
-    </main>
+    </div>
     <aside class="sh-aside">
       <div class="sh-widget"><div class="sh-widget-lbl">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool">Unreal Engine 5</span><span class="sh-tool">Blueprints</span><span class="sh-tool">GASP</span><span class="sh-tool">Miro</span><span class="sh-tool">Google Sheets</span></div></div>
       <div class="sh-widget"><div class="sh-widget-lbl">Role breakdown</div><ul class="sh-bullets"><li>Core mechanic design</li><li>Systems design</li><li>Blueprint implementation</li><li>Sprint planning</li><li>Playtesting &amp; iteration</li><li>Design documentation</li></ul></div>

@@ -1688,9 +1688,11 @@ const dlIsVideo = ref => /^video\//.test(ref?.type || '') || /\.(mp4|webm)$/i.te
 function dlMediaTag(ref, cls) {
   if (!ref || !ref.path) return '';
   const src = dlEsc(dlSrc(ref)), p = dlEsc(ref.path), c = cls ? ` class="${cls}"` : '';
+  // Dev-log media is always below the fold, so none of it needs to be on
+  // the wire before the page is usable.
   return dlIsVideo(ref)
-    ? `<video${c} src="${src}" data-mpath="${p}" onerror="dlMediaFallback(this)" autoplay loop muted playsinline></video>`
-    : `<img${c} src="${src}" data-mpath="${p}" onerror="dlMediaFallback(this)" alt=""/>`;
+    ? `<video${c} src="${src}" data-mpath="${p}" onerror="dlMediaFallback(this)" preload="metadata" autoplay loop muted playsinline></video>`
+    : `<img${c} src="${src}" data-mpath="${p}" onerror="dlMediaFallback(this)" loading="lazy" decoding="async" alt=""/>`;
 }
 
 /* ═══ RENDERING — the log list inside a case study ═══ */
@@ -1912,7 +1914,10 @@ function dlMountLog() {
   if (!IS_PROJECT || !caseView) return;
   caseView.querySelectorAll('#dl-wrap').forEach(n => n.remove());   // never stack two
   const wrap = dlRenderList(PAGE.id);
-  const host = caseView.querySelector('.sh-content > main');
+  // .sh-body used to be a second <main>, which isn't valid inside
+  // main.sh-page. Both are accepted so pages published before the rename
+  // keep mounting their log in the right place.
+  const host = caseView.querySelector('.sh-content > .sh-body, .sh-content > main');
   const nav  = caseView.querySelector('.sh-nav');
   if (host)     host.appendChild(wrap);
   else if (nav) caseView.insertBefore(wrap, nav);

@@ -80,6 +80,37 @@ if (heroEl) {
   addEventListener('scroll', onScroll, { passive:true }); onScroll();
 }
 
+/* ─── MOBILE MENU ──────────────────────────
+   Markup is static in every page (the publish flow serializes the DOM,
+   so injecting it here would bake it in and then duplicate it). This
+   only drives state. Null-guarded: the rest of the script must survive
+   a page that doesn't have these nodes. */
+const burger = document.getElementById('nav-burger');
+const mobileMenu = document.getElementById('mobile-menu');
+
+function setMenu(open) {
+  if (!burger || !mobileMenu) return;
+  if (open === mobileMenu.classList.contains('open')) return;
+  mobileMenu.classList.toggle('open', open);
+  document.body.classList.toggle('menu-open', open);
+  burger.setAttribute('aria-expanded', String(open));
+  burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  mobileMenu.setAttribute('aria-hidden', String(!open));
+  if (open) { lockScroll(); mobileMenu.querySelector('a')?.focus({ preventScroll:true }); }
+  else      { unlockScroll(); burger.focus({ preventScroll:true }); }
+}
+const closeMenu = () => setMenu(false);
+
+if (burger && mobileMenu) {
+  burger.addEventListener('click', () => setMenu(!mobileMenu.classList.contains('open')));
+  // Anchors on project pages navigate away; scrollToSection() links on the
+  // home page do not, so the menu has to close itself either way.
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+  // Rotating to landscape can cross the breakpoint with the menu still up.
+  MQ_PHONE.addEventListener('change', e => { if (!e.matches) closeMenu(); });
+}
+
 /* ─── SCROLL REVEAL ────────────────────── */
 const revealIO = new IntersectionObserver(
   entries => entries.forEach(e => {
@@ -1196,6 +1227,13 @@ function buildPublishHTML(opts) {
   const toast = clone.querySelector('.de-toast'); if (toast) toast.textContent = '';
   const saveBtn = clone.querySelector('.ep-foot-save');   // caught mid-publish otherwise
   if (saveBtn) saveBtn.textContent = '💾 Save & publish';
+  // Transient UI state that would otherwise ship to the live site: an open
+  // mobile menu, or an editor sheet left collapsed.
+  clone.querySelector('#mobile-menu')?.classList.remove('open');
+  clone.querySelector('#mobile-menu')?.setAttribute('aria-hidden', 'true');
+  clone.querySelector('#nav-burger')?.setAttribute('aria-expanded', 'false');
+  clone.querySelector('#nav-burger')?.setAttribute('aria-label', 'Open menu');
+  clone.querySelector('body')?.classList.remove('menu-open', 'panel-peek');
   clone.querySelector('#cs-edit-notice')?.remove();
   clone.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
   const cur = clone.querySelector('#cursor'); if (cur) { cur.className = ''; cur.removeAttribute('style'); }

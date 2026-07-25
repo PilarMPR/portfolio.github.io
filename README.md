@@ -17,7 +17,7 @@ A single-file, customizable portfolio site for a game designer. Edit everything 
 2. Click the logo in the top-left **6 times** in quick succession to open the editor panel.
 3. Fill in your info across the four tabs.
 4. Everything saves automatically to your browser's localStorage.
-5. When ready, click **Download HTML** in the editor to get a standalone file with all your content (and embedded images) baked in.
+5. When ready, click **Save & publish** to push it live, or **Export HTML file** for a standalone copy with all your content and images baked in.
 
 ## Editor tabs
 
@@ -104,10 +104,24 @@ Because everything is static, any static host works (Netlify, Vercel, Cloudflare
 
 ## How data is stored
 
-- **In the browser:** `localStorage.portfolioData` (one JSON blob with all your content + theme + layout).
-- **In a downloaded file:** click **Download HTML** in the editor to export a self-contained `portfolio.html` with all data and images baked into the markup. This is what you'd commit/deploy.
+- **In the browser:** `localStorage` (content + theme + dev log) and `IndexedDB` (uploaded dev-log media).
+- **On the live site:** **Save & publish** commits `index.html` with everything baked in, plus any new dev-log media as real files under `assets/`.
+- **In a downloaded file:** **Export HTML file** gives you a self-contained, read-only `pilar-mpr-portfolio.html`.
 
-If you switch browsers or clear localStorage, your in-progress edits are gone — download HTML or back up the JSON manually if you want to migrate.
+If you switch browsers or clear localStorage, your in-progress edits are gone — publish, export, or back up the JSON manually if you want to migrate.
+
+### Publish vs. export
+
+They're different on purpose:
+
+| | Save & publish | Export HTML file |
+|---|---|---|
+| Goes to | The live GitHub Pages site | Your downloads folder |
+| Dev-log media | Real files in `assets/` — keeps the page small | Embedded in the file — bigger, but self-contained |
+| Editing | Editor still available (logo ×6) | Read-only; the editor is stripped out |
+| Needs the repo | Yes | No — works offline, from a USB stick, as an email attachment |
+
+Both exclude private entries. The export is the one to hand to a studio directly; the published site is the one you link to.
 
 ## Tips
 

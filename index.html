@@ -1968,6 +1968,8 @@ document.getElementById('nav-logo').addEventListener('click', () => {
 });
 
 function toggleEdit() {
+  // Exported copies ship without the editor panel — don't half-open it.
+  if (document.documentElement.dataset.readonly) return;
   editing = !editing;
   document.body.classList.toggle('editing', editing);
 
@@ -2473,37 +2475,31 @@ function manualSave() {
   if (btn) { btn.textContent = '✓ Saved!'; setTimeout(() => btn.textContent = '💾 Save to browser', 2000); }
 }
 
-function exportHTML() {
+/* A standalone, read-only copy of the site: one file you can email, hand
+   to a studio on a USB stick, or open offline. Unlike publishing — which
+   writes media to assets/ as real files — the export embeds every image
+   so nothing depends on the repo being there. That makes it a big file;
+   that's the trade for it working anywhere. */
+async function exportHTML() {
   autoSave();
-  const clone = document.documentElement.cloneNode(true);
-  clone.querySelector('#edit-panel')?.remove();
-  clone.querySelector('#fmt-bar')?.remove();
-  clone.querySelector('#cursor')?.remove();
-  clone.querySelector('#modal-overlay')?.remove();
-  clone.querySelector('#dev-editor')?.remove();
-  clone.querySelector('.de-toast')?.remove();
-  // Dev log travels with the export — public entries only
-  const dlEx = clone.querySelector('#devlog-data');
-  if (dlEx) dlEx.textContent = JSON.stringify(dlPublicData());
-  clone.querySelector('body')?.classList.remove('editing');
-  clone.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable','false'));
-  clone.querySelectorAll('.img-upload-btn').forEach(el => el.remove());
-  clone.querySelectorAll('.cs-img-btn').forEach(el => el.remove());
-  clone.querySelectorAll('[data-img-zone]').forEach(el => el.removeAttribute('data-img-zone'));
-  // Remove inline margin-left from body editing shift
-  const body = clone.querySelector('body');
-  if (body) body.style.marginLeft = '';
-  const navEl = clone.querySelector('#site-nav');
-  if (navEl) navEl.style.marginLeft = '';
-  const canvasEl = clone.querySelector('#canvas');
-  if (canvasEl) canvasEl.style.marginLeft = '';
-  const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type:'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'pilar-mpr-portfolio.html';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const btn = document.querySelector('.ep-foot-export');
+  const set = t => { if (btn) btn.textContent = t; };
+  set('⏳ Packing…');
+  try {
+    const html = buildPublishHTML({ forExport: true, devlogData: await dlExportData() });
+    const blob = new Blob([html], { type:'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'pilar-mpr-portfolio.html';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    set('✓ Downloaded');
+  } catch (e) {
+    alert('Export failed: ' + e.message);
+    set('⚠ Retry export');
+  }
+  setTimeout(() => set('📥 Export HTML file'), 2600);
 }
 
 /* ─── GALLERY + LIGHTBOX CAROUSEL ─────── */
@@ -2773,7 +2769,8 @@ function utf8ToB64(str) {
 
 /* Serialize the live document with all edits baked in, keeping the
    in-page editor fully working so you can keep editing + re-publishing. */
-function buildPublishHTML() {
+function buildPublishHTML(opts) {
+  const { devlogData, forExport } = opts || {};
   const clone = document.documentElement.cloneNode(true);
 
   // Bake saved case-study text edits + gallery images into their templates
@@ -2797,7 +2794,7 @@ function buildPublishHTML() {
 
   // Bake the dev log in — public entries only, private ones never leave the browser
   const dlSlot = clone.querySelector('#devlog-data');
-  if (dlSlot) dlSlot.textContent = JSON.stringify(dlPublicData());
+  if (dlSlot) dlSlot.textContent = JSON.stringify(devlogData || dlPublicData());
 
   // Neutralize transient edit/UI state (edits themselves stay in the DOM)
   clone.querySelector('#dev-editor')?.classList.remove('open');
@@ -2817,6 +2814,22 @@ function buildPublishHTML() {
   clone.querySelector('#cs-edit-notice')?.remove();
   clone.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
   const cur = clone.querySelector('#cursor'); if (cur) { cur.className = ''; cur.removeAttribute('style'); }
+
+  /* Export mode: strip the authoring UI for a read-only copy.
+     Careful — the script captures #cursor, #nav, #hero, #modal-overlay,
+     #modal-body, #fmt-bar and #lightbox at load with no null checks, so
+     removing any of them throws and kills the rest of the script. Those
+     stay (inert); #fmt-bar and the toast are hidden anyway, and the toast
+     is what tells a visitor "link copied". Only the panels come out. */
+  if (forExport) {
+    clone.dataset.readonly = '1';
+    clone.querySelector('#edit-panel')?.remove();
+    clone.querySelector('#dev-editor')?.remove();
+    clone.querySelectorAll('.img-upload-btn,.cs-img-btn').forEach(el => el.remove());
+    clone.querySelectorAll('[data-img-zone]').forEach(el => el.removeAttribute('data-img-zone'));
+    clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    const b = clone.querySelector('body'); if (b) b.style.marginLeft = '';
+  }
 
   return '<!DOCTYPE html>\n' + clone.outerHTML;
 }
@@ -3048,7 +3061,7 @@ async function mediaBoot() {
 /* Resolve a stored media reference to something an <img> can use. */
 function dlSrc(ref) {
   if (!ref || !ref.path) return '';
-  return MEDIA_CACHE[ref.path] || ref.path;
+  return MEDIA_CACHE[ref.path] || ref.data || ref.path;   // .data = embedded in an export
 }
 
 /* Safety net: a published file that GitHub Pages hasn't deployed yet
@@ -3800,6 +3813,26 @@ function dlPublicData() {
     if (pub.length) out[p] = pub;
   });
   return out;
+}
+
+/* Same public data, but with every image and clip embedded, so an
+   exported file works with no assets/ folder next to it. */
+async function dlExportData() {
+  const data = JSON.parse(JSON.stringify(dlPublicData()));
+  const refs = [];
+  const take = r => { if (r && r.path) refs.push(r); };
+  Object.values(data).forEach(list => (list || []).forEach(e => {
+    take(e.hero);
+    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); (b.items || []).forEach(take); });
+  }));
+  for (const r of refs) {
+    if (MEDIA_CACHE[r.path]) { r.data = MEDIA_CACHE[r.path]; continue; }
+    try {
+      const rec = await mediaTx('readonly', s => s.get(r.path));
+      if (rec && rec.data) r.data = rec.data;   // no local copy → falls back to the path
+    } catch (e) {}
+  }
+  return data;
 }
 
 /* Called after a successful publish: media is live, slugs freeze. */

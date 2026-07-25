@@ -20,27 +20,52 @@ const projectHref = id => PAGE.base + 'projects/' + id + '.html';
 /* A stored image may be a legacy data: URL or an assets/ path. */
 const storedSrc = v => !v ? '' : (v.startsWith('data:') ? v : (MEDIA_CACHE[v] || asset(v)));
 
-/* ─── CURSOR ───────────────────────────── */
+/* ─── LAYOUT METRICS ───────────────────────
+   Single source of truth is --nav-h in portfolio.css, so the header
+   height and every scroll offset that depends on it can't drift apart. */
+const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 56;
+
+/* Media queries the script needs to agree with. Keep in step with the
+   RESPONSIVE block in portfolio.css. */
+const MQ_PHONE = matchMedia('(max-width:620px)');
+const MQ_STACK = matchMedia('(max-width:900px)');
+const MQ_FINE  = matchMedia('(hover:hover) and (pointer:fine)');
+
+/* ─── SCROLL LOCK ──────────────────────────
+   The lightbox, the dev-log editor and the mobile menu can all be open
+   over the page. Counted, so whichever closes first doesn't hand scroll
+   back while another is still up. */
+let scrollLocks = 0;
+function lockScroll()   { if (++scrollLocks === 1) document.body.style.overflow = 'hidden'; }
+function unlockScroll() { if (scrollLocks > 0 && --scrollLocks === 0) document.body.style.overflow = ''; }
+
+/* ─── CURSOR ─────────────────────────────
+   Pointer-driven, so it's skipped entirely on touch — otherwise a 60fps
+   rAF loop runs forever on a phone animating an element nobody sees. */
 const cur = document.getElementById('cursor');
-let mx=0,my=0,cx=0,cy=0;
-document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
-document.addEventListener('mouseleave', () => cur.classList.add('hidden'));
-document.addEventListener('mouseenter', () => cur.classList.remove('hidden'));
-(function tick(){
-  cx += (mx-cx)*.17; cy += (my-cy)*.17;
-  cur.style.left = cx+'px'; cur.style.top = cy+'px';
-  requestAnimationFrame(tick);
-})();
-document.querySelectorAll('a,button,.project,.ch,.skill,.sh-nav-btn,.db-btn').forEach(el => {
-  el.addEventListener('mouseenter', () => cur.classList.add('big'));
-  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
-});
+if (cur && MQ_FINE.matches) {
+  let mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  document.addEventListener('mouseleave', () => cur.classList.add('hidden'));
+  document.addEventListener('mouseenter', () => cur.classList.remove('hidden'));
+  (function tick(){
+    cx += (mx-cx)*.17; cy += (my-cy)*.17;
+    cur.style.left = cx+'px'; cur.style.top = cy+'px';
+    requestAnimationFrame(tick);
+  })();
+  document.querySelectorAll('a,button,.project,.ch,.skill,.sh-nav-btn,.db-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+} else if (cur) {
+  cur.classList.add('hidden');
+}
 
 /* ─── SCROLL ───────────────────────────── */
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (!el) return;
-  const top = el.getBoundingClientRect().top + window.scrollY - 62;
+  const top = el.getBoundingClientRect().top + window.scrollY - navH() - 6;
   window.scrollTo({ top, behavior: 'smooth' });
 }
 
@@ -311,7 +336,7 @@ function makeSectionItem(id, icon, name, deletable) {
     if (el) {
       document.querySelectorAll('.ep-focused-section').forEach(x => x.classList.remove('ep-focused-section'));
       el.classList.add('ep-focused-section');
-      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      const top = el.getBoundingClientRect().top + window.scrollY - navH() - 24;
       window.scrollTo({ top, behavior:'smooth' });
     }
   });
@@ -420,8 +445,13 @@ const fmtBar = document.getElementById('fmt-bar');
 function fmt(cmd) { document.execCommand(cmd, false, null); }
 
 function showFmtBar(x, y) {
-  fmtBar.style.left = Math.min(x, window.innerWidth - 200) + 'px';
-  fmtBar.style.top  = (y - 48) + 'px';
+  /* On a phone the bar is docked to the bottom edge by CSS — free
+     positioning there would push it off-screen at narrow widths. */
+  if (!MQ_PHONE.matches) {
+    const w = fmtBar.offsetWidth || 200;
+    fmtBar.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + 'px';
+    fmtBar.style.top  = Math.max(8, y - 48) + 'px';
+  }
   fmtBar.classList.add('show');
 }
 function hideFmtBar() { fmtBar.classList.remove('show'); }
@@ -901,7 +931,7 @@ function openGallery(featuredEl) {
   lbIndex = 0;
   showLbImage();
   document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockScroll();
 }
 
 function showLbImage() {
@@ -937,8 +967,10 @@ function lbGoto(i) { lbIndex = i; showLbImage(); }
 
 function closeLightbox(e) {
   if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('#lb-close')) return;
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  lb.classList.remove('open');
+  unlockScroll();
 }
 
 // Swipe support on lightbox
@@ -2011,14 +2043,16 @@ function deOpen(proj, id) {
   deRenderBlocks();
 
   document.getElementById('dev-editor').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockScroll();
   const scroller = document.querySelector('#dev-editor .de-body');
   if (scroller) scroller.scrollTop = 0;
 }
 
 function deClose() {
-  document.getElementById('dev-editor').classList.remove('open');
-  document.body.style.overflow = '';
+  const de = document.getElementById('dev-editor');
+  const wasOpen = de.classList.contains('open');
+  de.classList.remove('open');
+  if (wasOpen) unlockScroll();
   dlSave();
   deCur = null;
   renderDlEntryList();

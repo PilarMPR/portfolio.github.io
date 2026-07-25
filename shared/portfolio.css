@@ -29,6 +29,12 @@
   --fi: 'Caveat', cursive;
   --ease: cubic-bezier(.4,0,.2,1);
   --eo:   cubic-bezier(0,0,.2,1);
+  /* Layout metrics. Deliberately NOT part of the theme variable set —
+     applyTheme() writes its vars onto documentElement.style, which would
+     win over anything declared here. Keep these out of that list. */
+  --nav-h:  56px;   /* fixed header height; JS reads this, see navH() */
+  --ep-w:   280px;  /* editor drawer width on desktop */
+  --ep-peek:132px;  /* visible strip of the editor sheet when collapsed */
 }
 
 /* ── BASE ─────────────────────────────── */
@@ -78,7 +84,7 @@ ul { list-style:none; }
 /* ── NAV ──────────────────────────────── */
 #nav {
   position:fixed; top:0; left:0; right:0; z-index:200;
-  height:56px; display:flex; align-items:center;
+  height:var(--nav-h); display:flex; align-items:center;
   padding:0 clamp(1.25rem,5vw,3.5rem);
   justify-content:space-between;
   /* `left` animates because the nav slides aside for the editor panel */
@@ -177,7 +183,7 @@ h1.hero-name {
   max-width:230px; text-align:center;
   animation:fadeUp .8s var(--eo) 1s both;
 }
-@media(max-width:760px){ .scribble-hero{ display:none; } }
+@media(max-width:900px){ .scribble-hero{ display:none; } }
 .hero-scroll {
   position:absolute; bottom:clamp(2rem,4vw,3.5rem);
   right:clamp(1.5rem,5vw,3.5rem); z-index:2;
@@ -219,9 +225,7 @@ h1.hero-name {
   padding:.24rem .6rem; border-radius:2px;
   border:1px solid var(--faint); background:rgba(255,255,255,.4); color:var(--muted);
 }
-.tag-white  { }
 .tag-accent { color:var(--accent); border-color:rgba(200,64,46,.4); background:rgba(200,64,46,.07); }
-.tag-dim    { }
 
 /* mono section label "// LABEL ——" */
 .slabel {
@@ -371,7 +375,9 @@ h1.hero-name {
 /* ── ABOUT ────────────────────────────── */
 #about {
   padding:clamp(6rem,12vw,10rem) clamp(1.5rem,5vw,3.5rem) clamp(6rem,10vw,9rem) clamp(1.5rem,5vw,6rem);
-  display:grid; grid-template-columns:1fr 350px;
+  /* minmax(0,1fr) so the bio can actually shrink, and a fluid sidebar so
+     there's no squeeze zone just above the stack breakpoint. */
+  display:grid; grid-template-columns:minmax(0,1fr) clamp(280px,26vw,350px);
   gap:clamp(3.5rem,7vw,7rem); align-items:start; position:relative; z-index:2;
 }
 .about-left .slabel { margin-bottom:2.5rem; }
@@ -510,33 +516,8 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
 .copy { font-family:var(--fm); font-size:.58rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
 
-/* ── CASE STUDY MODAL (design-doc page) ─ */
-#modal-overlay {
-  position:fixed; inset:0; z-index:800;
-  background:rgba(36,33,27,.55); backdrop-filter:blur(6px);
-  display:flex; align-items:center; justify-content:center;
-  padding:clamp(1rem,3vw,2.5rem); opacity:0; pointer-events:none;
-  transition:opacity .35s var(--ease);
-}
-#modal-overlay.open { opacity:1; pointer-events:all; }
-#modal {
-  background:var(--bg); border:2px solid var(--text); border-radius:6px;
-  width:100%; max-width:1000px; max-height:90vh;
-  display:flex; flex-direction:column; overflow:hidden;
-  box-shadow:14px 18px 0 rgba(36,33,27,.22);
-  transform:translateY(18px) scale(.97); transition:transform .38s var(--eo);
-}
-#modal-overlay.open #modal { transform:none; }
-#modal-close {
-  position:absolute; top:1rem; right:1rem; z-index:10;
-  width:36px; height:36px; border-radius:50%;
-  background:var(--bg); border:1.5px solid var(--text);
-  color:var(--text); font-size:1rem; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; transition:all .2s;
-}
-#modal-close:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
-#modal-body { flex:1; overflow-y:auto; overscroll-behavior:contain; position:relative;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px); background-size:100% 26px; }
+/* ── CASE STUDY (design-doc page) ───────
+   Lived in a modal once; it's real pages now (see .sh-page below). */
 .sh-hero { position:relative; height:clamp(180px,30vh,360px); background:var(--bg3); flex-shrink:0; overflow:hidden; border-bottom:2px solid var(--text); }
 .sh-hero img { width:100%; height:100%; object-fit:cover; filter:saturate(.95) contrast(1.02); }
 .sh-hero-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:var(--fd); font-weight:800; font-size:clamp(6rem,18vw,16rem); color:rgba(36,33,27,.06); }
@@ -544,7 +525,10 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 .sh-hero-info { position:absolute; bottom:0; left:0; right:0; padding:1.75rem clamp(1.5rem,4vw,2.5rem); }
 .sh-tags { display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.75rem; }
 .sh-hero-info h2 { font-family:var(--fd); font-weight:800; font-size:clamp(2rem,5vw,4rem); letter-spacing:-.035em; line-height:.9; color:var(--text); }
-.sh-facts { background:var(--bg2); border-bottom:2px solid var(--text); display:grid; grid-template-columns:repeat(4,1fr); padding:1.1rem clamp(1.5rem,4vw,2.5rem); gap:1rem; }
+/* auto-fit rather than a fixed 4 columns: the cells hold strings like
+   "Lead Designer & Producer", so let them reflow 4 → 3 → 2 → 1 on their
+   own instead of stepping through breakpoints. */
+.sh-facts { background:var(--bg2); border-bottom:2px solid var(--text); display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); padding:1.1rem clamp(1.5rem,4vw,2.5rem); gap:1rem; }
 .sh-facts > div { position:relative; padding-left:.9rem; }
 .sh-facts > div::before { content:''; position:absolute; left:0; top:.1rem; bottom:.1rem; width:2px; background:var(--accent); opacity:.5; }
 .sh-fact-lbl { font-family:var(--fm); font-size:.55rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.25rem; }
@@ -601,7 +585,7 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 .sh-nav-btn:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(200,64,46,.2); border-color:var(--accent); color:var(--accent); }
 .sh-nav-btn.primary { background:var(--text); color:var(--bg); }
 .sh-nav-btn.primary:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
-@media(max-width:700px){ .sh-content{ grid-template-columns:1fr; gap:0; } .sh-aside{ position:static; padding-top:2rem; } .sh-facts{ grid-template-columns:repeat(2,1fr); } .sh-resp{ grid-template-columns:1fr; } }
+/* Responsive rules for the above live in the RESPONSIVE section. */
 
 /* ── LIGHTBOX ─────────────────────────── */
 #lightbox { position:fixed; inset:0; z-index:9000; background:rgba(36,33,27,.94); display:none; flex-direction:column; align-items:center; justify-content:center; }
@@ -622,18 +606,18 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 #lb-caption { font-family:var(--fm); font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:rgba(251,248,240,.5); min-height:1em; }
 
 /* ── EDIT MODE PANEL (tool UI — kept dark) ─
-   The panel is a fixed 280px column, so the page has to make room for it
-   or it just gets covered up. That room is body padding, and the
-   transition is declared on the element itself — NOT inside .editing —
-   or it only plays on the way in and the page snaps back on the way out.
+   The panel is a fixed column, so the page has to make room for it or it
+   just gets covered up. That room is body padding, and the transition is
+   declared on the element itself — NOT inside .editing — or it only plays
+   on the way in and the page snaps back on the way out.
    #canvas / #site-nav are what these rules used to target; those ids went
    away when the site was split into per-project pages, which left the
    panel silently overlapping the page instead of pushing it. */
 body { transition:padding-left .35s var(--ease), padding-bottom .35s var(--ease); }
-body.editing { padding-left:280px; }
-body.editing #nav { left:280px; }
-body.editing .proj-back { left:calc(280px + clamp(.75rem,2vw,1.5rem)); }
-#edit-panel { position:fixed; top:0; left:0; bottom:0; width:280px; z-index:3000; background:#211e18; border-right:1px solid rgba(255,255,255,.1); display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .35s var(--ease); box-shadow:6px 0 30px rgba(0,0,0,.4); }
+body.editing { padding-left:var(--ep-w); }
+body.editing #nav { left:var(--ep-w); }
+body.editing .proj-back { left:calc(var(--ep-w) + clamp(.75rem,2vw,1.5rem)); }
+#edit-panel { position:fixed; top:0; left:0; bottom:0; width:var(--ep-w); z-index:3000; background:#211e18; border-right:1px solid rgba(255,255,255,.1); display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .35s var(--ease); box-shadow:6px 0 30px rgba(0,0,0,.4); }
 body.editing #edit-panel { transform:none; }
 
 /* Narrow screens can't spare 280px of width — a phone would be left with a
@@ -675,8 +659,10 @@ body.editing #edit-panel { transform:none; }
 .ep-swatch input[type=color] { position:absolute; inset:-8px; width:160%; height:180%; border:none; padding:0; background:none; cursor:pointer; }
 .ep-hex { width:82px; font-family:var(--fm); font-size:.62rem; text-transform:uppercase; background:#17140f; border:1px solid rgba(255,255,255,.14); color:#e8dfca; border-radius:4px; padding:.38rem .45rem; }
 .ep-hex:focus { outline:none; border-color:var(--accent); }
-.ep-select { width:100%; font-family:var(--fm); font-size:.62rem; background:#17140f; border:1px solid rgba(255,255,255,.14); color:#e8dfca; border-radius:5px; padding:.5rem; margin-bottom:.45rem; cursor:pointer; }
-.ep-select:focus { outline:none; border-color:var(--accent); }
+/* Scoped to the drawer: the same class is reused inside #dev-editor, which
+   is a light surface and gets its own rule further down. */
+#edit-panel .ep-select { width:100%; font-family:var(--fm); font-size:.62rem; background:#17140f; border:1px solid rgba(255,255,255,.14); color:#e8dfca; border-radius:5px; padding:.5rem; margin-bottom:.45rem; cursor:pointer; }
+#edit-panel .ep-select:focus { outline:none; border-color:var(--accent); }
 .ep-tab-pane { display:none; padding:.75rem; }
 .ep-tab-pane.active { display:block; }
 .ep-section-item { display:flex; align-items:center; gap:.6rem; padding:.7rem .85rem; border-radius:6px; border:1px solid transparent; margin-bottom:.35rem; cursor:pointer; transition:all .18s; position:relative; }
@@ -742,8 +728,27 @@ body.editing .sh-gal-item .cs-img-btn { display:inline-flex; }
 body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .card-del-btn:hover { background:#e63946; }
 
-/* ── RESPONSIVE ───────────────────────── */
-@media(max-width:960px){
+/* ═══ RESPONSIVE ═══════════════════════════════════════════
+   Four breakpoints, and only four. Anything narrower than the
+   next one up inherits it, so rules cascade downward.
+
+     wide   1100px  relieve the two-column squeeze zones
+     stack   900px  one column everywhere; editor becomes a sheet
+     phone   620px  hamburger nav, 16px inputs, 44px targets
+     small   420px  final tightening
+
+   Before adding a fifth: check whether intrinsic sizing solves it
+   instead (see .sh-facts, which uses auto-fit and needs no query).
+   ═════════════════════════════════════════════════════════ */
+
+/* ── wide ─────────────────────────────── */
+@media(max-width:1100px){
+  .proj-back { display:none; }   /* the mobile menu covers back-navigation */
+  .sh-content { grid-template-columns:1fr 200px; gap:2rem; }
+}
+
+/* ── stack ────────────────────────────── */
+@media(max-width:900px){
   .projects { grid-template-columns:1fr; }
   #about { grid-template-columns:1fr; }
   .about-right { position:static; order:-1; max-width:340px; }
@@ -751,11 +756,41 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
   .channels { grid-template-columns:1fr; }
   .sh-content { grid-template-columns:1fr; gap:0; }
   .sh-aside { position:static; padding-top:2.5rem; }
-  .sh-facts { grid-template-columns:repeat(2,1fr); }
   .sh-resp { grid-template-columns:1fr; }
+  .de-row, .de-row3, .dl-grid2 { grid-template-columns:1fr; }
+  .dl-entry { grid-template-columns:64px 1fr; }
+  .dl-entry-go { display:none; }
+  .dl-thumb { width:64px; height:48px; }
 }
-@media(max-width:600px){ .nav-links a:not(.nav-cv){ display:none; } }
-@media(max-width:480px){ .nav-links { gap:1rem; } }
+
+/* ── phone ────────────────────────────── */
+@media(max-width:620px){
+  :root { --nav-h:52px; }
+  .sh-page { box-shadow:6px 8px 0 rgba(36,33,27,.18); }
+  .hero-btns { flex-wrap:wrap; }
+  .about-pull { margin-left:0; }
+
+  /* Micro-type is charming at desktop size and unreadable at 8-10px.
+     Nothing below .75rem (12px) on a phone. */
+  .nav-links a   { font-size:.75rem; }
+  .sh-fact-lbl   { font-size:.75rem; }
+  .dl-chip       { font-size:.75rem; }
+  .proj-img::after { font-size:.75rem; }
+  .sh-sec-lbl, .de-sec-lbl, .sh-widget-lbl, .sh-resp-lbl { font-size:.7rem; }
+
+  /* Comfortable touch targets. */
+  .nav-links a, .sh-nav-btn, .ch, .btn { min-height:44px; display:flex; align-items:center; }
+  .nav-links a { justify-content:center; }
+  .ch { display:flex; }
+}
+
+/* ── small ────────────────────────────── */
+@media(max-width:420px){
+  .nav-links { gap:1rem; }
+  .sh-facts { padding-left:1.1rem; padding-right:1.1rem; }
+  .sh-nav { flex-direction:column; align-items:stretch; }
+  .sh-nav-btn { text-align:center; justify-content:center; }
+}
 
 
 /* ═══ DEVELOPMENT LOG ══════════════════════════════════════
@@ -849,7 +884,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-code pre { font-family:var(--fm); font-size:.78rem; line-height:1.7; color:var(--text); white-space:pre; }
 
 /* ── Editor: Dev Log tab in the side panel ── */
-.ep-select {
+#dev-editor .ep-select {
   width:100%; font-family:var(--fm); font-size:.68rem; padding:.5rem .6rem;
   background:var(--bg); color:var(--text); border:1.3px solid var(--faint); border-radius:3px; cursor:pointer;
 }
@@ -1010,19 +1045,15 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 }
 .de-toast.show { transform:translateX(-50%) translateY(0); }
 
-@media (max-width:760px) {
-  .dl-entry { grid-template-columns:64px 1fr; }
-  .dl-entry-go { display:none; }
-  .dl-thumb { width:64px; height:48px; }
-  .de-row, .de-row3, .dl-grid2 { grid-template-columns:1fr; }
-}
-
 /* ═══ PROJECT PAGES ════════════════════════════════════════
    The case study used to live in a modal; it is its own page now.
    These rules give it the same framed, notebook look at page level.
    ═════════════════════════════════════════════════════════ */
 .sh-page {
-  max-width:1000px; margin:calc(62px + clamp(1rem,3vw,2.5rem)) auto clamp(2rem,5vw,4rem);
+  /* width, not max-width: the card needs a gutter on small screens or its
+     border and offset shadow run straight off the viewport edge. */
+  width:min(1000px, 100% - clamp(1.5rem,6vw,3rem));
+  margin:calc(var(--nav-h) + clamp(1rem,3vw,2.5rem)) auto clamp(2rem,5vw,4rem);
   background:var(--bg); border:2px solid var(--text); border-radius:6px; overflow:hidden;
   box-shadow:14px 18px 0 rgba(36,33,27,.22);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px); background-size:100% 26px;
@@ -1032,7 +1063,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 
 /* Footers sit at the foot of the page, not wherever the text happens to
    end — a short dev entry used to leave its footer stranded mid-screen. */
-.sh-page { display:flex; flex-direction:column; min-height:calc(100vh - 62px - 6rem); }
+.sh-page { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h) - 6rem); }
 #case-view, #entry-view { display:flex; flex-direction:column; flex:1 1 auto; }
 #case-view > .sh-hero, #case-view > .sh-facts { flex:0 0 auto; }
 #case-view > .sh-content { flex:1 1 auto; }
@@ -1049,13 +1080,13 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-top-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
 .dl-top-actions .dl-share { margin-left:0; }
 .proj-back {
-  position:fixed; left:clamp(.75rem,2vw,1.5rem); top:76px; z-index:60;
+  position:fixed; left:clamp(.75rem,2vw,1.5rem); top:calc(var(--nav-h) + 20px); z-index:60;
   font-family:var(--fm); font-size:.56rem; letter-spacing:.1em; text-transform:uppercase;
   background:var(--bg); border:1.5px solid var(--text); border-radius:3px; color:var(--text);
   padding:.45rem .75rem; box-shadow:2px 2px 0 rgba(36,33,27,.14); text-decoration:none;
 }
 .proj-back:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
-@media (max-width:1200px) { .proj-back { display:none; } }
+/* .proj-back is hidden below the `wide` breakpoint — see RESPONSIVE. */
 
 #cs-edit-notice {
   position:sticky; top:0; z-index:50;

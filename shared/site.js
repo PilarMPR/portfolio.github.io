@@ -192,11 +192,45 @@ navLogo.addEventListener('click', e => {
   }, 420);
 });
 
+/* ─── EDITOR SHEET (small screens) ─────────
+   Below the stack breakpoint #edit-panel is docked to the bottom edge and
+   can collapse to a peek, so the page underneath stays visible while you
+   edit it. Above that breakpoint it's the usual side drawer and none of
+   this applies. */
+const epGrip = document.getElementById('ep-grip');
+
+function setEditorSheet(expanded) {
+  document.body.classList.toggle('panel-peek', !expanded);
+  if (epGrip) {
+    epGrip.setAttribute('aria-expanded', String(expanded));
+    epGrip.setAttribute('aria-label', expanded ? 'Collapse editor panel' : 'Expand editor panel');
+  }
+}
+function toggleEditorSheet() {
+  setEditorSheet(document.body.classList.contains('panel-peek'));
+}
+
+if (epGrip) {
+  epGrip.addEventListener('click', toggleEditorSheet);
+  // Tapping the header expands too — the grip alone is a small target and
+  // the header is the obvious thing to reach for.
+  document.querySelector('#edit-panel .ep-head')?.addEventListener('click', e => {
+    if (e.target.closest('.ep-exit')) return;
+    if (MQ_STACK.matches && document.body.classList.contains('panel-peek')) setEditorSheet(true);
+  });
+  // Back to the side drawer: the peek state is meaningless there.
+  MQ_STACK.addEventListener('change', e => { if (!e.matches) document.body.classList.remove('panel-peek'); });
+}
+
 function toggleEdit() {
   // Exported copies ship without the editor panel — don't half-open it.
   if (document.documentElement.dataset.readonly) return;
   editing = !editing;
   document.body.classList.toggle('editing', editing);
+  // On a phone the panel is a bottom sheet. Open it collapsed so the first
+  // thing you can do is tap the region you came here to edit.
+  if (editing && MQ_STACK.matches) setEditorSheet(false);
+  else if (!editing) document.body.classList.remove('panel-peek');
 
   document.querySelectorAll('[data-ed]').forEach(el => {
     el.contentEditable = editing ? 'true' : 'false';
@@ -336,6 +370,8 @@ function appendFieldItems(sub, fields) {
       </div>
       <span class="ep-sub-go">Edit</span>`;
     fi.addEventListener('click', () => {
+      // Get the sheet out of the way first — the point is to see the field.
+      if (MQ_STACK.matches) setEditorSheet(false);
       f.focus();
       f.scrollIntoView({ behavior:'smooth', block:'center' });
       f.style.outline = '2px solid var(--accent)';
@@ -367,6 +403,7 @@ function makeSectionItem(id, icon, name, deletable) {
     if (el) {
       document.querySelectorAll('.ep-focused-section').forEach(x => x.classList.remove('ep-focused-section'));
       el.classList.add('ep-focused-section');
+      if (MQ_STACK.matches) setEditorSheet(false);
       const top = el.getBoundingClientRect().top + window.scrollY - navH() - 24;
       window.scrollTo({ top, behavior:'smooth' });
     }

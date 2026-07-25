@@ -940,7 +940,25 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 }
 .sh-page .sh-hero { height:clamp(230px,40vh,440px); }
 .sh-page .sh-nav:last-child { border-radius:0 0 4px 4px; }
+
+/* Footers sit at the foot of the page, not wherever the text happens to
+   end — a short dev entry used to leave its footer stranded mid-screen. */
+.sh-page { display:flex; flex-direction:column; min-height:calc(100vh - 62px - 6rem); }
+#case-view, #entry-view { display:flex; flex-direction:column; flex:1 1 auto; }
+#case-view > .sh-hero, #case-view > .sh-facts { flex:0 0 auto; }
+#case-view > .sh-content { flex:1 1 auto; }
+.dl-detail { flex:1 1 auto; display:flex; flex-direction:column; align-self:center; width:100%; }
+/* margin-top:auto is what pushes each footer down — don't give these a
+   fixed margin-top later in the file or it stops working. */
+#case-view > .sh-nav, .dl-foot { margin-top:auto; }
+.dl-foot { border:1.5px solid var(--text); border-radius:4px; justify-content:flex-start; }
 #entry-view[hidden], #case-view[hidden] { display:none; }
+
+/* entry header: back-link on the left, entry actions on the right */
+.dl-top { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.dl-top .dl-back { margin-bottom:0; }
+.dl-top-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+.dl-top-actions .dl-share { margin-left:0; }
 .proj-back {
   position:fixed; left:clamp(.75rem,2vw,1.5rem); top:76px; z-index:60;
   font-family:var(--fm); font-size:.56rem; letter-spacing:.1em; text-transform:uppercase;

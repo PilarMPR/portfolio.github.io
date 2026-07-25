@@ -1532,7 +1532,13 @@ function dlRenderDetail(projId, e) {
     ? `<div class="sh-sec"><div class="sh-sec-lbl">${lbl}</div><h3>${title}</h3>${dlClean(html)}</div>` : '';
 
   wrap.innerHTML = `
-    <button class="dl-back" onclick="dlBackToCase('${dlEsc(projId)}')">← ${dlEsc(dlProjectName(projId))} · Development Log</button>
+    <div class="dl-top">
+      <button class="dl-back" onclick="dlBackToCase('${dlEsc(projId)}')">← ${dlEsc(dlProjectName(projId))} · Development Log</button>
+      <span class="dl-top-actions">
+        <button class="dl-share" onclick="dlCopyLink('${dlEsc(projId)}','${dlEsc(e.id)}')">🔗 Copy link</button>
+        ${editing ? `<button class="dl-share" onclick="deOpen('${dlEsc(projId)}','${dlEsc(e.id)}')">✎ Edit entry</button>` : ''}
+      </span>
+    </div>
 
     <div class="dl-chips">
       ${e.tag   ? `<span class="dl-chip tagged">${dlEsc(e.tag)}</span>` : ''}
@@ -1562,12 +1568,8 @@ function dlRenderDetail(projId, e) {
       <div class="sh-tools">${tools.map(t => `<span class="sh-tool">${dlEsc(t)}</span>`).join('')}</div>
     </div>` : ''}
 
-    <div class="sh-nav" style="margin-top:2.5rem; border:1.5px solid var(--text); border-top-width:2px; border-radius:4px">
-      <button class="sh-nav-btn" onclick="dlBackToCase('${dlEsc(projId)}')">← Back to log</button>
-      <div>
-        <button class="dl-share" onclick="dlCopyLink('${dlEsc(projId)}','${dlEsc(e.id)}')">🔗 Copy link to this entry</button>
-        ${editing ? `<button class="dl-share" onclick="deOpen('${dlEsc(projId)}','${dlEsc(e.id)}')">✎ Edit entry</button>` : ''}
-      </div>
+    <div class="sh-nav dl-foot">
+      <button class="sh-nav-btn" onclick="dlBackToCase('${dlEsc(projId)}')">← Back to project</button>
     </div>`;
   return wrap;
 }

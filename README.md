@@ -1,29 +1,45 @@
 # Portfolio
 
-A single-file, customizable portfolio site for a game designer. Edit everything from the browser, save to localStorage, deploy as static HTML.
+A static, browser-editable portfolio site for a game designer. No build step, no dependencies — edit any page in place, publish straight to GitHub.
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `index.html` | The whole portfolio (HTML + CSS + JS in one file) |
-| `case-study.html` | Standalone case-study page; reads `?project=N` and pulls data from localStorage |
-| `SPEC.md` | Original design spec |
-| `README.md` | This file |
+```
+index.html                  landing page — hero, work grid, about, contact  (28 KB)
+projects/
+  hot-potato.html           one page per project: case study + its dev log  (~20 KB each)
+  block-city.html
+  healthy-jeart.html
+  create-your-own-monster.html
+shared/
+  portfolio.css             every page's styling
+  site.js                   every page's behaviour, incl. the editor
+assets/
+  <project>/…               images and clips, as real files
+  site/                     profile photo, CV pdf
+.nojekyll                   serve the files as-is
+SPEC.md · README.md
+```
+
+Nothing is base64'd into the markup, so the landing page is 28 KB and a visitor only downloads the images for the project they actually open.
 
 ## Quick start
 
-1. Open `index.html` in a browser (no build step, no server needed).
-2. Click the logo in the top-left **6 times** in quick succession to open the editor panel.
-3. Fill in your info across the four tabs.
-4. Everything saves automatically to your browser's localStorage.
-5. When ready, click **Save & publish** to push it live, or **Export HTML file** for a standalone copy with all your content and images baked in.
+1. Serve the folder — `python3 -m http.server` — and open it. (Opening `index.html` straight off disk mostly works, but export and a few fetches need http.)
+2. Click the logo in the top-left **6 times** in quick succession to open the editor.
+3. Edit in place. Everything saves to your browser as you type.
+4. **Save & publish** commits the page you're on, plus any new images, to GitHub.
+
+Each page publishes itself: edit the landing page and you commit `index.html`; edit Hot Potato and you commit `projects/hot-potato.html`. Nothing else is touched.
 
 ## Editor tabs
 
-### Profile
+### Sections
+On the landing page: hero, work, about and contact, each expanding to its editable fields. On a project page: a table of contents for the case study — click any text on the page to edit it directly.
+
+### Profile fields
 - Name, job title, tagline (hero section)
-- Profile photo (uploads embed as base64 — no hosting needed)
+- Profile photo
 - Bio, quote, education, skills
 - Contact: email, LinkedIn, Twitter/X, CV link
 
@@ -39,6 +55,8 @@ Reorder with the up/down buttons. Up to as many projects as you want, though the
 Where you explain how each game was actually built. Every project has its own log of entries — one per system, feature or decision — shown at the bottom of its case study.
 
 **To write one:** editor → **Dev Log** tab → pick the project → **New dev entry**. A full-screen form opens.
+
+Entries are published with their project's page, so they're written there. Starting from the landing page just takes you to the right page first.
 
 Each entry has a fixed skeleton, so they all read consistently:
 
@@ -60,10 +78,12 @@ Below that, add as many free blocks as you want, in any order: text, image, GIF/
 Every entry has its own address:
 
 ```
-yoursite.com/#/hot-potato/dev/round-timer-tuning
+yoursite.com/projects/hot-potato.html#/dev/round-timer-tuning
 ```
 
 Paste that into an application and it opens straight to that entry. **Copy link to this entry** at the bottom of any entry copies it for you. The link is generated from the title and follows it while you edit — once the entry has been published, the link freezes so nothing you've already sent out breaks.
+
+Links in the older `#/hot-potato/dev/…` form still work — the landing page forwards them.
 
 #### Private entries
 
@@ -73,7 +93,7 @@ Toggle any entry to 🔒 **Private** (top-right of the editor). Private entries 
 
 #### Images and clips
 
-Uploads in dev entries are **not** base64'd into the page. They're held in the browser and committed as real files under `assets/<project>/` when you hit **Save & publish** — one commit, page and media together. Until you publish, a badge in the Dev Log tab tells you how many files are still browser-only.
+Every upload — dev-entry media, project card art, gallery images, your profile photo — is committed as a real file under `assets/` when you hit **Save & publish**. One commit, page and media together. Nothing is base64'd into the markup. Until you publish, a badge in the Dev Log tab tells you how many files are still browser-only.
 
 GitHub Pages takes about a minute to deploy, so freshly published images fall back to your local copy in the meantime instead of showing as broken.
 
@@ -89,9 +109,9 @@ GitHub Pages takes about a minute to deploy, so freshly published images fall ba
 
 ## Case study pages
 
-Project tiles link to `case-study.html?project=N` (where `N` is the project's index). The page renders the full case study from your saved data: hero, facts row (role / team / duration / platform), overview, challenges, results, gallery, tools sidebar, and prev/next navigation between projects.
+Each project tile links to its own page under `projects/`. The page carries the full case study — hero, facts row, overview, challenges, awards, gallery, tools sidebar — and its Development Log at the foot, with prev/next links between projects.
 
-Empty fields render as friendly "Coming soon" placeholders so the layout still looks intentional while you fill things in.
+Because they're real pages, each one has its own title, description and URL, so a link to a single case study previews properly when you paste it somewhere.
 
 ## Deploying to GitHub Pages
 
@@ -100,13 +120,15 @@ Empty fields render as friendly "Coming soon" placeholders so the layout still l
 3. Your portfolio will be live at `https://<username>.github.io/<repo-name>/`.
 4. Optional: rename the repo to `<username>.github.io` to host at the apex path.
 
+All internal links are relative, so the site works at any sub-path without changes. `.nojekyll` tells Pages to serve the files exactly as committed.
+
 Because everything is static, any static host works (Netlify, Vercel, Cloudflare Pages, plain S3, etc.).
 
 ## How data is stored
 
 - **In the browser:** `localStorage` (content + theme + dev log) and `IndexedDB` (uploaded dev-log media).
-- **On the live site:** **Save & publish** commits `index.html` with everything baked in, plus any new dev-log media as real files under `assets/`.
-- **In a downloaded file:** **Export HTML file** gives you a self-contained, read-only `pilar-mpr-portfolio.html`.
+- **On the live site:** **Save & publish** commits the current page with everything baked in, plus any new media as real files under `assets/`.
+- **In a downloaded file:** **Export this page** gives you a self-contained, read-only copy of whichever page you're on.
 
 If you switch browsers or clear localStorage, your in-progress edits are gone — publish, export, or back up the JSON manually if you want to migrate.
 
@@ -116,16 +138,17 @@ They're different on purpose:
 
 | | Save & publish | Export HTML file |
 |---|---|---|
+| Scope | The page you're on | The page you're on |
 | Goes to | The live GitHub Pages site | Your downloads folder |
-| Dev-log media | Real files in `assets/` — keeps the page small | Embedded in the file — bigger, but self-contained |
+| Images, CSS, JS | Stay as separate files — pages stay small | All folded into the one file |
 | Editing | Editor still available (logo ×6) | Read-only; the editor is stripped out |
-| Needs the repo | Yes | No — works offline, from a USB stick, as an email attachment |
+| Needs the rest of the site | Yes | No — works offline, from a USB stick, as an email attachment |
 
-Both exclude private entries. The export is the one to hand to a studio directly; the published site is the one you link to.
+Both exclude private entries. Export gives you a single self-contained page — handy for emailing one case study to a studio; links to the other pages point back at the live site. Export needs the page served over http, not opened from disk.
 
 ## Tips
 
-- Images are embedded as base64 data URIs. Big photos make big files; resize before uploading if you care about page weight.
+- Images are committed as real files, so page weight stays low — but the repo still grows. Resize screenshots before uploading; keep clips to a few seconds.
 - The CV link is just a URL — host the PDF anywhere (Drive, Dropbox, your repo) and paste the public link.
 - The tagline, bio, and case-study text fields all preserve line breaks.
 - Status dot in the contact section is hard-coded as "Available for projects" — edit `index.html` directly to change the wording.
@@ -133,6 +156,8 @@ Both exclude private entries. The export is the one to hand to a studio directly
 ## Tech
 
 - Plain HTML / CSS / vanilla JS, no build step, no dependencies
+- One stylesheet and one script shared by every page, so they're cached across navigation
+- Each page declares its own `window.PAGE` context (role, path, base) — that's how the same script drives the landing page and the project pages
 - Works fully offline once the fonts are cached
 - Responsive (single column under 900px)
 - Theme system uses CSS variables; the text color drives all derivative `rgba()` shades automatically via `--text-rgb`

@@ -26,7 +26,7 @@ Nothing is base64'd into the markup, so the landing page is 28 KB and a visitor 
 ## Quick start
 
 1. Serve the folder — `python3 -m http.server` — and open it. (Opening `index.html` straight off disk mostly works, but export and a few fetches need http.)
-2. Click the logo in the top-left **6 times** in quick succession to open the editor.
+2. Open the editor with the hidden trigger in the header. The gesture is deliberately not written down — this repo is public, and the point is that a visitor can't find it. Nothing in the header marks it, either: no icon, no pointer cursor, no hover state.
 3. Edit in place. Everything saves to your browser as you type.
 4. **Save & publish** commits the page you're on, plus any new images, to GitHub.
 
@@ -146,7 +146,7 @@ They're different on purpose:
 | Scope | The page you're on | The page you're on |
 | Goes to | The live GitHub Pages site | Your downloads folder |
 | Images, CSS, JS | Stay as separate files — pages stay small | All folded into the one file |
-| Editing | Editor still available (logo ×6) | Read-only; the editor is stripped out |
+| Editing | Editor still available | Read-only; the editor is stripped out |
 | Needs the rest of the site | Yes | No — works offline, from a USB stick, as an email attachment |
 
 Both exclude private entries. Export gives you a single self-contained page — handy for emailing one case study to a studio; links to the other pages point back at the live site. Export needs the page served over http, not opened from disk.

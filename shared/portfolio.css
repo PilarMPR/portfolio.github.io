@@ -106,12 +106,17 @@ ul { list-style:none; }
 .nav-logo {
   font-family:var(--fm); font-weight:700;
   font-size:.72rem; letter-spacing:.04em;
-  color:var(--text); cursor:pointer; user-select:none;
-  display:inline-flex; align-items:center; gap:.5rem;
+  color:var(--text); user-select:none;
+  display:inline-flex; align-items:center;
   transition:color .2s;
 }
-.nav-logo::before { content:'✎'; color:var(--accent); font-size:.9rem; }
-.nav-logo:hover { color:var(--accent); }
+/* Only the project-page logo is a real link (back to the landing page).
+   On the landing page it's a bare <span> that happens to open the editor,
+   so it gets no pointer and no hover tint — nothing marks it as
+   interactive. user-select:none stays: it stops the text selecting under
+   repeated clicks. */
+a.nav-logo { cursor:pointer; }
+a.nav-logo:hover { color:var(--accent); }
 .nav-links { display:flex; gap:2rem; align-items:center; }
 .nav-links a {
   font-family:var(--fm); font-size:.63rem;

@@ -118,11 +118,22 @@ const SECTIONS = [
   { id:'contact', icon:'✉',  name:'Contact' },
 ];
 
-document.getElementById('nav-logo').addEventListener('click', () => {
+/* Six quick clicks on the logo open the editor. On a project page the logo is
+   a real link home, so the first click would leave the page and the gesture
+   could never finish — hold the navigation until the clicks stop instead. */
+const navLogo = document.getElementById('nav-logo');
+const navLogoHref = navLogo.getAttribute('href');
+
+navLogo.addEventListener('click', e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey) return;   // open-in-new-tab still works
+  if (navLogoHref) e.preventDefault();
   logoClicks++;
   clearTimeout(logoTimer);
-  logoTimer = setTimeout(() => { logoClicks = 0; }, 700);
-  if (logoClicks >= 6) { logoClicks = 0; clearTimeout(logoTimer); toggleEdit(); }
+  if (logoClicks >= 6) { logoClicks = 0; toggleEdit(); return; }
+  logoTimer = setTimeout(() => {
+    logoClicks = 0;
+    if (navLogoHref) location.href = navLogoHref;     // it was an ordinary click after all
+  }, 420);
 });
 
 function toggleEdit() {
@@ -1058,9 +1069,20 @@ function buildPublishHTML(opts) {
        .forEach(el => { el.innerHTML = ''; });
   clone.querySelector('#de-private')?.removeAttribute('checked');
   clone.querySelector('body')?.classList.remove('editing');
-  clone.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+  // Page content ships read-only — edit mode turns it back on. The editor's
+  // own writing surfaces are NOT page content: baking contenteditable="false"
+  // onto them leaves the published copy unable to write a dev entry, because
+  // nothing ever switches those back on.
+  clone.querySelectorAll('[contenteditable]').forEach(el => {
+    if (el.closest('#dev-editor,#edit-panel')) return;
+    el.setAttribute('contenteditable', 'false');
+  });
   clone.querySelector('#lightbox')?.classList.remove('open');
-  clone.querySelector('#fmt-bar')?.classList.remove('show');
+  const fb = clone.querySelector('#fmt-bar');
+  if (fb) { fb.classList.remove('show'); fb.removeAttribute('style'); }
+  const toast = clone.querySelector('.de-toast'); if (toast) toast.textContent = '';
+  const saveBtn = clone.querySelector('.ep-foot-save');   // caught mid-publish otherwise
+  if (saveBtn) saveBtn.textContent = '💾 Save & publish';
   clone.querySelector('#cs-edit-notice')?.remove();
   clone.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
   const cur = clone.querySelector('#cursor'); if (cur) { cur.className = ''; cur.removeAttribute('style'); }
@@ -1789,6 +1811,11 @@ function deOpen(proj, id) {
   if (!e) return;
   deCur = { proj, id };
   showCaseView();
+
+  // A page published before this was fixed carries contenteditable="false" on
+  // the three prose fields, which silently swallows every keystroke. Re-arm
+  // them on every open so an already-live copy heals itself.
+  document.querySelectorAll('#dev-editor [data-rich]').forEach(el => { el.contentEditable = 'true'; });
 
   document.getElementById('de-bar-proj').textContent = dlProjectName(proj);
   document.getElementById('de-title').value    = e.title   || '';

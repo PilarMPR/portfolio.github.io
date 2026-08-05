@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="--bg: #f4efe3; --bg2: #e8e3d8; --bg3: #dcd7cc; --card-bg: #ede8dc; --card-bg2: #e3ded3; --text: #24211b; --white: #24211b; --muted: #77736b; --faint: #c3bfb6; --accent: #24211B; --accent2: #3a3732; --blue: #2f5c8f; --yellow: #f4d24a; --sticky: #f5d658; --green: #4f7a4a; --grid: rgba(36,33,27,0.05); --grid2: rgba(36,33,27,0.085); --fd: 'Bricolage Grotesque', sans-serif; --fb: 'Space Grotesk', sans-serif;" data-lt-installed="true"><head>
+<html lang="en" data-lt-installed="true" style="--bg: #f4efe3; --bg2: #e8e3d8; --bg3: #dcd7cc; --card-bg: #ede8dc; --card-bg2: #e3ded3; --text: #24211b; --white: #24211b; --muted: #77736b; --faint: #c3bfb6; --accent: #24211B; --accent2: #3a3732; --blue: #2f5c8f; --yellow: #f4d24a; --sticky: #f5d658; --green: #4f7a4a; --grid: rgba(36,33,27,0.05); --grid2: rgba(36,33,27,0.085); --fd: 'Bricolage Grotesque', sans-serif; --fb: 'Space Grotesk', sans-serif;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Pilar Martín-Peña Rojo — Game Designer</title>
@@ -13,7 +13,7 @@
 <div id="cursor" class=""></div>
 
 <!-- Nav -->
-<nav id="nav" class="solid">
+<nav id="nav" class="">
   <span class="nav-logo" id="nav-logo">Pilar MPR</span>
   <ul class="nav-links">
     <li><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a></li>
@@ -24,7 +24,7 @@
 </nav>
 
 <!-- ═══ HERO ═════════════════════════════ -->
-<section id="hero">
+<section id="hero" class="">
   <div class="hero-inner">
     <div class="hero-kicker"><span data-label="Job title + location" data-ed="" contenteditable="false" spellcheck="false">Game Designer &amp; Producer · Madrid</span></div>
     <h1 class="hero-name">
@@ -34,7 +34,11 @@
     </h1>
     <div class="scribble scribble-hero">she designs the rules,<br>not the art ↗</div>
     <div class="hero-foot">
-      <p class="hero-tagline" data-label="Hero description" data-ed="" contenteditable="false" spellcheck="false">My passion is to build what players don't notice,&nbsp;<br>Te core loops, the economies in game and teh rules<br>that make the game whole without the player realizing.</p>
+      <p class="hero-tagline" data-label="Hero description" data-ed="" contenteditable="false" spellcheck="false">
+        I build the machinery players never see — the loops, economies and
+        rules that make a game click. Right now I'm leading design on
+        <em>Hot Potato</em> at Wild Alchemists.
+      </p>
       <div class="hero-btns">
         <a href="javascript:void(0)" onclick="scrollToSection('work')" class="btn btn-white">See my work ↓</a>
         <a href="javascript:void(0)" onclick="scrollToSection('contact')" class="btn btn-ghost">Get in touch</a>
@@ -266,8 +270,8 @@
 <!-- ═══ CONTACT ═══════════════════════════ -->
 <section id="contact">
   <div class="contact-inner">
-    <div class="slabel reveal">Contact</div>
-    <h2 class="contact-h2 reveal">
+    <div class="slabel reveal on">Contact</div>
+    <h2 class="contact-h2 reveal on">
       Leave a<br>
       <span class="dim" data-label="Contact heading line 2" data-ed="" contenteditable="false" spellcheck="false">note.</span>
     </h2>
@@ -310,22 +314,22 @@
   </div>
 
   <div class="ep-tabs">
-    <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
+    <button class="ep-tab" onclick="switchTab('sections',this)">Sections</button>
     <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
     <button class="ep-tab" onclick="switchTab('devlog',this)">Dev Log</button>
-    <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
+    <button class="ep-tab active" onclick="switchTab('design',this)">Design</button>
   </div>
 
   <div class="ep-body">
     <!-- SECTIONS TAB -->
-    <div class="ep-tab-pane active" id="tab-sections">
+    <div class="ep-tab-pane" id="tab-sections">
       <div id="ep-section-list"><div class="ep-section-item" data-section-id="hero">
     <span class="ep-section-icon">🏠</span>
     <span class="ep-section-name">Hero</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-hero" class="ep-sub"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-hero" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Job title + location</div>
@@ -341,7 +345,7 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Hero description</div>
-        <div class="ep-field-prev">My passion is to build what </div>
+        <div class="ep-field-prev">I build the machinery player</div>
       </div>
       <span class="ep-sub-go">Edit</span></div></div><div class="ep-section-item" data-section-id="work">
     <span class="ep-section-icon">🎮</span>
@@ -349,13 +353,13 @@
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-work" class="ep-sub"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
+    </div></div><div id="ep-sub-work" class="ep-sub" style="display: none;"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
     <span class="ep-section-icon">👤</span>
     <span class="ep-section-name">About</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-about" class="ep-sub"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-about" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Field 1</div>
@@ -427,7 +431,7 @@
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-contact" class="ep-sub"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-contact" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Contact heading line 2</div>
@@ -525,7 +529,7 @@
     </div>
 
     <!-- DESIGN TAB -->
-    <div class="ep-tab-pane" id="tab-design">
+    <div class="ep-tab-pane active" id="tab-design">
       <div class="ep-dsn-label">Theme presets</div>
       <div id="ep-presets" class="ep-presets"><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#f4efe3"></i><i style="background:#c8402e"></i><i style="background:#24211b"></i></span><span class="ep-preset-name">Notebook</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#e4ecf2"></i><i style="background:#1f6feb"></i><i style="background:#152435"></i></span><span class="ep-preset-name">Blueprint</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#1f1b16"></i><i style="background:#e0553f"></i><i style="background:#efe6d4"></i></span><span class="ep-preset-name">Midnight</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#f6ebe6"></i><i style="background:#c05678"></i><i style="background:#2b2320"></i></span><span class="ep-preset-name">Rosé</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#eceee2"></i><i style="background:#b5622e"></i><i style="background:#20261d"></i></span><span class="ep-preset-name">Forest</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#eeeae4"></i><i style="background:#141414"></i><i style="background:#1c1c1c"></i></span><span class="ep-preset-name">Mono</span></div></div>
       <div class="ep-dsn-label">Colors — click a swatch</div>
@@ -534,8 +538,8 @@
         <input class="ep-hex" value="#F4EFE3" data-hk="bg" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Ink / text</label>
         <span class="ep-swatch"><input type="color" value="#24211b" data-ck="text"></span>
         <input class="ep-hex" value="#24211B" data-hk="text" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Accent (pen)</label>
-        <span class="ep-swatch"><input type="color" value="#24211B" data-ck="accent"></span>
-        <input class="ep-hex" value="#24211B" data-hk="accent" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Blue ink</label>
+        <span class="ep-swatch"><input type="color" value="#c8402e" data-ck="accent"></span>
+        <input class="ep-hex" value="#C8402E" data-hk="accent" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Blue ink</label>
         <span class="ep-swatch"><input type="color" value="#2f5c8f" data-ck="blue"></span>
         <input class="ep-hex" value="#2F5C8F" data-hk="blue" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Highlighter</label>
         <span class="ep-swatch"><input type="color" value="#f4d24a" data-ck="yellow"></span>

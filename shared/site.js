@@ -1065,7 +1065,7 @@ function buildPublishHTML(opts) {
   clone.querySelectorAll('#dev-editor input,#dev-editor textarea').forEach(el => { el.removeAttribute('value'); el.textContent = ''; });
   // Wipe every trace of the editor's own state — the entry list in the side
   // panel renders private titles, and this clone becomes the live page.
-  clone.querySelectorAll('#dev-editor .de-rich,#de-hero-slot,#de-blocks,#dl-entry-list,#dl-proj-select,#dl-pending,#de-bar-proj,#de-slug-preview')
+  clone.querySelectorAll('#dev-editor .de-rich,#de-blocks,#dl-entry-list,#dl-proj-select,#dl-pending,#de-bar-proj,#de-slug-preview')
        .forEach(el => { el.innerHTML = ''; });
   clone.querySelector('#de-private')?.removeAttribute('checked');
   clone.querySelector('body')?.classList.remove('editing');
@@ -1289,31 +1289,68 @@ function dlLoad() {
   if (moved) dlSave();
 }
 
-/* Entries used to have a fixed problem → approach → result skeleton and a
-   "discipline" tag. The body is free-form blocks now, so anything written
-   under the old shape is lifted into blocks — same words, same order, but
-   editable and deletable like everything else. Idempotent: v marks an
-   entry as already converted. */
-const DL_SCHEMA = 2;
+/* Entries used to be a form: a "discipline" tag, a phase, a date, a header
+   image and a compulsory problem → approach → result skeleton. All of it is
+   blocks now, so anything written under an older shape is lifted into blocks
+   — same words, same order, but movable and deletable like everything else.
+   Idempotent: v records how far an entry has been carried. */
+const DL_SCHEMA = 3;
 
 function dlMigrate(e) {
   if (!e || e.v >= DL_SCHEMA) return false;
+  const blocks = () => (e.blocks = Array.isArray(e.blocks) ? e.blocks : []);
 
-  const has  = html => String(html || '').replace(/<[^>]*>/g, '').trim() !== '';
+  // v2 — the three prose beats become a heading + its text, each.
+  if (!(e.v >= 2)) {
+    const has  = html => String(html || '').replace(/<[^>]*>/g, '').trim() !== '';
+    const head = [];
+    [['problem',  'The problem',  'What needed solving'],
+     ['approach', 'The approach', 'What I designed'],
+     ['result',   'The result',   'What changed']].forEach(([key, lbl, text]) => {
+      if (!has(e[key])) return;
+      head.push({ t:'heading', lbl, text });
+      head.push({ t:'text', html: e[key] });
+    });
+    e.blocks = head.concat(blocks());
+    delete e.problem; delete e.approach; delete e.result;
+    delete e.tag;                     // the title already says which discipline it is
+  }
+
+  // v3 — phase and date become a tags block, the header image an image block,
+  // both at the top, which is where they used to render.
   const head = [];
-  [['problem',  'The problem',  'What needed solving'],
-   ['approach', 'The approach', 'What I designed'],
-   ['result',   'The result',   'What changed']].forEach(([key, lbl, text]) => {
-    if (!has(e[key])) return;
-    head.push({ t:'heading', lbl, text });
-    head.push({ t:'text', html: e[key] });
-  });
+  const tags = [e.phase, e.date].map(t => String(t || '').trim()).filter(Boolean);
+  if (tags.length) head.push({ t:'tags', items: tags.join(', ') });
+  if (e.hero && e.hero.path) head.push({ t: dlIsVideo(e.hero) ? 'clip' : 'image', src: e.hero, cap:'' });
+  e.blocks = head.concat(blocks());
+  delete e.phase; delete e.date; delete e.hero;
 
-  e.blocks = head.concat(Array.isArray(e.blocks) ? e.blocks : []);
-  delete e.problem; delete e.approach; delete e.result;
-  delete e.tag;                       // the title already says which discipline it is
   e.v = DL_SCHEMA;
   return true;
+}
+
+/* Phase names keep their own chip colour wherever they're written. */
+const DL_PHASES = ['concept','pre-production','production','polish','shipped','postmortem'];
+const dlChipCls = t => DL_PHASES.includes(String(t).toLowerCase()) ? 'dl-chip phase' : 'dl-chip';
+
+function dlTagItems(e) {
+  const b = (e.blocks || []).find(x => x.t === 'tags' && String(x.items || '').trim());
+  return b ? String(b.items).split(',').map(s => s.trim()).filter(Boolean) : [];
+}
+
+/* b.items is a gallery's images — but on a list or tags block it's a plain
+   string, so never iterate it blind. */
+const dlGalItems = b => Array.isArray(b && b.items) ? b.items : [];
+
+/* The entry list still wants a thumbnail — it takes the first picture the
+   entry contains, wherever that happens to sit. */
+function dlThumb(e) {
+  if (e.hero && e.hero.path) return e.hero;              // not yet migrated
+  for (const b of e.blocks || []) {
+    for (const r of [b.src, b.a, b.b, ...dlGalItems(b)])
+      if (r && r.path) return r;
+  }
+  return null;
 }
 
 /* Read-only — never invents a project, so a junk URL can't pollute the data. */
@@ -1445,7 +1482,7 @@ function dlMediaRefs() {
   const take = r => { if (r && r.path) out.push(r.path); };
   Object.keys(DEVLOG).forEach(p => dlEntries(p).forEach(e => {
     take(e.hero);
-    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); (b.items || []).forEach(take); });
+    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); dlGalItems(b).forEach(take); });
   }));
   return out;
 }
@@ -1497,16 +1534,17 @@ function dlRenderList(projId) {
     html += '<div class="dl-list">';
     entries.forEach((e, i) => {
       const num = String(i + 1).padStart(2, '0');
+      const thumb = dlThumb(e);
       html += `
         <button class="dl-entry" onclick="dlOpenEntry('${dlEsc(projId)}','${dlEsc(e.id)}')">
           <span class="dl-thumb">
             <span class="dl-thumb-n">${num}</span>
-            ${e.hero && e.hero.path ? dlMediaTag(e.hero, 'dl-thumb-img') : ''}
+            ${thumb ? dlMediaTag(thumb, 'dl-thumb-img') : ''}
           </span>
           <span class="dl-entry-body">
             <span class="dl-chips">
               <span class="dl-chip">${num}</span>
-              ${e.phase ? `<span class="dl-chip phase">${dlEsc(e.phase)}</span>` : ''}
+              ${dlTagItems(e).slice(0, 3).map(t => `<span class="${dlChipCls(t)}">${dlEsc(t)}</span>`).join('')}
               ${e.private ? `<span class="dl-chip locked">🔒 Private</span>` : ''}
             </span>
             <span class="dl-entry-name">${dlEsc(e.title || 'Untitled entry')}</span>
@@ -1538,6 +1576,14 @@ function dlRenderBlock(b) {
       return String(b.text || '').trim()
         ? `<div class="dl-blk dl-blk-sub"><h4 class="dl-h4">${dlEsc(b.text)}</h4></div>` : '';
 
+    case 'tags': {
+      const items = String(b.items || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (!items.length) return '';
+      return `<div class="dl-blk dl-blk-tags"><div class="dl-chips">${
+        items.map(t => `<span class="${dlChipCls(t)}">${dlEsc(t)}</span>`).join('')
+      }</div></div>`;
+    }
+
     case 'divider':
       return '<div class="dl-rule"></div>';
 
@@ -1553,7 +1599,7 @@ function dlRenderBlock(b) {
       </div>`;
 
     case 'gallery': {
-      const items = (b.items || []).filter(i => i && i.path);
+      const items = dlGalItems(b).filter(i => i && i.path);
       if (!items.length) return '';
       return `<div class="dl-blk">
         <div class="dl-gal">${items.map(i => `<div>${dlMediaTag(i)}</div>`).join('')}</div>
@@ -1631,15 +1677,12 @@ function dlRenderDetail(projId, e) {
       </span>
     </div>
 
-    <div class="dl-chips">
-      ${e.phase ? `<span class="dl-chip phase">${dlEsc(e.phase)}</span>` : ''}
-      ${e.date  ? `<span class="dl-chip">${dlEsc(e.date)}</span>` : ''}
-      ${e.private ? `<span class="dl-chip locked">🔒 Private — not published</span>` : ''}
-    </div>
+    ${e.private ? `<div class="dl-chips">
+      <span class="dl-chip locked">🔒 Private — not published</span>
+    </div>` : ''}
 
     <h2 class="dl-d-title">${dlEsc(e.title || 'Untitled entry')}</h2>
     ${e.summary ? `<p class="dl-d-sum">${dlEsc(e.summary)}</p>` : ''}
-    ${e.hero && e.hero.path ? `<div class="dl-d-hero">${dlMediaTag(e.hero)}</div>` : ''}
 
     ${e.private ? `<div class="dl-nda">
       <span style="font-size:1.1rem">🔒</span>
@@ -1812,9 +1855,8 @@ function dlAddEntry() {
   const proj = dlSelectedProject();
   if (!IS_PROJECT) return dlGoToProject(proj, null, true);
   const entry = {
-    id: dlUid(), title:'', phase:'', date:'', summary:'',
-    hero:null, tools:'', private:false, published:false,
-    blocks:[], v: DL_SCHEMA
+    id: dlUid(), title:'', summary:'', tools:'',
+    private:false, published:false, blocks:[], v: DL_SCHEMA
   };
   dlEnsure(proj).push(entry);
   dlSave();
@@ -1880,14 +1922,11 @@ function deOpen(proj, id) {
 
   document.getElementById('de-bar-proj').textContent = dlProjectName(proj);
   document.getElementById('de-title').value    = e.title   || '';
-  document.getElementById('de-phase').value    = e.phase   || '';
-  document.getElementById('de-date').value     = e.date    || '';
   document.getElementById('de-summary').value  = e.summary || '';
   document.getElementById('de-tools').value    = e.tools   || '';
   document.getElementById('de-private').checked = !!e.private;
   deSetPrivateLabel(!!e.private);
   deSlugPreview();
-  deRenderHero();
   deRenderBlocks();
 
   document.getElementById('dev-editor').classList.add('open');
@@ -1953,41 +1992,6 @@ function deDeleteEntry() {
   dlToast('Entry deleted');
 }
 
-/* ── Hero media ── */
-function deRenderHero() {
-  const e = deEntry(), host = document.getElementById('de-hero-slot');
-  if (!e || !host) return;
-  host.innerHTML = e.hero && e.hero.path
-    ? `<div class="de-prev">
-         ${dlMediaTag(e.hero)}
-         <button class="de-prev-x" onclick="deClearHero()" title="Remove">✕</button>
-         <span class="de-prev-tag">${dlEsc(e.hero.path)}</span>
-       </div>`
-    : `<label class="de-drop">
-         <div class="de-drop-t">📷 Click to add an image, GIF or short clip</div>
-         <input type="file" accept="image/*,video/mp4,video/webm" style="display:none" onchange="deHeroUpload(this)"/>
-       </label>`;
-}
-
-async function deHeroUpload(input) {
-  const e = deEntry(), file = input.files?.[0];
-  input.value = '';
-  if (!e || !file) return;
-  try {
-    e.hero = await dlStoreFile(file, deCur.proj, e.id);
-    dlSave(); deRenderHero(); renderDlEntryList();
-  } catch (err) { alert(err.message); }
-}
-
-function deClearHero() {
-  const e = deEntry();
-  if (!e) return;
-  const ref = e.hero;
-  e.hero = null;
-  dlDropMedia(ref);
-  dlSave(); deRenderHero(); renderDlEntryList(); dlUpdatePendingBadge();
-}
-
 /* ── Content blocks ────────────────────────────────────────
    The whole body of an entry. Order is yours: add anything
    anywhere, drag it where you want it, delete what you don't
@@ -2007,6 +2011,7 @@ const DE_BLOCKS = {
   table:       { name:'Table',          icon:'▦'  },
   list:        { name:'Bullet list',    icon:'•'  },
   code:        { name:'Code / formula', icon:'⌨'  },
+  tags:        { name:'Tags',           icon:'#'  },
   divider:     { name:'Divider',        icon:'—'  },
 };
 const DE_ORDER = Object.keys(DE_BLOCKS);
@@ -2014,6 +2019,7 @@ const DE_ORDER = Object.keys(DE_BLOCKS);
 const DE_NEW = {
   heading:     () => ({ lbl:'', text:'' }),
   sub:         () => ({ text:'' }),
+  tags:        () => ({ items:'' }),
   divider:     () => ({}),
   text:        () => ({ html:'' }),
   image:       () => ({ src:null, cap:'' }),
@@ -2086,7 +2092,7 @@ function deBlkDel(i) {
   const e = deEntry();
   if (!e?.blocks?.[i]) return;
   const b = e.blocks.splice(i, 1)[0];
-  [b.src, b.a, b.b, ...(b.items || [])].forEach(dlDropMedia);
+  [b.src, b.a, b.b, ...dlGalItems(b)].forEach(dlDropMedia);
   if (deInsertAt != null && deInsertAt > i) deInsertAt--;
   dlSave(); deRenderBlocks(); dlUpdatePendingBadge();
 }
@@ -2223,6 +2229,11 @@ function deRenderBlocks() {
       case 'sub':
         body = `<input class="de-in de-h-in sm" value="${dlEsc(b.text || '')}" oninput="deBlkField(${i},'text',this.value)"/>`;
         break;
+      case 'tags':
+        body = `<input class="de-in mono" value="${dlEsc(b.items || '')}" oninput="deBlkField(${i},'items',this.value)"/>
+                <div class="de-hint">Comma separated. Small chips — phase, date, platform, whatever labels the entry.
+                  The first tags block in an entry is also what shows in the log list.</div>`;
+        break;
       case 'divider':
         body = `<div class="de-hint" style="margin:0">A dashed rule across the page. Nothing to fill in.</div>`;
         break;
@@ -2237,7 +2248,7 @@ function deRenderBlocks() {
         break;
       case 'gallery':
         body = `<div class="dl-gal" style="margin-bottom:.6rem">${
-          (b.items || []).map((it, k) => `<div style="position:relative">${dlMediaTag(it)}
+          dlGalItems(b).map((it, k) => `<div style="position:relative">${dlMediaTag(it)}
             <button class="de-prev-x" onclick="deGalDel(${i},${k})" title="Remove">✕</button></div>`).join('')
         }</div>
         <label class="de-drop"><div class="de-drop-t">🗂 Add images — you can pick several at once</div>
@@ -2325,7 +2336,7 @@ async function dlExportData() {
   const take = r => { if (r && r.path) refs.push(r); };
   Object.values(data).forEach(list => (list || []).forEach(e => {
     take(e.hero);
-    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); (b.items || []).forEach(take); });
+    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); dlGalItems(b).forEach(take); });
   }));
   for (const r of refs) {
     if (MEDIA_CACHE[r.path]) { r.data = MEDIA_CACHE[r.path]; continue; }

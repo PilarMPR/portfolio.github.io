@@ -58,26 +58,25 @@ Where you explain how each game was actually built. Every project has its own lo
 
 Entries are published with their project's page, so they're written there. Starting from the landing page just takes you to the right page first.
 
-An entry is a short header and then whatever you build under it.
+An entry is three header fields and then whatever you build under them.
 
 **Header** — only the title is required; anything left blank simply doesn't appear:
 
 | Field | What goes in it |
 |---|---|
 | Title | Shown at the top, and it becomes the entry's URL |
-| Phase | Concept → Postmortem |
-| When | e.g. "Q2 2024" |
 | Summary | One line — the hook shown in the entry list |
-| Header image or clip | Image, GIF or short MP4/WebM |
 | Tools & tech | Comma separated; listed at the foot of the entry |
 
 **The entry** — everything else is blocks, in whatever order you put them:
 
-`Heading` · `Subheading` · `Text` · `Image` · `GIF / video` · `Gallery` · `Pull quote` · `Core loop` (diagram) · `Before / after` · `Table` (for balance and economy tuning) · `Bullet list` · `Code / formula` · `Divider`
+`Heading` · `Subheading` · `Text` · `Image` · `GIF / video` · `Gallery` · `Pull quote` · `Core loop` (diagram) · `Before / after` · `Table` (for balance and economy tuning) · `Bullet list` · `Code / formula` · `Tags` · `Divider`
 
 Nothing is pre-written and no section is compulsory — an entry contains exactly the blocks you add. Hover between any two blocks for **+ Add block here** to drop a new one in at that spot, drag a block by its ⠿ handle (or use ↑ ↓) to move it, ⧉ to duplicate, 🗑 to remove.
 
-A heading block also takes an optional small label above it — that's how the older Problem / Approach / Result entries are laid out. Those entries were converted to blocks automatically, so they read exactly as before and are now editable and deletable like everything else.
+Two blocks also feed the log list: the entry's thumbnail is the first picture it contains, wherever that sits, and the chips beside the title come from its first **Tags** block. A tag that names a phase (Concept, Production, Shipped…) keeps the blue phase colouring.
+
+A heading block takes an optional small label above it — that's how the older Problem / Approach / Result entries are laid out. Everything from the old fixed form (those three beats, the discipline tag, phase, when, the header image) was converted to blocks automatically, so existing entries read as they did and every part of them is now movable and deletable.
 
 #### Links you can share
 

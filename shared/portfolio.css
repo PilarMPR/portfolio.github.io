@@ -785,6 +785,8 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-h3 { font-family:var(--fd); font-weight:700; font-size:clamp(1.15rem,1.8vw,1.5rem); letter-spacing:-.02em; color:var(--text); line-height:1.2; }
 .dl-h4 { font-family:var(--fd); font-weight:700; font-size:1.02rem; letter-spacing:-.01em; color:var(--text); line-height:1.3; }
 .dl-rule { height:0; border-top:1.5px dashed var(--faint); margin:2.4rem 0; }
+.dl-blk-tags { margin:1.4rem 0; }
+.dl-blk-tags .dl-chips { margin-bottom:0; }
 .dl-blk-fig { border:1.5px solid var(--text); border-radius:4px; overflow:hidden; background:var(--bg3); box-shadow:3px 4px 0 rgba(36,33,27,.1); }
 .dl-blk-fig img, .dl-blk-fig video { width:100%; display:block; }
 .dl-cap { font-family:var(--fm); font-size:.58rem; letter-spacing:.05em; color:var(--muted); margin-top:.55rem; line-height:1.6; }

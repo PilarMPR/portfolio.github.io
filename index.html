@@ -604,8 +604,8 @@
   <div class="de-body">
     <div class="de-inner">
 
-      <!-- ── Header: what the entry list and the link need. Everything
-           except the title is optional and skipped when left empty. ── -->
+      <!-- ── Header: the three things the log list and the link need.
+           Everything else about the entry is a block. ── -->
       <div class="de-sec">
         <div class="de-sec-lbl">Header</div>
 
@@ -615,30 +615,10 @@
           <div class="de-hint">Shown at the top of the entry, and it becomes the link: <code id="de-slug-preview" style="font-family:var(--fm);font-size:.72rem;color:var(--accent)"></code></div>
         </div>
 
-        <div class="de-row">
-          <div class="de-field">
-            <label class="de-lbl" for="de-phase">Phase <span class="de-opt">optional</span></label>
-            <select class="ep-select" id="de-phase" onchange="deField('phase',this.value)">
-              <option value="">—</option>
-              <option>Concept</option><option>Pre-production</option><option>Production</option>
-              <option>Polish</option><option>Shipped</option><option>Postmortem</option>
-            </select>
-          </div>
-          <div class="de-field">
-            <label class="de-lbl" for="de-date">When <span class="de-opt">optional</span></label>
-            <input class="de-in" id="de-date" oninput="deField('date',this.value)">
-          </div>
-        </div>
-
         <div class="de-field">
           <label class="de-lbl" for="de-summary">One-line summary <span class="de-opt">optional</span></label>
           <input class="de-in" id="de-summary" oninput="deField('summary',this.value)">
           <div class="de-hint">Shown under the title in the entry list. Leave it empty and no summary appears.</div>
-        </div>
-
-        <div class="de-field">
-          <label class="de-lbl">Header image or clip <span class="de-opt">optional</span></label>
-          <div id="de-hero-slot"></div>
         </div>
 
         <div class="de-field">

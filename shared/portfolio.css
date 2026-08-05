@@ -743,7 +743,6 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-entry-body { min-width:0; }
 .dl-chips { display:flex; gap:.35rem; flex-wrap:wrap; margin-bottom:.35rem; align-items:center; }
 .dl-chip { font-family:var(--fm); font-size:.53rem; letter-spacing:.1em; text-transform:uppercase; padding:.2rem .45rem; border-radius:2px; border:1px solid var(--faint); color:var(--muted); background:var(--bg); }
-.dl-chip.tagged { color:var(--accent); border-color:rgba(200,64,46,.4); background:rgba(200,64,46,.07); }
 .dl-chip.phase  { color:var(--blue); border-color:rgba(47,92,143,.35); background:rgba(47,92,143,.07); }
 .dl-chip.locked { color:#8a6d1f; border-color:rgba(138,109,31,.4); background:rgba(244,210,74,.28); }
 .dl-entry-name { font-family:var(--fd); font-weight:700; font-size:.98rem; letter-spacing:-.01em; color:var(--text); line-height:1.25; margin-bottom:.2rem; }
@@ -778,6 +777,14 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 
 /* ── Rendered content blocks ───────────── */
 .dl-blk { margin:1.75rem 0; }
+/* Headings are blocks like any other, so they carry their own rhythm and
+   pull whatever follows up close underneath them. */
+.dl-blk-head { margin:2.6rem 0 .9rem; }
+.dl-blk-sub  { margin:1.9rem 0 .6rem; }
+.dl-blk-head + .dl-blk, .dl-blk-sub + .dl-blk, .dl-blk-head + .dl-rule, .dl-blk-sub + .dl-rule { margin-top:0; }
+.dl-h3 { font-family:var(--fd); font-weight:700; font-size:clamp(1.15rem,1.8vw,1.5rem); letter-spacing:-.02em; color:var(--text); line-height:1.2; }
+.dl-h4 { font-family:var(--fd); font-weight:700; font-size:1.02rem; letter-spacing:-.01em; color:var(--text); line-height:1.3; }
+.dl-rule { height:0; border-top:1.5px dashed var(--faint); margin:2.4rem 0; }
 .dl-blk-fig { border:1.5px solid var(--text); border-radius:4px; overflow:hidden; background:var(--bg3); box-shadow:3px 4px 0 rgba(36,33,27,.1); }
 .dl-blk-fig img, .dl-blk-fig video { width:100%; display:block; }
 .dl-cap { font-family:var(--fm); font-size:.58rem; letter-spacing:.05em; color:var(--muted); margin-top:.55rem; line-height:1.6; }
@@ -854,6 +861,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .de-sec-lbl::after { content:''; flex:1; height:1px; background:rgba(200,64,46,.25); }
 .de-field { margin-bottom:1.1rem; }
 .de-lbl { font-family:var(--fm); font-size:.57rem; letter-spacing:.11em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; display:block; }
+.de-opt { font-family:var(--fm); font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); opacity:.6; margin-left:.4rem; }
 .de-hint { font-family:var(--fb); font-size:.74rem; color:var(--muted); opacity:.85; margin-top:.3rem; line-height:1.5; }
 .de-in, .de-ta, .de-rich {
   width:100%; font-family:var(--fb); font-size:.92rem; color:var(--text); line-height:1.7;
@@ -890,12 +898,23 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 /* block cards in the editor */
 .de-blk {
   border:1.5px solid var(--text); border-radius:4px; background:var(--card-bg);
-  margin-bottom:.9rem; box-shadow:3px 3px 0 rgba(36,33,27,.09);
+  box-shadow:3px 3px 0 rgba(36,33,27,.09); position:relative;
 }
+.de-blk.dragging { opacity:.45; }
+/* where the dragged block would land */
+.de-blk.drop-before::before, .de-blk.drop-after::after {
+  content:''; position:absolute; left:-2px; right:-2px; height:3px;
+  background:var(--accent); border-radius:2px;
+}
+.de-blk.drop-before::before { top:-6px; }
+.de-blk.drop-after::after   { bottom:-6px; }
 .de-blk-hd {
   display:flex; align-items:center; gap:.5rem; padding:.5rem .7rem;
   background:var(--bg2); border-bottom:1.5px solid var(--text); border-radius:2px 2px 0 0;
+  cursor:grab;
 }
+.de-blk-hd:active { cursor:grabbing; }
+.de-grip { font-size:.75rem; line-height:1; color:var(--muted); opacity:.7; letter-spacing:-.1em; }
 .de-blk-name { font-family:var(--fm); font-size:.55rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); flex:1; }
 .de-blk-hd button {
   font-family:var(--fm); font-size:.6rem; width:22px; height:22px; line-height:1;
@@ -903,13 +922,38 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 }
 .de-blk-hd button:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
 .de-blk-bd { padding:.8rem .85rem; }
+/* heading fields read like the heading they produce */
+.de-h-in { font-family:var(--fd); font-weight:700; font-size:1.25rem; letter-spacing:-.02em; }
+.de-h-in.sm { font-size:1rem; }
+.de-blank { font-family:var(--fb); font-size:.85rem; color:var(--muted); line-height:1.7; padding:.2rem 0 .6rem; }
+
+/* the "+" between blocks, and the palette it opens there */
+.de-gap { display:flex; align-items:center; justify-content:center; height:34px; position:relative; }
+.de-gap::before {
+  content:''; position:absolute; left:0; right:0; top:50%;
+  border-top:1.5px dashed var(--faint); opacity:0; transition:opacity .15s;
+}
+.de-gap:hover::before, .de-gap.open::before, .de-gap.always::before { opacity:1; }
+.de-gap-btn {
+  position:relative; font-family:var(--fm); font-size:.55rem; letter-spacing:.1em; text-transform:uppercase;
+  background:var(--bg); border:1.3px solid var(--faint); border-radius:3px; color:var(--muted);
+  padding:.3rem .7rem; cursor:pointer; opacity:0; transition:opacity .15s, border-color .15s, color .15s;
+}
+.de-gap:hover .de-gap-btn, .de-gap.open .de-gap-btn, .de-gap.always .de-gap-btn { opacity:1; }
+.de-gap-btn:hover, .de-gap.open .de-gap-btn { border-color:var(--accent); color:var(--accent); }
 .de-palette { display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:.5rem; }
+.de-pop {
+  padding:.7rem; margin-bottom:.5rem; border-radius:4px;
+  border:1.3px dashed rgba(200,64,46,.45); background:rgba(255,255,255,.55);
+}
 .de-pal-btn {
   display:flex; align-items:center; gap:.45rem; padding:.55rem .6rem; cursor:pointer;
   font-family:var(--fm); font-size:.57rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text);
   background:var(--bg); border:1.3px solid var(--faint); border-radius:3px; transition:all .15s; text-align:left;
 }
 .de-pal-btn:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+/* text-transform is off here so the H / h pair stays distinguishable */
+.de-pal-i { width:1.1em; text-align:center; flex-shrink:0; text-transform:none; font-weight:700; }
 .de-toggle { display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none; }
 .de-toggle input { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
 .de-toggle span { font-family:var(--fm); font-size:.57rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }

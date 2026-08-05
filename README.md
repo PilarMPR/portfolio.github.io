@@ -58,20 +58,26 @@ Where you explain how each game was actually built. Every project has its own lo
 
 Entries are published with their project's page, so they're written there. Starting from the landing page just takes you to the right page first.
 
-Each entry has a fixed skeleton, so they all read consistently:
+An entry is a short header and then whatever you build under it.
+
+**Header** — only the title is required; anything left blank simply doesn't appear:
 
 | Field | What goes in it |
 |---|---|
-| Title | Becomes the entry's URL |
-| Discipline / Phase / When | Systems, Combat, Economy… · Concept → Postmortem · e.g. "Q2 2024" |
+| Title | Shown at the top, and it becomes the entry's URL |
+| Phase | Concept → Postmortem |
+| When | e.g. "Q2 2024" |
 | Summary | One line — the hook shown in the entry list |
 | Header image or clip | Image, GIF or short MP4/WebM |
-| **Problem** | What needed solving |
-| **Approach** | What you designed, and how you iterated |
-| **Result** | What changed, with evidence |
-| Tools & tech | Comma separated |
+| Tools & tech | Comma separated; listed at the foot of the entry |
 
-Below that, add as many free blocks as you want, in any order: text, image, GIF/video, gallery, pull quote, **core-loop diagram**, before/after, **table** (for balance and economy tuning), bullet list, code/formula.
+**The entry** — everything else is blocks, in whatever order you put them:
+
+`Heading` · `Subheading` · `Text` · `Image` · `GIF / video` · `Gallery` · `Pull quote` · `Core loop` (diagram) · `Before / after` · `Table` (for balance and economy tuning) · `Bullet list` · `Code / formula` · `Divider`
+
+Nothing is pre-written and no section is compulsory — an entry contains exactly the blocks you add. Hover between any two blocks for **+ Add block here** to drop a new one in at that spot, drag a block by its ⠿ handle (or use ↑ ↓) to move it, ⧉ to duplicate, 🗑 to remove.
+
+A heading block also takes an optional small label above it — that's how the older Problem / Approach / Result entries are laid out. Those entries were converted to blocks automatically, so they read exactly as before and are now editable and deletable like everything else.
 
 #### Links you can share
 

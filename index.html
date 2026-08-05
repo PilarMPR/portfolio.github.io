@@ -604,29 +604,20 @@
   <div class="de-body">
     <div class="de-inner">
 
-      <!-- ── Fixed fields ── -->
+      <!-- ── Header: what the entry list and the link need. Everything
+           except the title is optional and skipped when left empty. ── -->
       <div class="de-sec">
-        <div class="de-sec-lbl">The essentials</div>
+        <div class="de-sec-lbl">Header</div>
 
         <div class="de-field">
           <label class="de-lbl" for="de-title">Title</label>
-          <input class="de-in" id="de-title" placeholder="e.g. Round timer tuning" oninput="deField('title',this.value)">
-          <div class="de-hint">This becomes the entry's link: <code id="de-slug-preview" style="font-family:var(--fm);font-size:.72rem;color:var(--accent)"></code></div>
+          <input class="de-in" id="de-title" oninput="deField('title',this.value)">
+          <div class="de-hint">Shown at the top of the entry, and it becomes the link: <code id="de-slug-preview" style="font-family:var(--fm);font-size:.72rem;color:var(--accent)"></code></div>
         </div>
 
-        <div class="de-row3">
+        <div class="de-row">
           <div class="de-field">
-            <label class="de-lbl" for="de-tag">Discipline</label>
-            <input class="de-in" id="de-tag" list="de-tag-list" placeholder="Systems" oninput="deField('tag',this.value)">
-            <datalist id="de-tag-list">
-              <option>Systems</option><option>Combat</option><option>Economy</option>
-              <option>Level design</option><option>Multiplayer</option><option>UX / UI</option>
-              <option>Tooling</option><option>Production</option><option>Narrative</option>
-              <option>Game feel</option><option>Balancing</option><option>Playtesting</option>
-            </datalist>
-          </div>
-          <div class="de-field">
-            <label class="de-lbl" for="de-phase">Phase</label>
+            <label class="de-lbl" for="de-phase">Phase <span class="de-opt">optional</span></label>
             <select class="ep-select" id="de-phase" onchange="deField('phase',this.value)">
               <option value="">—</option>
               <option>Concept</option><option>Pre-production</option><option>Production</option>
@@ -634,65 +625,33 @@
             </select>
           </div>
           <div class="de-field">
-            <label class="de-lbl" for="de-date">When</label>
-            <input class="de-in" id="de-date" placeholder="e.g. Q2 2024" oninput="deField('date',this.value)">
+            <label class="de-lbl" for="de-date">When <span class="de-opt">optional</span></label>
+            <input class="de-in" id="de-date" oninput="deField('date',this.value)">
           </div>
         </div>
 
         <div class="de-field">
-          <label class="de-lbl" for="de-summary">One-line summary</label>
-          <input class="de-in" id="de-summary" placeholder="What this entry is about, in a sentence" oninput="deField('summary',this.value)">
-          <div class="de-hint">Shown in the entry list — the hook that makes someone click.</div>
+          <label class="de-lbl" for="de-summary">One-line summary <span class="de-opt">optional</span></label>
+          <input class="de-in" id="de-summary" oninput="deField('summary',this.value)">
+          <div class="de-hint">Shown under the title in the entry list. Leave it empty and no summary appears.</div>
         </div>
 
         <div class="de-field">
-          <label class="de-lbl">Header image or clip</label>
+          <label class="de-lbl">Header image or clip <span class="de-opt">optional</span></label>
           <div id="de-hero-slot"></div>
         </div>
-      </div>
-
-      <!-- ── The three-beat structure ── -->
-      <div class="de-sec">
-        <div class="de-sec-lbl">Problem → Approach → Result</div>
 
         <div class="de-field">
-          <label class="de-lbl">Problem — what needed solving</label>
-          <div class="de-rich" id="de-problem" contenteditable="true" spellcheck="false" data-rich="" data-ph="What wasn't working, and why it mattered. Be concrete: what did playtesters do, what broke, what felt wrong?" oninput="deField('problem',this.innerHTML)"></div>
-        </div>
-
-        <div class="de-field">
-          <label class="de-lbl">Approach — what you designed and how you iterated</label>
-          <div class="de-rich" id="de-approach" contenteditable="true" spellcheck="false" data-rich="" data-ph="The design you tried, what you changed between versions, what you rejected and why. This is the part studios actually read." oninput="deField('approach',this.innerHTML)"></div>
-        </div>
-
-        <div class="de-field">
-          <label class="de-lbl">Result — outcome and evidence</label>
-          <div class="de-rich" id="de-result" contenteditable="true" spellcheck="false" data-rich="" data-ph="What changed. Playtest findings, numbers, retention, the moment it clicked. Include what still isn't solved." oninput="deField('result',this.innerHTML)"></div>
-        </div>
-
-        <div class="de-field">
-          <label class="de-lbl" for="de-tools">Tools &amp; tech</label>
-          <input class="de-in mono" id="de-tools" placeholder="Unreal Engine 5, Blueprints, Miro" oninput="deField('tools',this.value)">
-          <div class="de-hint">Comma separated.</div>
+          <label class="de-lbl" for="de-tools">Tools &amp; tech <span class="de-opt">optional</span></label>
+          <input class="de-in mono" id="de-tools" oninput="deField('tools',this.value)">
+          <div class="de-hint">Comma separated, listed at the foot of the entry.</div>
         </div>
       </div>
 
-      <!-- ── Free blocks ── -->
+      <!-- ── The entry itself — blocks, in whatever order you want ── -->
       <div class="de-sec">
-        <div class="de-sec-lbl">Anything else</div>
+        <div class="de-sec-lbl">The entry</div>
         <div id="de-blocks"></div>
-        <div class="de-palette" style="margin-top:1rem">
-          <button class="de-pal-btn" onclick="deAddBlock('text')">📝 Text</button>
-          <button class="de-pal-btn" onclick="deAddBlock('image')">🖼 Image</button>
-          <button class="de-pal-btn" onclick="deAddBlock('clip')">🎬 GIF / video</button>
-          <button class="de-pal-btn" onclick="deAddBlock('gallery')">🗂 Gallery</button>
-          <button class="de-pal-btn" onclick="deAddBlock('quote')">💬 Pull quote</button>
-          <button class="de-pal-btn" onclick="deAddBlock('loop')">🔁 Core loop</button>
-          <button class="de-pal-btn" onclick="deAddBlock('beforeafter')">⇄ Before / after</button>
-          <button class="de-pal-btn" onclick="deAddBlock('table')">▦ Table</button>
-          <button class="de-pal-btn" onclick="deAddBlock('list')">• Bullet list</button>
-          <button class="de-pal-btn" onclick="deAddBlock('code')">⌨ Code / formula</button>
-        </div>
       </div>
 
     </div>

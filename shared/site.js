@@ -1180,8 +1180,11 @@ async function saveAndPublish() {
 
 /* ═══════════════════════════════════════════════════════════════════
    DEVELOPMENT LOG
-   Per-project dev entries. Structured fields first (problem →
-   approach → result), free content blocks after.
+   Per-project dev entries. A short header (title, phase, when,
+   summary, header image, tools) and then a body made entirely of
+   blocks — heading, text, image, gallery, table… — in whatever
+   order the entry wants. Nothing is prescribed, nothing is
+   pre-written: an entry contains exactly the blocks you add.
 
    Data lives in localStorage while you work and is baked into
    #devlog-data on publish. Private entries are never baked.
@@ -1280,6 +1283,37 @@ function dlLoad() {
     (baked[p] || []).forEach(e => { if (!seen.has(e.id)) list.push(e); });
     DEVLOG[p] = list;
   });
+
+  let moved = false;
+  Object.keys(DEVLOG).forEach(p => dlEntries(p).forEach(e => { if (dlMigrate(e)) moved = true; }));
+  if (moved) dlSave();
+}
+
+/* Entries used to have a fixed problem → approach → result skeleton and a
+   "discipline" tag. The body is free-form blocks now, so anything written
+   under the old shape is lifted into blocks — same words, same order, but
+   editable and deletable like everything else. Idempotent: v marks an
+   entry as already converted. */
+const DL_SCHEMA = 2;
+
+function dlMigrate(e) {
+  if (!e || e.v >= DL_SCHEMA) return false;
+
+  const has  = html => String(html || '').replace(/<[^>]*>/g, '').trim() !== '';
+  const head = [];
+  [['problem',  'The problem',  'What needed solving'],
+   ['approach', 'The approach', 'What I designed'],
+   ['result',   'The result',   'What changed']].forEach(([key, lbl, text]) => {
+    if (!has(e[key])) return;
+    head.push({ t:'heading', lbl, text });
+    head.push({ t:'text', html: e[key] });
+  });
+
+  e.blocks = head.concat(Array.isArray(e.blocks) ? e.blocks : []);
+  delete e.problem; delete e.approach; delete e.result;
+  delete e.tag;                       // the title already says which discipline it is
+  e.v = DL_SCHEMA;
+  return true;
 }
 
 /* Read-only — never invents a project, so a junk URL can't pollute the data. */
@@ -1403,6 +1437,27 @@ function dlStoreFile(file, projId, entryId) {
   });
 }
 
+/* Every media reference currently held by any entry. Used before deleting
+   a file — duplicating a block copies the reference, so the same upload can
+   be pointed at from two places and must survive losing one of them. */
+function dlMediaRefs() {
+  const out = [];
+  const take = r => { if (r && r.path) out.push(r.path); };
+  Object.keys(DEVLOG).forEach(p => dlEntries(p).forEach(e => {
+    take(e.hero);
+    (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); (b.items || []).forEach(take); });
+  }));
+  return out;
+}
+
+/* Call *after* the reference has been removed from the entry. */
+function dlDropMedia(ref) {
+  if (!ref || !ref.path) return;
+  if (dlMediaRefs().includes(ref.path)) return;
+  mediaDel(ref.path).catch(() => {});
+  delete MEDIA_CACHE[ref.path];
+}
+
 const dlIsVideo = ref => /^video\//.test(ref?.type || '') || /\.(mp4|webm)$/i.test(ref?.path || '');
 
 function dlMediaTag(ref, cls) {
@@ -1451,7 +1506,6 @@ function dlRenderList(projId) {
           <span class="dl-entry-body">
             <span class="dl-chips">
               <span class="dl-chip">${num}</span>
-              ${e.tag   ? `<span class="dl-chip tagged">${dlEsc(e.tag)}</span>` : ''}
               ${e.phase ? `<span class="dl-chip phase">${dlEsc(e.phase)}</span>` : ''}
               ${e.private ? `<span class="dl-chip locked">🔒 Private</span>` : ''}
             </span>
@@ -1471,6 +1525,22 @@ function dlRenderList(projId) {
 /* ═══ RENDERING — a single entry ═══ */
 function dlRenderBlock(b) {
   switch (b.t) {
+    case 'heading': {
+      const lbl = String(b.lbl || '').trim(), text = String(b.text || '').trim();
+      if (!lbl && !text) return '';
+      return `<div class="dl-blk dl-blk-head">
+        ${lbl  ? `<div class="sh-sec-lbl">${dlEsc(lbl)}</div>` : ''}
+        ${text ? `<h3 class="dl-h3">${dlEsc(text)}</h3>`       : ''}
+      </div>`;
+    }
+
+    case 'sub':
+      return String(b.text || '').trim()
+        ? `<div class="dl-blk dl-blk-sub"><h4 class="dl-h4">${dlEsc(b.text)}</h4></div>` : '';
+
+    case 'divider':
+      return '<div class="dl-rule"></div>';
+
     case 'text':
       return `<div class="dl-blk sh-sec">${dlClean(b.html) || ''}</div>`;
 
@@ -1504,12 +1574,13 @@ function dlRenderBlock(b) {
 
     case 'beforeafter': {
       if (!(b.a && b.a.path) && !(b.b && b.b.path)) return '';
-      const side = (ref, lbl, fallback) => `<div>
-        <div class="dl-ba-lbl">${dlEsc(lbl || fallback)}</div>
-        <div class="dl-blk-fig">${dlMediaTag(ref)}</div>
+      // Labels are yours to write — an unlabelled pair just shows the images.
+      const side = (ref, lbl) => `<div>
+        ${lbl ? `<div class="dl-ba-lbl">${dlEsc(lbl)}</div>` : ''}
+        ${ref && ref.path ? `<div class="dl-blk-fig">${dlMediaTag(ref)}</div>` : ''}
       </div>`;
       return `<div class="dl-blk">
-        <div class="dl-grid2">${side(b.a, b.la, 'Before')}${side(b.b, b.lb, 'After')}</div>
+        <div class="dl-grid2">${side(b.a, b.la)}${side(b.b, b.lb)}</div>
         ${b.cap ? `<div class="dl-cap">${dlEsc(b.cap)}</div>` : ''}
       </div>`;
     }
@@ -1550,8 +1621,6 @@ function dlRenderDetail(projId, e) {
   wrap.className = 'dl-detail';
 
   const tools = String(e.tools || '').split(',').map(s => s.trim()).filter(Boolean);
-  const beat = (lbl, title, html) => html && html.replace(/<[^>]*>/g,'').trim()
-    ? `<div class="sh-sec"><div class="sh-sec-lbl">${lbl}</div><h3>${title}</h3>${dlClean(html)}</div>` : '';
 
   wrap.innerHTML = `
     <div class="dl-top">
@@ -1563,7 +1632,6 @@ function dlRenderDetail(projId, e) {
     </div>
 
     <div class="dl-chips">
-      ${e.tag   ? `<span class="dl-chip tagged">${dlEsc(e.tag)}</span>` : ''}
       ${e.phase ? `<span class="dl-chip phase">${dlEsc(e.phase)}</span>` : ''}
       ${e.date  ? `<span class="dl-chip">${dlEsc(e.date)}</span>` : ''}
       ${e.private ? `<span class="dl-chip locked">🔒 Private — not published</span>` : ''}
@@ -1578,10 +1646,6 @@ function dlRenderDetail(projId, e) {
       <div><div class="dl-nda-t">Private entry</div>
       <div class="dl-nda-s">Only visible in this browser. It is stripped out when you publish, so it never reaches the live site.</div></div>
     </div>` : ''}
-
-    ${beat('The problem',  'What needed solving', e.problem)}
-    ${beat('The approach', 'What I designed',     e.approach)}
-    ${beat('The result',   'What changed',        e.result)}
 
     ${(e.blocks || []).map(dlRenderBlock).join('')}
 
@@ -1748,9 +1812,9 @@ function dlAddEntry() {
   const proj = dlSelectedProject();
   if (!IS_PROJECT) return dlGoToProject(proj, null, true);
   const entry = {
-    id: dlUid(), title:'', tag:'', phase:'', date:'', summary:'',
-    hero:null, problem:'', approach:'', result:'', tools:'',
-    private:false, published:false, blocks:[]
+    id: dlUid(), title:'', phase:'', date:'', summary:'',
+    hero:null, tools:'', private:false, published:false,
+    blocks:[], v: DL_SCHEMA
   };
   dlEnsure(proj).push(entry);
   dlSave();
@@ -1789,6 +1853,7 @@ function dlImportPrivate(input) {
         const list = dlEnsure(p);
         (data[p] || []).forEach(e => {
           if (!e || !e.id) return;
+          dlMigrate(e);                 // a backup taken before the block rewrite
           const at = list.findIndex(x => x.id === e.id);
           if (at > -1) list[at] = e; else list.push(e);
           n++;
@@ -1810,23 +1875,15 @@ function deOpen(proj, id) {
   const e = dlGet(proj, id);
   if (!e) return;
   deCur = { proj, id };
+  deInsertAt = null;
   showCaseView();
-
-  // A page published before this was fixed carries contenteditable="false" on
-  // the three prose fields, which silently swallows every keystroke. Re-arm
-  // them on every open so an already-live copy heals itself.
-  document.querySelectorAll('#dev-editor [data-rich]').forEach(el => { el.contentEditable = 'true'; });
 
   document.getElementById('de-bar-proj').textContent = dlProjectName(proj);
   document.getElementById('de-title').value    = e.title   || '';
-  document.getElementById('de-tag').value      = e.tag     || '';
   document.getElementById('de-phase').value    = e.phase   || '';
   document.getElementById('de-date').value     = e.date    || '';
   document.getElementById('de-summary').value  = e.summary || '';
   document.getElementById('de-tools').value    = e.tools   || '';
-  document.getElementById('de-problem').innerHTML  = e.problem  || '';
-  document.getElementById('de-approach').innerHTML = e.approach || '';
-  document.getElementById('de-result').innerHTML   = e.result   || '';
   document.getElementById('de-private').checked = !!e.private;
   deSetPrivateLabel(!!e.private);
   deSlugPreview();
@@ -1925,38 +1982,76 @@ async function deHeroUpload(input) {
 function deClearHero() {
   const e = deEntry();
   if (!e) return;
-  if (e.hero?.path) mediaDel(e.hero.path).catch(() => {});
+  const ref = e.hero;
   e.hero = null;
+  dlDropMedia(ref);
   dlSave(); deRenderHero(); renderDlEntryList(); dlUpdatePendingBadge();
 }
 
-/* ── Content blocks ── */
+/* ── Content blocks ────────────────────────────────────────
+   The whole body of an entry. Order is yours: add anything
+   anywhere, drag it where you want it, delete what you don't
+   need. Nothing here is required and nothing is filled in for
+   you — an empty entry publishes as an empty entry.
+   ───────────────────────────────────────────────────────── */
 const DE_BLOCKS = {
-  text:        { name:'Text' },
-  image:       { name:'Image' },
-  clip:        { name:'GIF / video' },
-  gallery:     { name:'Gallery' },
-  quote:       { name:'Pull quote' },
-  loop:        { name:'Core loop' },
-  beforeafter: { name:'Before / after' },
-  table:       { name:'Table' },
-  list:        { name:'Bullet list' },
-  code:        { name:'Code / formula' },
+  heading:     { name:'Heading',        icon:'H'  },
+  sub:         { name:'Subheading',     icon:'h'  },
+  text:        { name:'Text',           icon:'📝' },
+  image:       { name:'Image',          icon:'🖼' },
+  clip:        { name:'GIF / video',    icon:'🎬' },
+  gallery:     { name:'Gallery',        icon:'🗂' },
+  quote:       { name:'Pull quote',     icon:'💬' },
+  loop:        { name:'Core loop',      icon:'🔁' },
+  beforeafter: { name:'Before / after', icon:'⇄'  },
+  table:       { name:'Table',          icon:'▦'  },
+  list:        { name:'Bullet list',    icon:'•'  },
+  code:        { name:'Code / formula', icon:'⌨'  },
+  divider:     { name:'Divider',        icon:'—'  },
+};
+const DE_ORDER = Object.keys(DE_BLOCKS);
+
+const DE_NEW = {
+  heading:     () => ({ lbl:'', text:'' }),
+  sub:         () => ({ text:'' }),
+  divider:     () => ({}),
+  text:        () => ({ html:'' }),
+  image:       () => ({ src:null, cap:'' }),
+  clip:        () => ({ src:null, cap:'' }),
+  gallery:     () => ({ items:[], cap:'' }),
+  quote:       () => ({ text:'' }),
+  loop:        () => ({ steps:'', cap:'' }),
+  beforeafter: () => ({ a:null, b:null, la:'', lb:'', cap:'' }),
+  table:       () => ({ data:'', cap:'' }),
+  list:        () => ({ items:'' }),
+  code:        () => ({ lbl:'', code:'' }),
 };
 
-function deAddBlock(t) {
+/* Which gap the block palette is currently open at (null = closed). */
+let deInsertAt = null;
+
+function deToggleInsert(i) {
+  deInsertAt = (deInsertAt === i) ? null : i;
+  deRenderBlocks();
+}
+
+function deAddBlock(t, at) {
   const e = deEntry();
-  if (!e) return;
-  const base = { text:{html:''}, image:{src:null,cap:''}, clip:{src:null,cap:''},
-                 gallery:{items:[],cap:''}, quote:{text:''}, loop:{steps:'',cap:''},
-                 beforeafter:{a:null,b:null,la:'Before',lb:'After',cap:''},
-                 table:{data:'Version | Round length | Result',cap:''}, list:{items:''},
-                 code:{lbl:'',code:''} }[t] || {};
-  (e.blocks = e.blocks || []).push(Object.assign({ t }, base));
+  if (!e || !DE_BLOCKS[t]) return;
+  const blocks = (e.blocks = e.blocks || []);
+  const i = (at == null || at < 0 || at > blocks.length) ? blocks.length : at;
+  blocks.splice(i, 0, Object.assign({ t }, (DE_NEW[t] || (() => ({})))()));
+  deInsertAt = null;
   dlSave();
   deRenderBlocks();
-  const host = document.getElementById('de-blocks');
-  host.lastElementChild?.scrollIntoView({ behavior:'smooth', block:'center' });
+  deFocusBlock(i);
+}
+
+function deFocusBlock(i) {
+  const el = document.querySelector(`#de-blocks .de-blk[data-i="${i}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+  el.querySelector('input:not([type=file]),textarea,[contenteditable]')?.focus();
 }
 
 function deBlkMove(i, dir) {
@@ -1967,13 +2062,68 @@ function deBlkMove(i, dir) {
   dlSave(); deRenderBlocks();
 }
 
+/* Move block `from` so it lands at slot `to` in the *current* list. */
+function deBlkMoveTo(from, to) {
+  const e = deEntry(), b = e?.blocks;
+  if (!b || from < 0 || from >= b.length) return;
+  if (to > from) to--;                       // removing it first shifts the target
+  to = Math.max(0, Math.min(b.length - 1, to));
+  if (to === from) return;
+  b.splice(to, 0, b.splice(from, 1)[0]);
+  dlSave(); deRenderBlocks();
+}
+
+function deBlkDup(i) {
+  const e = deEntry();
+  if (!e?.blocks?.[i]) return;
+  // Media references are copied, not the files — dlDropMedia keeps the
+  // upload alive as long as either copy still points at it.
+  e.blocks.splice(i + 1, 0, JSON.parse(JSON.stringify(e.blocks[i])));
+  dlSave(); deRenderBlocks(); deFocusBlock(i + 1);
+}
+
 function deBlkDel(i) {
   const e = deEntry();
-  if (!e?.blocks) return;
-  const b = e.blocks[i];
-  [b?.src, b?.a, b?.b, ...(b?.items || [])].forEach(r => { if (r?.path) mediaDel(r.path).catch(() => {}); });
-  e.blocks.splice(i, 1);
+  if (!e?.blocks?.[i]) return;
+  const b = e.blocks.splice(i, 1)[0];
+  [b.src, b.a, b.b, ...(b.items || [])].forEach(dlDropMedia);
+  if (deInsertAt != null && deInsertAt > i) deInsertAt--;
   dlSave(); deRenderBlocks(); dlUpdatePendingBadge();
+}
+
+/* ── Drag to reorder ── */
+let deDragFrom = null;
+
+function deDragStart(i, ev) {
+  deDragFrom = i;
+  try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', String(i)); } catch (err) {}
+  ev.currentTarget.closest('.de-blk')?.classList.add('dragging');
+}
+
+function deDragEnd() {
+  deDragFrom = null;
+  document.querySelectorAll('#de-blocks .de-blk')
+    .forEach(n => n.classList.remove('dragging', 'drop-before', 'drop-after'));
+}
+
+function deDragOver(i, ev) {
+  if (deDragFrom === null) return;
+  ev.preventDefault();
+  const el = ev.currentTarget, r = el.getBoundingClientRect();
+  const after = (ev.clientY - r.top) > r.height / 2;
+  document.querySelectorAll('#de-blocks .de-blk')
+    .forEach(n => n.classList.remove('drop-before', 'drop-after'));
+  el.classList.add(after ? 'drop-after' : 'drop-before');
+}
+
+function deDrop(i, ev) {
+  if (deDragFrom === null) return;
+  ev.preventDefault();
+  const el = ev.currentTarget, r = el.getBoundingClientRect();
+  const after = (ev.clientY - r.top) > r.height / 2;
+  const from = deDragFrom;
+  deDragEnd();
+  deBlkMoveTo(from, i + (after ? 1 : 0));
 }
 
 function deBlkField(i, key, val) {
@@ -2008,16 +2158,17 @@ function deGalDel(i, k) {
   const e = deEntry();
   const ref = e?.blocks?.[i]?.items?.[k];
   if (!ref) return;
-  if (ref.path) mediaDel(ref.path).catch(() => {});
   e.blocks[i].items.splice(k, 1);
+  dlDropMedia(ref);
   dlSave(); deRenderBlocks(); dlUpdatePendingBadge();
 }
 
 function deBlkClear(i, key) {
   const e = deEntry();
-  const ref = e?.blocks?.[i]?.[key];
-  if (ref?.path) mediaDel(ref.path).catch(() => {});
-  if (e?.blocks?.[i]) e.blocks[i][key] = null;
+  if (!e?.blocks?.[i]) return;
+  const ref = e.blocks[i][key];
+  e.blocks[i][key] = null;
+  dlDropMedia(ref);
   dlSave(); deRenderBlocks(); dlUpdatePendingBadge();
 }
 
@@ -2030,14 +2181,31 @@ function deMediaSlot(i, key, ref, label) {
          <input type="file" accept="image/*,video/mp4,video/webm" style="display:none" onchange="deBlkUpload(this,${i},'${key}')"/></label>`;
 }
 
+/* Every block type, each inserting at slot i. */
+function dePalette(i) {
+  return `<div class="de-palette de-pop">${DE_ORDER.map(t =>
+    `<button class="de-pal-btn" onclick="deAddBlock('${t}',${i})"><span class="de-pal-i">${DE_BLOCKS[t].icon}</span>${DE_BLOCKS[t].name}</button>`
+  ).join('')}</div>`;
+}
+
+/* The "+" between two blocks, and the palette it opens. */
+function deGap(i, opts) {
+  const open = deInsertAt === i;
+  const cls  = 'de-gap' + (open ? ' open' : '') + (opts && opts.always ? ' always' : '');
+  return `<div class="${cls}">
+      <button class="de-gap-btn" onclick="deToggleInsert(${i})">${open ? '✕ Close' : '+ Add block here'}</button>
+    </div>${open ? dePalette(i) : ''}`;
+}
+
 function deRenderBlocks() {
   const e = deEntry(), host = document.getElementById('de-blocks');
   if (!e || !host) return;
   const blocks = e.blocks || [];
 
+  // Nothing to insert *between* yet — just offer the palette outright.
   if (!blocks.length) {
-    host.innerHTML = `<div style="font-family:var(--fb);font-size:.85rem;color:var(--muted);line-height:1.7;padding:.5rem 0 .25rem">
-      The three fields above cover most entries. Add blocks below when you need a diagram, a balance table, a clip of the mechanic, or a spreadsheet of tuning values.</div>`;
+    deInsertAt = null;
+    host.innerHTML = `<div class="de-blank">This entry is empty. Build it out of the blocks below, in any order.</div>${dePalette(0)}`;
     return;
   }
 
@@ -2047,9 +2215,20 @@ function deRenderBlocks() {
     let body = '';
 
     switch (b.t) {
+      case 'heading':
+        body = `<input class="de-in mono" style="margin-bottom:.5rem" placeholder="Small label above it (optional)"
+                  value="${dlEsc(b.lbl || '')}" oninput="deBlkField(${i},'lbl',this.value)"/>
+                <input class="de-in de-h-in" value="${dlEsc(b.text || '')}" oninput="deBlkField(${i},'text',this.value)"/>`;
+        break;
+      case 'sub':
+        body = `<input class="de-in de-h-in sm" value="${dlEsc(b.text || '')}" oninput="deBlkField(${i},'text',this.value)"/>`;
+        break;
+      case 'divider':
+        body = `<div class="de-hint" style="margin:0">A dashed rule across the page. Nothing to fill in.</div>`;
+        break;
       case 'text':
         body = `<div class="de-rich" contenteditable="true" spellcheck="false" data-rich
-                  data-ph="Write freely here." oninput="deBlkField(${i},'html',this.innerHTML)">${dlClean(b.html || '')}</div>`;
+                  oninput="deBlkField(${i},'html',this.innerHTML)">${dlClean(b.html || '')}</div>`;
         break;
       case 'image':
       case 'clip':
@@ -2065,20 +2244,20 @@ function deRenderBlocks() {
           <input type="file" accept="image/*" multiple style="display:none" onchange="deGalUpload(this,${i})"/></label>${cap()}`;
         break;
       case 'quote':
-        body = `<textarea class="de-ta" style="min-height:70px" placeholder="A line worth pulling out — a design principle, a playtester's reaction."
+        body = `<textarea class="de-ta" style="min-height:70px"
                   oninput="deBlkField(${i},'text',this.value)">${dlEsc(b.text || '')}</textarea>`;
         break;
       case 'loop':
-        body = `<input class="de-in mono" placeholder="Round starts, Potato assigned, Chase, Tag = transfer, Timer ends"
+        body = `<input class="de-in mono"
                   value="${dlEsc(b.steps || '')}" oninput="deBlkField(${i},'steps',this.value)"/>
                 <div class="de-hint">Separate each step with a comma — they render as a linked loop diagram.</div>${cap()}`;
         break;
       case 'beforeafter':
         body = `<div class="de-row">
-          <div><input class="de-in" style="margin-bottom:.5rem" value="${dlEsc(b.la || '')}" placeholder="Before"
-                 oninput="deBlkField(${i},'la',this.value)"/>${deMediaSlot(i,'a',b.a,'🖼 Before')}</div>
-          <div><input class="de-in" style="margin-bottom:.5rem" value="${dlEsc(b.lb || '')}" placeholder="After"
-                 oninput="deBlkField(${i},'lb',this.value)"/>${deMediaSlot(i,'b',b.b,'🖼 After')}</div>
+          <div><input class="de-in" style="margin-bottom:.5rem" value="${dlEsc(b.la || '')}" placeholder="Label (optional)"
+                 oninput="deBlkField(${i},'la',this.value)"/>${deMediaSlot(i,'a',b.a,'🖼 Left image')}</div>
+          <div><input class="de-in" style="margin-bottom:.5rem" value="${dlEsc(b.lb || '')}" placeholder="Label (optional)"
+                 oninput="deBlkField(${i},'lb',this.value)"/>${deMediaSlot(i,'b',b.b,'🖼 Right image')}</div>
         </div>${cap()}`;
         break;
       case 'table':
@@ -2087,27 +2266,35 @@ function deRenderBlocks() {
                 <div class="de-hint">One row per line, columns separated by <code>|</code>. The first line is the header.</div>${cap()}`;
         break;
       case 'list':
-        body = `<textarea class="de-ta" style="min-height:100px" placeholder="One bullet per line"
-                  oninput="deBlkField(${i},'items',this.value)">${dlEsc(b.items || '')}</textarea>`;
+        body = `<textarea class="de-ta" style="min-height:100px"
+                  oninput="deBlkField(${i},'items',this.value)">${dlEsc(b.items || '')}</textarea>
+                <div class="de-hint">One bullet per line.</div>`;
         break;
       case 'code':
-        body = `<input class="de-in mono" style="margin-bottom:.5rem" placeholder="Label — e.g. Damage formula"
+        body = `<input class="de-in mono" style="margin-bottom:.5rem" placeholder="Label (optional)"
                   value="${dlEsc(b.lbl || '')}" oninput="deBlkField(${i},'lbl',this.value)"/>
                 <textarea class="de-ta mono" style="min-height:110px"
                   oninput="deBlkField(${i},'code',this.value)">${dlEsc(b.code || '')}</textarea>`;
         break;
     }
 
-    return `<div class="de-blk">
-      <div class="de-blk-hd">
+    return deGap(i) + `<div class="de-blk" data-i="${i}"
+        ondragover="deDragOver(${i},event)" ondrop="deDrop(${i},event)">
+      <div class="de-blk-hd" draggable="true" ondragstart="deDragStart(${i},event)" ondragend="deDragEnd()">
+        <span class="de-grip" title="Drag to move this block">⠿</span>
         <span class="de-blk-name">${DE_BLOCKS[b.t]?.name || b.t}</span>
         <button onclick="deBlkMove(${i},-1)" title="Move up">↑</button>
         <button onclick="deBlkMove(${i},1)"  title="Move down">↓</button>
+        <button onclick="deBlkDup(${i})"     title="Duplicate block">⧉</button>
         <button onclick="deBlkDel(${i})"     title="Delete block">🗑</button>
       </div>
       <div class="de-blk-bd">${body}</div>
     </div>`;
-  }).join('');
+  }).join('') + deGap(blocks.length, { always:true });
+
+  // A copy published before the editor's own surfaces were exempted from
+  // read-only mode can arrive with contenteditable off; re-arm it here.
+  host.querySelectorAll('[data-rich]').forEach(el => { el.contentEditable = 'true'; });
 }
 
 /* ═══ PUBLISH SUPPORT ════════════════════════════════════ */

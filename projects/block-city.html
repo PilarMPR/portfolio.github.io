@@ -169,7 +169,7 @@
         <span class="ep-add-btn-label">New dev entry</span>
       </button>
 
-      <div class="dl-pending on" id="dl-pending"></div>
+      <div class="dl-pending" id="dl-pending"></div>
 
       <div style="border-top:1px solid var(--faint);margin:.8rem 0 .5rem"></div>
       <div style="font-family:var(--fm);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 .25rem .45rem;line-height:1.7">
@@ -247,7 +247,7 @@
      entries never reach this element — they stay in the
      browser only. Your live copy always wins over this.
      ═══════════════════════════════════════════════════════ -->
-<script type="application/json" id="devlog-data">{"block-city":[{"id":"main-mechanics","title":"Main mechanics","summary":"","tools":"Google docs, Miro, Construct 3, Google sheets","private":false,"published":false,"blocks":[{"t":"heading","lbl":"","text":"Core loop"},{"t":"image","src":{"path":"assets/block-city/main-mechanics-w4p6.png","type":"image/png"},"cap":""},{"t":"sub","text":"Core loop intent"},{"t":"text","html":"The intent behind the core loop is to make the maths excercise a core mechanic to expand the city.&nbsp;"}],"v":3}]}</script>
+<script type="application/json" id="devlog-data">{}</script>
 
 <!-- ═══ DEV ENTRY EDITOR (the fillable container) ═══ -->
 <div id="dev-editor" class="">
@@ -257,7 +257,7 @@
     <span class="de-bar-sp"></span>
     <label class="de-toggle" title="Private entries are never published to the live site">
       <input type="checkbox" id="de-private" onchange="deSetPrivate(this.checked)">
-      <span id="de-private-lbl">Public</span>
+      <span id="de-private-lbl" style="color: rgb(138, 109, 31);">🔒 Private</span>
     </label>
     <button class="de-btn danger" onclick="deDeleteEntry()">🗑 Delete</button>
     <button class="de-btn primary" onclick="deClose()">✓ Done</button>

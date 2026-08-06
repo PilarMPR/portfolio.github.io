@@ -189,7 +189,7 @@
       <p data-ed="about-p1" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
       <div class="about-pull" data-label="Pull quote" data-ed="about-quote" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</div>
       <p data-ed="about-p2" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
-      <p data-ed="about-p3" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</p>
+      <p data-ed="about-p3" contenteditable="false" spellcheck="false" style="">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</p>
       <p data-ed="about-p4" style="color:var(--muted)" contenteditable="false" spellcheck="false">My passion is <strong>mechanic design</strong>: how to tell a story through player actions. I'm also drawn to <strong>educational games</strong>, where the challenge is making something that genuinely teaches without sacrificing game feel.</p>
     </div>
 
@@ -202,8 +202,8 @@
       <div class="edu-item" data-edu="edu-1">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-1-name" contenteditable="false" spellcheck="false">Currently Lead Designer &amp; Producer at Wild Alchemists, working on <em>Hot Potato</em> — Audience Award winner at Match in Games 2025. Based in Madrid.</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-1-sub" contenteditable="false" spellcheck="false">Outside of games: music, reading, and sport.</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-1-name" contenteditable="false" spellcheck="false" style="">IE summer program - Business and management</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-1-sub" contenteditable="false" spellcheck="false">Business and management course</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -214,8 +214,8 @@
       <div class="edu-item" data-edu="edu-2">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-2-name" contenteditable="false" spellcheck="false">UDIT — Universidad de Diseño y Tecnología</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-2-sub" contenteditable="false" spellcheck="false">Game Design &amp; Development · Madrid</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-2-name" contenteditable="false" spellcheck="false" style="">UDIT — Universidad de Diseño y Tecnología</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-2-sub" contenteditable="false" spellcheck="false" style="">Game Design &amp; Development · Madrid</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -226,8 +226,8 @@
       <div class="edu-item" data-edu="edu-3">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-3-name" contenteditable="false" spellcheck="false">Runnymede College</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-3-sub" contenteditable="false" spellcheck="false">International Baccalaureate · Madrid</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-3-name" contenteditable="false" spellcheck="false" style="">Runnymede College</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-3-sub" contenteditable="false" spellcheck="false" style="">A Levels: History, Geography, English literature</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -235,7 +235,18 @@
           <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
         </span>
       </div>
+    <div class="edu-item" data-edu="edu-mshi2271">
+    <div class="edu-dot"></div>
+    <div class="edu-body">
+      <div class="edu-name" data-label="School name" data-ed="edu-mshi2271-name" contenteditable="false" spellcheck="false">IE Summer course</div>
+      <div class="edu-sub" data-label="Degree / detail" data-ed="edu-mshi2271-sub" contenteditable="false" spellcheck="false">IE Entrepeneurship&nbsp;</div>
     </div>
+    <span class="edu-ctrl">
+      <button onclick="eduMove(this,-1)" title="Move up">↑</button>
+      <button onclick="eduMove(this,1)" title="Move down">↓</button>
+      <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
+    </span>
+  </div></div>
     <button class="edu-add" onclick="eduAdd()">+ Add education entry</button>
   </div>
 
@@ -330,22 +341,22 @@
   </div>
 
   <div class="ep-tabs">
-    <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
-    <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
+    <button class="ep-tab" onclick="switchTab('sections',this)">Sections</button>
+    <button class="ep-tab active" onclick="switchTab('add',this)">+ Add</button>
     <button class="ep-tab" onclick="switchTab('devlog',this)">Dev Log</button>
     <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
   </div>
 
   <div class="ep-body">
     <!-- SECTIONS TAB -->
-    <div class="ep-tab-pane active" id="tab-sections">
+    <div class="ep-tab-pane" id="tab-sections">
       <div id="ep-section-list"><div class="ep-section-item" data-section-id="hero">
     <span class="ep-section-icon">🏠</span>
     <span class="ep-section-name">Hero</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-hero" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-hero" class="ep-sub"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Job title + location</div>
@@ -369,13 +380,13 @@
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-work" class="ep-sub" style="display: none;"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
+    </div></div><div id="ep-sub-work" class="ep-sub"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
     <span class="ep-section-icon">👤</span>
     <span class="ep-section-name">About</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-about" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-about" class="ep-sub"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">about-p1</div>
@@ -409,13 +420,13 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">School name</div>
-        <div class="ep-field-prev">Currently Lead Designer &amp; Pr</div>
+        <div class="ep-field-prev">IE summer program - Business</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Degree / detail</div>
-        <div class="ep-field-prev">Outside of games: music, rea</div>
+        <div class="ep-field-prev">Business and management cour</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
@@ -439,15 +450,27 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Degree / detail</div>
-        <div class="ep-field-prev">International Baccalaureate </div>
+        <div class="ep-field-prev">A Levels: History, Geography</div>
       </div>
-      <span class="ep-sub-go">Edit</span></div></div><div class="ep-section-item focused" data-section-id="contact">
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">School name</div>
+        <div class="ep-field-prev">IE Summer course</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">Degree / detail</div>
+        <div class="ep-field-prev">IE Entrepeneurship</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div></div><div class="ep-section-item" data-section-id="contact">
     <span class="ep-section-icon">✉</span>
     <span class="ep-section-name">Contact</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
-      <span class="ep-chevron" style="font-size: 0.6rem; color: var(--muted); transition: transform 0.2s; display: inline-block; margin-left: auto; transform: rotate(180deg);">▾</span>
-    </div></div><div id="ep-sub-contact" class="ep-sub" style="display: block;"><div class="ep-section-item ep-field-item">
+      <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
+    </div></div><div id="ep-sub-contact" class="ep-sub"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Contact heading line 2</div>
@@ -463,13 +486,13 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">LinkedIn name</div>
-        <div class="ep-field-prev">note.</div>
+        <div class="ep-field-prev">www.linkedin.com/in/pilar-ma</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Discord handle</div>
-        <div class="ep-field-prev">pilarmprojo@gmail.com</div>
+        <div class="ep-field-prev">@pilumpr</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
@@ -481,7 +504,7 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">footer-copy</div>
-        <div class="ep-field-prev">@pilumpr</div>
+        <div class="ep-field-prev">This website has used AI to </div>
       </div>
       <span class="ep-sub-go">Edit</span></div></div></div>
       <div id="ep-fields-area" style="margin-top:.5rem;border-top:1px solid var(--faint);padding-top:.5rem;display:none">
@@ -491,7 +514,7 @@
     </div>
 
     <!-- ADD TAB -->
-    <div class="ep-tab-pane" id="tab-add">
+    <div class="ep-tab-pane active" id="tab-add">
       <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.75rem .25rem .4rem">Work / Projects</div>
       <button class="ep-add-btn" onclick="insertProjectCard()">
         <span class="ep-add-btn-icon">🎮</span>

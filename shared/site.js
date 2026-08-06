@@ -154,6 +154,10 @@ function toggleEdit() {
     renderDesignTab();
     renderDevlogTab();
   } else {
+    // Leaving edit mode with a dev entry open used to strand the overlay on
+    // screen and leave body overflow locked to hidden — the page then looked
+    // like it had lost its scroll for no visible reason.
+    if (document.getElementById('dev-editor')?.classList.contains('open')) deClose();
     // Clear focus
     document.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
     focusedSectionEl = null;

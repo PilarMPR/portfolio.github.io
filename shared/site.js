@@ -1241,10 +1241,13 @@ async function buildExportHTML() {
   const doc = new DOMParser().parseFromString(
     buildPublishHTML({ forExport: true, devlogData: await dlExportData() }), 'text/html');
 
-  const link = doc.querySelector('link[rel="stylesheet"][href$="portfolio.css"]');
-  if (link) {
+  // Both sheets, in order — theme.css after portfolio.css, because it
+  // wins on source order alone. Swap them and the export loses its colours.
+  for (const name of ['portfolio.css', 'theme.css']) {
+    const link = doc.querySelector(`link[rel="stylesheet"][href$="${name}"]`);
+    if (!link) continue;
     const st = doc.createElement('style');
-    st.textContent = await fetchText(asset('shared/portfolio.css'));
+    st.textContent = await fetchText(asset('shared/' + name));
     link.replaceWith(st);
   }
   const scr = [...doc.querySelectorAll('script[src]')].find(s => /site\.js$/.test(s.getAttribute('src') || ''));
@@ -1484,6 +1487,22 @@ function applyTheme(t){
   if (t.fb) { ensureFont(t.fb, (BODY_FONTS.find(f=>f.n===t.fb)||{}).w); root.setProperty('--fb', "'"+t.fb+"', sans-serif"); }
 }
 let currentTheme = Object.assign({}, THEME_DEFAULT);
+/* The theme as a stylesheet, for shared/theme.css. Built from the same
+   computeVars() applyTheme() uses, so the published file and the live
+   preview cannot disagree. */
+function themeCSS(t){
+  const vars = computeVars(t || currentTheme);
+  const lines = Object.keys(vars).map(k => `  ${k}: ${vars[k]};`);
+  const th = t || currentTheme;
+  if (th.fd) lines.push(`  --fd: '${th.fd}', sans-serif;`);
+  if (th.fb) lines.push(`  --fb: '${th.fb}', sans-serif;`);
+  return `/* SITE THEME — one file, every page.\n` +
+         `   Written by "Save & publish"; change it through the editor's\n` +
+         `   Design tab rather than by hand. Loaded after portfolio.css,\n` +
+         `   and both declare :root, so that link order is what makes\n` +
+         `   these win — keep it. */\n:root {\n${lines.join('\n')}\n}\n`;
+}
+
 function saveTheme(){ try { localStorage.setItem('pmpr_theme', JSON.stringify(currentTheme)); } catch(e){} }
 function loadTheme(){
   try { const raw = localStorage.getItem('pmpr_theme'); if (raw){ currentTheme = Object.assign({}, THEME_DEFAULT, JSON.parse(raw)); applyTheme(currentTheme); } } catch(e){}
@@ -1613,7 +1632,20 @@ function buildPublishHTML(opts) {
   clone.querySelectorAll('[contenteditable]').forEach(el => {
     if (el.closest('#dev-editor,#edit-panel')) return;
     el.setAttribute('contenteditable', 'false');
+    // enableCaseEditing() paints dashed outlines and a text cursor onto
+    // every editable region. Those are author-only affordances; published
+    // once, a visitor sees dashed boxes around all the prose.
+    ['outline', 'background', 'cursor', 'borderRadius'].forEach(k => { el.style[k] = ''; });
+    if (!el.getAttribute('style')) el.removeAttribute('style');
+    el.removeAttribute('spellcheck');
   });
+
+  // The theme lives in shared/theme.css, written by ghPublish(). Leaving
+  // applyTheme()'s inline copy on <html> would pin this page to whatever
+  // the theme was the day it was published — which is how the site ended
+  // up with three different accents. An export has no sibling files, so
+  // it keeps its inline theme.
+  if (!forExport) clone.removeAttribute('style');
   clone.querySelector('#lightbox')?.classList.remove('open');
   const fb = clone.querySelector('#fmt-bar');
   if (fb) { fb.classList.remove('show'); fb.removeAttribute('style'); }
@@ -1679,6 +1711,14 @@ async function ghPublish(token, onStep) {
     tree.push({ path: rec.path, mode: '100644', type: 'blob', sha: blob.sha });
     uploaded.push(rec.path);
   }
+
+  // The theme is site-wide, so it ships as its own file rather than being
+  // stamped into this one page. Publishing any page now recolours the
+  // whole site instead of leaving the other four behind.
+  step('⏳ Publishing theme…');
+  const themeBlob = await j(await fetch(`${api}/repos/${owner}/${repo}/git/blobs`, { method: 'POST', headers: H,
+    body: JSON.stringify({ content: utf8ToB64(themeCSS()), encoding: 'base64' }) }));
+  tree.push({ path: 'shared/theme.css', mode: '100644', type: 'blob', sha: themeBlob.sha });
 
   step('⏳ Publishing page…');
   const pageBlob = await j(await fetch(`${api}/repos/${owner}/${repo}/git/blobs`, { method: 'POST', headers: H,

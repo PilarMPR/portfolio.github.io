@@ -184,7 +184,11 @@ Both exclude private entries. Export gives you a single self-contained page — 
 - One stylesheet and one script shared by every page, so they're cached across navigation
 - Each page declares its own `window.PAGE` context (role, path, base) — that's how the same script drives the landing page and the project pages
 - Works fully offline once the fonts are cached
-- Theme system uses CSS variables; the text color drives all derivative `rgba()` shades automatically via `--text-rgb`
+- Theme system uses CSS variables. The theme is **one file — `shared/theme.css`** — loaded by every page after `portfolio.css`, and written by **Save & publish** from whatever the Design tab is set to. Publishing any page therefore recolours the whole site.
+
+  It used to be baked into each page's `<html style>` instead, which meant a theme change only reached the page you published from. Doing that twice left the site with three different accents at once — near-black on the landing page, navy on Block City, the original red everywhere else. If you add anything themed, put it in `theme.css`, not on a page.
+
+  Known gap: about a dozen decorative rules in `portfolio.css` still hardcode the original red as `rgba(200,64,46,…)` — small underlines, hover shadows, tag borders — so those don't follow the accent yet. (`--text-rgb`, referenced by an earlier version of this note, was never actually implemented.)
 
 ### Responsive
 

@@ -345,11 +345,61 @@ function buildProjectSectionList(list) {
     list.appendChild(item);
   });
 
+  buildAsideList(list);
+
   const back = document.createElement('div');
   back.className = 'ep-section-item';
   back.innerHTML = '<span class="ep-section-icon">🏠</span><span class="ep-section-name">Back to the landing page</span>';
   back.addEventListener('click', () => { location.href = PAGE.base + 'index.html'; });
   list.appendChild(back);
+}
+
+/* The sidebar, as a group in the Sections tab: one row per widget with the
+   same reorder arrows the landing page's sections use, then the buttons
+   that add a new one. */
+function buildAsideList(list) {
+  const aside = asideEl();
+  if (!aside) return;
+
+  const head = document.createElement('div');
+  head.className = 'ep-dsn-label';
+  head.textContent = 'Sidebar';
+  list.appendChild(head);
+
+  const widgets = [...aside.querySelectorAll('.sh-widget')];
+  if (!widgets.length) {
+    list.insertAdjacentHTML('beforeend', '<div class="ep-note">No boxes yet — add one below.</div>');
+  }
+
+  widgets.forEach(w => {
+    const id = w.dataset.widget;
+    const kind = w.querySelector('.sh-tools') ? 'chips' : w.querySelector('.sh-bullets') ? 'bullets' : 'text';
+    const name = w.querySelector('.sh-widget-lbl')?.textContent.trim() || WIDGET_KINDS[kind].name;
+    const item = document.createElement('div');
+    item.className = 'ep-section-item';
+    item.innerHTML =
+      `<span class="ep-section-icon">${WIDGET_KINDS[kind].icon}</span>` +
+      `<span class="ep-section-name">${dlEsc(name)}</span>` +
+      `<div class="ep-section-arrows">` +
+        `<button class="ep-arr" title="Move up" onclick="moveWidget('${id}',-1,event)">▲</button>` +
+        `<button class="ep-arr" title="Move down" onclick="moveWidget('${id}',1,event)">▼</button>` +
+      `</div>`;
+    item.addEventListener('click', e => {
+      if (e.target.closest('.ep-arr')) return;
+      if (MQ_STACK.matches) setEditorSheet(false);
+      w.scrollIntoView({ behavior:'smooth', block:'center' });
+      w.querySelector('.sh-widget-lbl')?.focus();
+    });
+    list.appendChild(item);
+  });
+
+  Object.entries(WIDGET_KINDS).forEach(([kind, spec]) => {
+    const btn = document.createElement('button');
+    btn.className = 'ep-add-btn';
+    btn.innerHTML = `<span class="ep-add-btn-icon">${spec.icon}</span><span class="ep-add-btn-label">Add ${spec.name}</span>`;
+    btn.addEventListener('click', () => addWidget(kind));
+    list.appendChild(btn);
+  });
 }
 
 function appendFieldItems(sub, fields) {
@@ -439,13 +489,60 @@ function openCaseEdit(id) {
   caseView.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
+/* ─── CASE-STUDY FIELD KEYS ────────────────
+   Every editable bit of a case study needs a stable name, so an edit can
+   be stored and put back into the page's own markup rather than replacing
+   the page with a stored copy of itself. The key is a path — which region,
+   which section, which element — derived from position in the file, so it
+   survives text edits and reappears identically on the next load.
+
+   `.sh-aside` is its own region: the sidebar can be added to and pruned,
+   so its widgets are keyed by their own id rather than by position. */
+const CS_EDITABLE = 'h2,h3,p,li,.sh-pull,.sh-widget-lbl,.sh-tool';
+
+function csFieldKey(el) {
+  const widget = el.closest('.sh-widget');
+  if (widget) {
+    const wid = widget.dataset.widget || 'w0';
+    const peers = [...widget.querySelectorAll(CS_EDITABLE)];
+    return `aside/${wid}/${peers.indexOf(el)}`;
+  }
+  const sec = el.closest('.sh-sec');
+  if (sec) {
+    const secs = [...caseView.querySelectorAll('.sh-sec')];
+    const peers = [...sec.querySelectorAll(CS_EDITABLE)];
+    return `sec${secs.indexOf(sec)}/${peers.indexOf(el)}`;
+  }
+  const loose = [...caseView.querySelectorAll(CS_EDITABLE)]
+    .filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget'));
+  return `page/${loose.indexOf(el)}`;
+}
+
+/* Widgets need an id before anything can be keyed against them. Authored
+   ones get a positional id on first load; once the page is published the
+   attribute is in the file, so it never moves again. */
+function ensureWidgetIds() {
+  if (!caseView) return;
+  caseView.querySelectorAll('.sh-widget').forEach((w, i) => {
+    if (!w.dataset.widget) w.dataset.widget = 'w' + i;
+  });
+}
+
+/* Everything the editor owns on a case-study page. */
+function csFields() {
+  if (!caseView) return [];
+  return [...caseView.querySelectorAll(CS_EDITABLE)]
+    .filter(el => !el.closest('.sh-facts') && !el.closest('.sh-nav') && !el.closest('#dl-wrap'));
+}
+
 /* Make the case-study prose directly editable. */
 function enableCaseEditing() {
   if (!caseView || caseView.dataset.editable) return;
   caseView.dataset.editable = '1';
+  ensureWidgetIds();
+  decorateWidgets();
 
-  caseView.querySelectorAll('h2,h3,p,li,.sh-pull').forEach(el => {
-    if (el.closest('.sh-facts') || el.closest('.sh-nav') || el.closest('#dl-wrap')) return;
+  csFields().forEach(el => {
     el.contentEditable = 'true';
     el.spellcheck = false;
     el.style.outline = '1px dashed rgba(200,64,46,.25)';
@@ -458,8 +555,10 @@ function enableCaseEditing() {
     el.addEventListener('blur', () => {
       el.style.outline = '1px dashed rgba(200,64,46,.25)';
       el.style.background = '';
+      markBlankFields();
       saveCaseStudy(PAGE.id);
     });
+    if (el.dataset.ph) el.addEventListener('input', markBlankFields);
   });
 
   if (!document.getElementById('cs-edit-notice')) {
@@ -470,35 +569,271 @@ function enableCaseEditing() {
   }
 }
 
+/* ─── SIDEBAR WIDGETS ──────────────────────
+   The boxes down the right of a case study. Three shapes cover every one
+   in use: chips (Tools & Tech), bullets (Role breakdown) and text
+   (Studio). Built the same way as the landing page's custom project
+   cards — make the node, then autoSave() and rebuild the panel list. */
+const WIDGET_KINDS = {
+  chips:   { icon:'🏷', name:'Tool chips',  body:'<div class="sh-tools"><span class="sh-tool" data-ph="Tool"></span></div>' },
+  bullets: { icon:'▹', name:'Bullet list', body:'<ul class="sh-bullets"><li data-ph="Point"></li></ul>' },
+  text:    { icon:'¶', name:'Text',        body:'<p data-ph="Write something…"></p>' },
+};
+
+function asideEl() { return caseView?.querySelector('.sh-aside') || null; }
+
+/* Mark the sidebar as user-modified. Until this happens its markup is
+   never stored, so an untouched page always takes its widgets from the
+   file — see saveCaseStudy(). */
+function touchAside() {
+  const a = asideEl();
+  if (a) a.dataset.touched = '1';
+}
+
+function widgetUid() { return 'w-' + Date.now().toString(36) + Math.floor(Math.random()*1296).toString(36); }
+
+function addWidget(kind) {
+  const aside = asideEl();
+  const spec = WIDGET_KINDS[kind];
+  if (!aside || !spec) return;
+  const id = widgetUid();
+  const w = document.createElement('div');
+  w.className = 'sh-widget';
+  w.dataset.widget = id;
+  w.dataset.kind = kind;
+  w.innerHTML = `<div class="sh-widget-lbl" data-ph="Heading"></div>${spec.body}`;
+  aside.appendChild(w);
+  touchAside();
+  refreshCaseEditing();
+  w.scrollIntoView({ behavior:'smooth', block:'center' });
+  w.querySelector('.sh-widget-lbl')?.focus();
+}
+
+function deleteWidget(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const w = caseView?.querySelector(`.sh-widget[data-widget="${id}"]`);
+  if (!w) return;
+  w.remove();
+  touchAside();
+  refreshCaseEditing();
+}
+
+function moveWidget(id, dir, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const w = caseView?.querySelector(`.sh-widget[data-widget="${id}"]`);
+  if (!w) return;
+  const sib = dir < 0 ? w.previousElementSibling : w.nextElementSibling;
+  if (!sib) return;
+  dir < 0 ? w.parentNode.insertBefore(w, sib) : w.parentNode.insertBefore(sib, w);
+  touchAside();
+  refreshCaseEditing();
+}
+
+/* Items inside a widget — a chip or a bullet. */
+function addWidgetItem(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const w = caseView?.querySelector(`.sh-widget[data-widget="${id}"]`);
+  if (!w) return;
+  const chips = w.querySelector('.sh-tools');
+  const list  = w.querySelector('.sh-bullets');
+  let item;
+  if (chips)      { item = document.createElement('span'); item.className = 'sh-tool'; item.dataset.ph = 'Tool';  chips.appendChild(item); }
+  else if (list)  { item = document.createElement('li');   item.dataset.ph = 'Point'; list.appendChild(item); }
+  else return;
+  touchAside();
+  refreshCaseEditing();
+  item.focus();
+}
+
+function removeWidgetItem(el, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const item = el.closest('.sh-tool, .sh-bullets li');
+  if (!item) return;
+  item.remove();
+  touchAside();
+  refreshCaseEditing();
+}
+
+/* Re-arm editing after the sidebar's shape changes, then persist. New
+   nodes need their contentEditable and handlers; the panel needs to list
+   them. Cheapest correct approach is to tear down and rebuild. */
+function refreshCaseEditing() {
+  if (!caseView) return;
+  const wasEditing = !!caseView.dataset.editable;
+  if (wasEditing) { disableCaseEditing(); enableCaseEditing(); }
+  ensureWidgetIds();
+  saveCaseStudy(PAGE.id);
+  buildSectionList();
+}
+
+/* In-page controls, added only while editing and stripped on the way out
+   so they can never be serialized into a published page. */
+function decorateWidgets() {
+  const aside = asideEl();
+  if (!aside) return;
+  aside.querySelectorAll('.sh-widget').forEach(w => {
+    const id = w.dataset.widget;
+    if (!w.querySelector('.sh-widget-tools')) {
+      const tools = document.createElement('div');
+      tools.className = 'sh-widget-tools';
+      tools.innerHTML =
+        `<button type="button" title="Move up" onclick="moveWidget('${id}',-1,event)">↑</button>` +
+        `<button type="button" title="Move down" onclick="moveWidget('${id}',1,event)">↓</button>` +
+        `<button type="button" title="Delete this box" onclick="deleteWidget('${id}',event)">🗑</button>`;
+      w.appendChild(tools);
+    }
+    // A chip or bullet list gets an "add" affordance and a remove per item.
+    const host = w.querySelector('.sh-tools, .sh-bullets');
+    if (host && !w.querySelector('.sh-item-add')) {
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'sh-item-add';
+      add.textContent = '+';
+      add.title = 'Add one';
+      add.setAttribute('onclick', `addWidgetItem('${id}',event)`);
+      host.appendChild(add);
+    }
+    w.querySelectorAll('.sh-tool, .sh-bullets li').forEach(item => {
+      if (item.querySelector('.sh-item-del')) return;
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'sh-item-del';
+      del.textContent = '×';
+      del.title = 'Remove';
+      // The item itself is contenteditable — without this the button
+      // becomes typeable text inside it.
+      del.contentEditable = 'false';
+      del.setAttribute('onclick', 'removeWidgetItem(this,event)');
+      item.appendChild(del);
+    });
+  });
+  markBlankFields();
+}
+
+function stripWidgetControls(root) {
+  const host = root || caseView;
+  host?.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del').forEach(n => n.remove());
+  host?.querySelectorAll('.is-blank').forEach(n => n.classList.remove('is-blank'));
+}
+
+/* Flag the fields with no text so CSS can show their placeholder. A chip
+   or bullet always contains its remove button, so :empty never matches —
+   this reads the text instead. */
+function markBlankFields() {
+  const aside = asideEl();
+  if (!aside) return;
+  aside.querySelectorAll('[data-ph]').forEach(el => {
+    // textContent would count the injected × as content, so every chip
+    // would look non-empty. Read only what the user actually typed.
+    const typed = [...el.childNodes]
+      .filter(n => !(n.nodeType === 1 && n.classList?.contains('sh-item-del')))
+      .map(n => n.textContent)
+      .join('')
+      .trim();
+    el.classList.toggle('is-blank', !typed);
+  });
+}
+
 function disableCaseEditing() {
   if (!caseView) return;
   delete caseView.dataset.editable;
   document.getElementById('cs-edit-notice')?.remove();
+  stripWidgetControls();
   caseView.querySelectorAll('[contenteditable]').forEach(el => {
     el.removeAttribute('contenteditable');
     el.style.outline = ''; el.style.background = ''; el.style.cursor = '';
   });
 }
 
+/* Store what was edited, keyed by field — NOT the whole of #case-view.
+   Snapshotting the subtree is what silently deleted Block City's sidebar:
+   the page rebuilt itself from a stored copy taken before the sidebar
+   existed, then published that copy over the real file. Structure now
+   always comes from the markup; only text comes from here. */
 function saveCaseStudy(id) {
   if (!caseView) return;
-  const clone = caseView.cloneNode(true);
-  clone.querySelector('#cs-edit-notice')?.remove();
-  // The dev log is rendered from data on every load — storing it here
-  // would freeze a stale copy and stack a second one on the next visit.
-  clone.querySelectorAll('#dl-wrap').forEach(n => n.remove());
+  const data = {};
+  csFields().forEach(el => { data[csFieldKey(el)] = fieldHTML(el); });
+
+  // The sidebar is the one place the user builds structure rather than
+  // just editing it, so its markup is stored — but only once it has
+  // actually been touched. Otherwise an untouched page would save an
+  // empty aside over a perfectly good one, which is the original bug.
+  const aside = caseView.querySelector('.sh-aside');
+  if (aside && aside.dataset.touched) data.__widgets__ = cleanAsideHTML(aside);
+
+  try { localStorage.setItem('pmpr_cs_fields_' + id, JSON.stringify(data)); } catch (e) {}
+}
+
+/* A field's value without any edit-mode controls that sit inside it —
+   the per-item × lives inside the chip or bullet it removes. */
+function fieldHTML(el) {
+  if (!el.querySelector('.sh-item-del')) return el.innerHTML;
+  const c = el.cloneNode(true);
+  c.querySelectorAll('.sh-item-del').forEach(n => n.remove());
+  return c.innerHTML;
+}
+
+/* Strip edit-mode residue so nothing transient is persisted or published. */
+function cleanAsideHTML(aside) {
+  const clone = aside.cloneNode(true);
+  clone.querySelectorAll('.sh-widget-tools,.sh-item-del,.sh-item-add').forEach(n => n.remove());
+  clone.querySelectorAll('.is-blank').forEach(el => {
+    el.classList.remove('is-blank');
+    if (!el.className) el.removeAttribute('class');
+  });
   clone.querySelectorAll('[contenteditable]').forEach(el => {
     el.removeAttribute('contenteditable');
+    el.removeAttribute('spellcheck');
     el.style.outline = ''; el.style.background = ''; el.style.cursor = '';
+    if (!el.getAttribute('style')) el.removeAttribute('style');
   });
-  clone.removeAttribute('data-editable');
-  try { localStorage.setItem('pmpr_cs_content_' + id, clone.innerHTML); } catch (e) {}
+  return clone.innerHTML;
 }
 
 function loadSavedCaseContent(id) {
   try {
-    return localStorage.getItem('pmpr_cs_content_' + id) || null;
-  } catch(e) { return null; }
+    const raw = localStorage.getItem('pmpr_cs_fields_' + id);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return migrateCaseSnapshot(id);
+}
+
+/* Older builds stored #case-view's entire innerHTML under
+   pmpr_cs_content_<id>. Convert one to the keyed format instead of
+   discarding it, so edits that were never published aren't lost. The old
+   copy's *structure* is thrown away deliberately — that's the fix. */
+function migrateCaseSnapshot(id) {
+  let html = null;
+  try { html = localStorage.getItem('pmpr_cs_content_' + id); } catch (e) {}
+  if (!html || !caseView) return null;
+
+  const old = document.createElement('div');
+  old.innerHTML = html;
+  const pick = root => [...root.querySelectorAll(CS_EDITABLE)]
+    .filter(el => !el.closest('.sh-facts') && !el.closest('.sh-nav') && !el.closest('#dl-wrap'));
+
+  // Walk the snapshot and the live page in parallel. Where the snapshot is
+  // missing a region the file has (Block City's sidebar), there is simply
+  // nothing to copy and the file's own markup stands.
+  const data = {};
+  const liveSecs = [...caseView.querySelectorAll('.sh-sec')];
+  const oldSecs  = [...old.querySelectorAll('.sh-sec')];
+  liveSecs.forEach((sec, i) => {
+    if (!oldSecs[i]) return;
+    const oldEls = [...oldSecs[i].querySelectorAll(CS_EDITABLE)];
+    [...sec.querySelectorAll(CS_EDITABLE)].forEach((el, j) => {
+      if (oldEls[j]) data[`sec${i}/${j}`] = oldEls[j].innerHTML;
+    });
+  });
+  const oldLoose = pick(old).filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget'));
+  oldLoose.forEach((el, i) => { data[`page/${i}`] = el.innerHTML; });
+
+  try {
+    localStorage.setItem('pmpr_cs_fields_' + id, JSON.stringify(data));
+    localStorage.removeItem('pmpr_cs_content_' + id);
+  } catch (e) {}
+  return data;
 }
 
 function deleteAddedBlock(id, e) {
@@ -807,7 +1142,20 @@ function autoSave() {
 function loadSaved() {
   if (IS_PROJECT) {
     const saved = loadSavedCaseContent(PAGE.id);
-    if (saved && caseView) caseView.innerHTML = saved;
+    if (!saved || !caseView) return;
+    // Restore the sidebar's own structure first, so the fields inside it
+    // exist before their text is put back.
+    const aside = caseView.querySelector('.sh-aside');
+    if (aside && saved.__widgets__ !== undefined) {
+      aside.innerHTML = saved.__widgets__;
+      aside.dataset.touched = '1';
+    }
+    // Text only. The page keeps the structure its own markup describes —
+    // that is what stops a stale copy erasing part of the page.
+    csFields().forEach(el => {
+      const v = saved[csFieldKey(el)];
+      if (v !== undefined) el.innerHTML = v;
+    });
     return;
   }
   try {
@@ -1233,6 +1581,14 @@ function buildPublishHTML(opts) {
   clone.querySelectorAll('#dl-wrap').forEach(n => n.remove());
   clone.querySelector('#cs-edit-notice')?.remove();
   clone.querySelector('#case-view')?.removeAttribute('data-editable');
+  // Sidebar edit controls are injected, never authored — they must not
+  // reach the published file.
+  clone.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del').forEach(n => n.remove());
+  clone.querySelectorAll('.is-blank').forEach(el => {
+    el.classList.remove('is-blank');
+    if (!el.className) el.removeAttribute('class');
+  });
+  clone.querySelector('.sh-aside')?.removeAttribute('data-touched');
   const ev = clone.querySelector('#entry-view'); if (ev) { ev.innerHTML = ''; ev.hidden = true; }
   const cv = clone.querySelector('#case-view');  if (cv) cv.hidden = false;
 

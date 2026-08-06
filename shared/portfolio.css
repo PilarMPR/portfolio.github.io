@@ -646,6 +646,52 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 .sh-bullets { display:flex; flex-direction:column; gap:.45rem; }
 .sh-bullets li { font-size:.83rem; color:var(--muted); padding-left:1.1rem; position:relative; line-height:1.5; }
 .sh-bullets li::before { content:'▹'; position:absolute; left:0; color:var(--accent); }
+
+/* ── Sidebar widgets in edit mode ─────────
+   Controls are injected by decorateWidgets() only while editing and
+   removed again on exit, so they can never be serialized into a
+   published page. Everything here is gated on body.editing to match. */
+.sh-widget { position:relative; }
+.sh-widget-tools { display:none; }
+body.editing .sh-widget-tools {
+  display:flex; gap:.2rem; position:absolute; top:.3rem; right:.3rem; z-index:5;
+}
+body.editing .sh-widget-tools button {
+  width:24px; height:24px; line-height:1; padding:0; cursor:pointer;
+  font-family:var(--fm); font-size:.62rem;
+  background:var(--bg); color:var(--muted);
+  border:1px solid var(--faint); border-radius:2px;
+  transition:background .15s, color .15s, border-color .15s;
+}
+body.editing .sh-widget-tools button:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+body.editing .sh-widget { padding-top:2rem; }
+
+.sh-item-add, .sh-item-del { display:none; }
+body.editing .sh-item-add {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:26px; height:24px; padding:0 .4rem; cursor:pointer;
+  font-family:var(--fm); font-size:.7rem; line-height:1;
+  background:transparent; color:var(--accent);
+  border:1px dashed var(--accent); border-radius:2px;
+}
+body.editing .sh-item-add:hover { background:var(--accent); color:#fff; border-style:solid; }
+body.editing .sh-bullets .sh-item-add { align-self:flex-start; margin-left:1.1rem; }
+body.editing .sh-item-del {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:15px; height:15px; margin-left:.35rem; padding:0; cursor:pointer;
+  font-size:.7rem; line-height:1; vertical-align:middle;
+  background:transparent; color:var(--muted);
+  border:none; border-radius:50%;
+}
+body.editing .sh-item-del:hover { background:var(--accent); color:#fff; }
+
+/* An empty field has no click target, so show what belongs there. Can't
+   use :empty — a chip or bullet still contains its remove button — so
+   markBlankFields() sets .is-blank from the text content instead. */
+body.editing .sh-widget .is-blank::before {
+  content:attr(data-ph); opacity:.5; font-style:italic; pointer-events:none;
+}
+body.editing .sh-tool.is-blank, body.editing .sh-bullets li.is-blank { min-width:4rem; }
 .sh-nav { border-top:2px dashed var(--faint); padding:1.4rem clamp(1.5rem,4vw,2.5rem); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; background:var(--bg2); flex-shrink:0; }
 .sh-nav-btn { font-family:var(--fm); font-size:.6rem; letter-spacing:.09em; text-transform:uppercase; padding:.62rem 1.15rem; border:1.5px solid var(--text); color:var(--text); border-radius:3px; cursor:pointer; transition:all .2s; background:var(--bg); box-shadow:2px 2px 0 rgba(36,33,27,.14); }
 .sh-nav-btn:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(200,64,46,.2); border-color:var(--accent); color:var(--accent); }

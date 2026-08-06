@@ -118,6 +118,26 @@ Each project tile links to its own page under `projects/`. The page carries the 
 
 Because they're real pages, each one has its own title, description and URL, so a link to a single case study previews properly when you paste it somewhere.
 
+### The sidebar
+
+The boxes down the right of a case study. In edit mode each one gets ↑ ↓ 🗑 in its corner, and the **Sections** tab lists them under **Sidebar** with buttons to add more. Three shapes:
+
+| | Looks like | Add items with |
+|---|---|---|
+| Tool chips | Tools & Tech | the dashed **+** at the end of the row |
+| Bullet list | Role breakdown | the dashed **+** under the last point |
+| Text | Studio | just type |
+
+Headings, chips and bullets are all editable in place; **×** on any chip or bullet removes it.
+
+### How a case study is stored
+
+Worth knowing, because getting it wrong once cost Block City its whole sidebar.
+
+Project pages save **only the text you edited**, keyed by where each field sits — never a copy of the page. Layout always comes from the `.html` file. An earlier version stored the entire `#case-view` and put it back on load, which meant any page whose stored copy predated a structural change would quietly rebuild itself without that part, then publish the loss back over the file.
+
+The one exception is the sidebar, because that's structure you author rather than just edit. It's stored — but only after you've actually changed it, so a page you've never touched still takes its widgets from its own markup. If you add anything similar, keep that rule.
+
 ## Deploying to GitHub Pages
 
 1. Push this repo to GitHub.

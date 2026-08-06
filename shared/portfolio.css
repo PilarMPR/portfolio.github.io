@@ -641,6 +641,10 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(200,64,46
 .sh-gal-cap { display:none; }
 .sh-widget { background:rgba(255,255,255,.4); border:1.5px solid var(--text); padding:1.2rem; margin-bottom:1rem; border-radius:3px; box-shadow:3px 4px 0 rgba(36,33,27,.08); }
 .sh-widget-lbl { font-family:var(--fm); font-size:.56rem; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin-bottom:.85rem; padding-bottom:.55rem; border-bottom:1px dashed var(--faint); }
+/* Body copy in a text widget — Studio, and anything added via "Add Text".
+   This was an inline style on one authored paragraph, so text boxes made
+   in the editor came out as plain default paragraphs instead. */
+.sh-widget p { font-size:.85rem; color:var(--muted); line-height:1.6; }
 .sh-tools { display:flex; flex-wrap:wrap; gap:.35rem; }
 .sh-tool { font-family:var(--fm); font-size:.57rem; letter-spacing:.04em; padding:.28rem .6rem; background:var(--bg); border:1px solid var(--faint); border-radius:2px; color:var(--muted); }
 .sh-bullets { display:flex; flex-direction:column; gap:.45rem; }

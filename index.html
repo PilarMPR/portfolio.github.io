@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-lt-installed="true"><head>
+<html lang="en" data-lt-installed="true" style="--bg: #f4efe3; --bg2: #e8e3d8; --bg3: #dcd7cc; --card-bg: #ede8dc; --card-bg2: #e3ded3; --text: #24211b; --white: #24211b; --muted: #77736b; --faint: #c3bfb6; --accent: #24211b; --accent2: #3a3732; --blue: #2f5c8f; --yellow: #f4d24a; --sticky: #f5d658; --green: #4f7a4a; --grid: rgba(36,33,27,0.05); --grid2: rgba(36,33,27,0.085); --fd: 'Bricolage Grotesque', sans-serif; --fb: 'Space Grotesk', sans-serif;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Pilar Martín-Peña Rojo — Game Designer</title>
@@ -8,13 +8,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Caveat:wght@400;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared/portfolio.css">
-<link rel="stylesheet" href="shared/theme.css">
 </head>
 <body class="">
 <div id="cursor" class=""></div>
 
 <!-- Nav -->
-<nav id="nav" class="">
+<nav id="nav" class="solid">
   <span class="nav-logo" id="nav-logo">Pilar MPR</span>
   <ul class="nav-links">
     <li><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a></li>
@@ -22,20 +21,7 @@
     <li><a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a></li>
     <li><a href="assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
   </ul>
-  <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
-
-<!-- Mobile menu. Static markup on purpose: the publish flow serializes the
-     live DOM, so anything injected by script would be baked into the page
-     and then injected a second time on the next load. -->
-<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
-  <a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a>
-  <a href="javascript:void(0)" onclick="scrollToSection('about')">About</a>
-  <a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a>
-  <a href="assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
-</div>
 
 <!-- ═══ HERO ═════════════════════════════ -->
 <section id="hero" class="">
@@ -80,7 +66,7 @@
     ───────────────────────────────────── -->
     <a href="projects/hot-potato.html" class="project reveal on">
       <div class="proj-img" data-img-zone="proj-1">
-        <img id="img-proj-1" src="assets/hot-potato/card.jpg" alt="Hot Potato" width="1080" height="1350" loading="lazy" decoding="async">
+        <img id="img-proj-1" src="assets/hot-potato/card.jpg" alt="Hot Potato">
         <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'proj-1')"></label>
       </div>
       <div class="proj-grad"></div>
@@ -108,7 +94,7 @@
     ───────────────────────────────────── -->
     <a href="projects/block-city.html" class="project reveal d1 on">
       <div class="proj-img" data-img-zone="proj-2">
-        <img id="img-proj-2" src="assets/block-city/card.jpg" alt="Block City" width="1080" height="1080" loading="lazy" decoding="async">
+        <img id="img-proj-2" src="assets/block-city/card.jpg" alt="Block City">
         <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'proj-2')"></label>
       </div>
       <div class="proj-grad"></div>
@@ -136,7 +122,7 @@
     ───────────────────────────────────── -->
     <a href="projects/healthy-jeart.html" class="project reveal on">
       <div class="proj-img" data-img-zone="proj-3">
-        <img id="img-proj-3" src="assets/healthy-jeart/card.jpg" alt="Healthy Jeart" width="1080" height="1080" loading="lazy" decoding="async">
+        <img id="img-proj-3" src="assets/healthy-jeart/card.jpg" alt="Healthy Jeart">
         <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'proj-3')"></label>
       </div>
       <div class="proj-grad"></div>
@@ -164,7 +150,7 @@
     ───────────────────────────────────── -->
     <a href="projects/create-your-own-monster.html" class="project reveal d1 on">
       <div class="proj-img" data-img-zone="proj-4">
-        <img id="img-proj-4" src="assets/create-your-own-monster/card.jpg" alt="Create Your Own Monster" width="1080" height="1080" loading="lazy" decoding="async">
+        <img id="img-proj-4" src="assets/create-your-own-monster/card.jpg" alt="Create Your Own Monster">
         <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'proj-4')"></label>
       </div>
       <div class="proj-grad"></div>
@@ -194,7 +180,7 @@
 <div id="added-blocks"></div>
 
 <!-- ═══ ABOUT ═════════════════════════════ -->
-<section id="about">
+<section id="about" class="">
   <div class="about-left reveal on">
     <div class="slabel">About me</div>
     <h2>About<br>the<br><em>Author.</em></h2>
@@ -202,9 +188,9 @@
     <div class="about-bio">
       <p data-ed="about-p1" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
       <div class="about-pull" data-label="Pull quote" data-ed="about-quote" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</div>
-      <p data-ed="about-p2" contenteditable="false" spellcheck="false">My passion is <strong>mechanic design</strong>: how to tell a story through player actions. I'm also drawn to <strong>educational games</strong>, where the challenge is making something that genuinely teaches without sacrificing game feel.</p>
-      <p data-ed="about-p3" contenteditable="false" spellcheck="false">Currently Lead Designer &amp; Producer at Wild Alchemists, working on <em>Hot Potato</em> — Audience Award winner at Match in Games 2025. Based in Madrid.</p>
-      <p data-ed="about-p4" style="color:var(--muted)" contenteditable="false" spellcheck="false">Outside of games: music, reading, and sport.</p>
+      <p data-ed="about-p2" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
+      <p data-ed="about-p3" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</p>
+      <p data-ed="about-p4" style="color:var(--muted)" contenteditable="false" spellcheck="false">My passion is <strong>mechanic design</strong>: how to tell a story through player actions. I'm also drawn to <strong>educational games</strong>, where the challenge is making something that genuinely teaches without sacrificing game feel.</p>
     </div>
 
     <div class="about-ctas">
@@ -216,8 +202,8 @@
       <div class="edu-item" data-edu="edu-1">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-1-name" contenteditable="false" spellcheck="false">UDIT — Universidad de Diseño y Tecnología</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-1-sub" contenteditable="false" spellcheck="false">Game Design &amp; Development · Madrid</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-1-name" contenteditable="false" spellcheck="false">Currently Lead Designer &amp; Producer at Wild Alchemists, working on <em>Hot Potato</em> — Audience Award winner at Match in Games 2025. Based in Madrid.</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-1-sub" contenteditable="false" spellcheck="false">Outside of games: music, reading, and sport.</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -228,8 +214,8 @@
       <div class="edu-item" data-edu="edu-2">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-2-name" contenteditable="false" spellcheck="false">Runnymede College</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-2-sub" contenteditable="false" spellcheck="false">International Baccalaureate · Madrid</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-2-name" contenteditable="false" spellcheck="false">UDIT — Universidad de Diseño y Tecnología</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-2-sub" contenteditable="false" spellcheck="false">Game Design &amp; Development · Madrid</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -240,8 +226,8 @@
       <div class="edu-item" data-edu="edu-3">
         <div class="edu-dot"></div>
         <div class="edu-body">
-          <div class="edu-name" data-label="School name" data-ed="edu-3-name" contenteditable="false" spellcheck="false">Lakefield College School</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-3-sub" contenteditable="false" spellcheck="false">International Exchange · Canada</div>
+          <div class="edu-name" data-label="School name" data-ed="edu-3-name" contenteditable="false" spellcheck="false">Runnymede College</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-3-sub" contenteditable="false" spellcheck="false">International Baccalaureate · Madrid</div>
         </div>
         <span class="edu-ctrl">
           <button onclick="eduMove(this,-1)" title="Move up">↑</button>
@@ -261,14 +247,14 @@
         area and click "Upload photo" to add yours.
         Or replace the photo-ph div below with:
         <img src="your-photo.jpg" alt="Pilar MPR"
-             style="width:100%;height:100%;object-fit:cover" loading="lazy" decoding="async" />
+             style="width:100%;height:100%;object-fit:cover"/>
         ════════════════════════════════════
       -->
       <div class="photo-ph" id="photo-ph" style="display:none">
         <div class="photo-ph-cross"></div>
         <span class="photo-ph-lbl">Your photo here<br>600 × 800 px</span>
       </div>
-      <img id="img-about-photo" src="assets/site/about-photo.jpg" alt="Pilar Martín-Peña Rojo" style="width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;inset:0;z-index:1" width="900" height="924" loading="lazy" decoding="async">
+      <img id="img-about-photo" src="assets/site/about-photo.jpg" alt="Pilar Martín-Peña Rojo" style="width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;inset:0;z-index:1">
       <label class="img-upload-btn">📷 Upload photo<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'about-photo')"></label>
     </div>
 
@@ -298,39 +284,39 @@
 </section>
 
 <!-- ═══ CONTACT ═══════════════════════════ -->
-<section id="contact">
+<section id="contact" class="">
   <div class="contact-inner">
     <div class="slabel reveal on">Contact</div>
     <h2 class="contact-h2 reveal on">
       Leave a<br>
-      <span class="dim" data-label="Contact heading line 2" data-ed="contact-line2" contenteditable="false" spellcheck="false">note.</span>
+      <span class="dim" data-label="Contact heading line 2" data-ed="contact-line2" contenteditable="false" spellcheck="false" style="">message</span>
     </h2>
     <div class="channels">
       <!-- 📝 EDIT: update href + ch-val text for your email -->
-      <a href="mailto:pilarmprojo@gmail.com" class="ch reveal">
+      <a href="mailto:pilarmprojo@gmail.com" class="ch reveal on">
         <div class="ch-lbl">Email</div>
-        <div class="ch-val" data-label="Email address" data-ed="contact-email" contenteditable="false" spellcheck="false">pilarmprojo@gmail.com</div>
+        <div class="ch-val" data-label="Email address" data-ed="contact-email" contenteditable="false" spellcheck="false" style="">pilarmprojo@gmail.com</div>
         <div class="ch-sub">Preferred contact ↗</div>
       </a>
       <!-- 📝 EDIT: update href for your LinkedIn profile -->
-      <a href="http://www.linkedin.com/in/pilarmartinpenarojo-362412217" target="_blank" class="ch reveal d1">
+      <a href="http://www.linkedin.com/in/pilarmartinpenarojo-362412217" target="_blank" class="ch reveal d1 on">
         <div class="ch-lbl">LinkedIn</div>
-        <div class="ch-val" data-label="LinkedIn name" data-ed="contact-linkedin" contenteditable="false" spellcheck="false">Pilar Martín-Peña Rojo</div>
+        <div class="ch-val" data-label="LinkedIn name" data-ed="contact-linkedin" contenteditable="false" spellcheck="false">www.linkedin.com/in/pilar-martín-peña-rojo-362412217</div>
         <div class="ch-sub">Let's connect ↗</div>
       </a>
       <!-- 📝 EDIT: add your Twitter/X href if you have one -->
-      <div class="ch reveal d2">
+      <div class="ch reveal d2 on">
         <div class="ch-lbl">Discord</div>
-        <div class="ch-val" data-label="Discord handle" data-ed="contact-discord" contenteditable="false" spellcheck="false">@pilumpr</div>
+        <div class="ch-val" data-label="Discord handle" data-ed="contact-discord" contenteditable="false" spellcheck="false" style="">@pilumpr</div>
         <div class="ch-sub">Also available here</div>
       </div>
     </div>
-    <div class="contact-foot reveal">
+    <div class="contact-foot reveal on">
       <span class="status">
         <span class="status-dot"></span>
-        <span data-ed="contact-availability" contenteditable="false" spellcheck="false">Available for new roles · Madrid, Spain</span>
+        <span data-ed="contact-availability" contenteditable="false" spellcheck="false" style="">Pilar Martín-Peña Rojo</span>
       </span>
-      <span class="copy" data-ed="footer-copy" contenteditable="false" spellcheck="false">© Pilar Martín-Peña Rojo · 2025</span>
+      <span class="copy" data-ed="footer-copy" contenteditable="false" spellcheck="false" style="">This website has used AI to a small extent</span>
     </div>
   </div>
 </section>
@@ -338,22 +324,21 @@
 <!-- ═══ CASE STUDY MODAL ═══════════════════ -->
 
 <div id="edit-panel">
-  <button class="ep-grip" id="ep-grip" type="button" aria-label="Collapse editor panel" aria-expanded="true"></button>
   <div class="ep-head">
     <span class="ep-head-title">Edit mode</span>
     <button class="ep-exit" onclick="toggleEdit()">✕ Exit</button>
   </div>
 
   <div class="ep-tabs">
-    <button class="ep-tab" onclick="switchTab('sections',this)">Sections</button>
+    <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
     <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
     <button class="ep-tab" onclick="switchTab('devlog',this)">Dev Log</button>
-    <button class="ep-tab active" onclick="switchTab('design',this)">Design</button>
+    <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
   </div>
 
   <div class="ep-body">
     <!-- SECTIONS TAB -->
-    <div class="ep-tab-pane" id="tab-sections">
+    <div class="ep-tab-pane active" id="tab-sections">
       <div id="ep-section-list"><div class="ep-section-item" data-section-id="hero">
     <span class="ep-section-icon">🏠</span>
     <span class="ep-section-name">Hero</span>
@@ -369,7 +354,7 @@
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 2</div>
+        <div class="ep-field-lbl">hero-name</div>
         <div class="ep-field-prev">MARTÍN-</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
@@ -393,7 +378,7 @@
     </div></div><div id="ep-sub-about" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 1</div>
+        <div class="ep-field-lbl">about-p1</div>
         <div class="ep-field-prev">I've been fascinated by vide</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
@@ -405,19 +390,31 @@
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 3</div>
+        <div class="ep-field-lbl">about-p2</div>
+        <div class="ep-field-prev">I've been fascinated by vide</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">about-p3</div>
+        <div class="ep-field-prev">"The most powerful moments i</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">about-p4</div>
         <div class="ep-field-prev">My passion is mechanic desig</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 4</div>
+        <div class="ep-field-lbl">School name</div>
         <div class="ep-field-prev">Currently Lead Designer &amp; Pr</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 5</div>
+        <div class="ep-field-lbl">Degree / detail</div>
         <div class="ep-field-prev">Outside of games: music, rea</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
@@ -444,29 +441,17 @@
         <div class="ep-field-lbl">Degree / detail</div>
         <div class="ep-field-prev">International Baccalaureate </div>
       </div>
-      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
-      <span class="ep-dot"></span>
-      <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">School name</div>
-        <div class="ep-field-prev">Lakefield College School</div>
-      </div>
-      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
-      <span class="ep-dot"></span>
-      <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Degree / detail</div>
-        <div class="ep-field-prev">International Exchange · Can</div>
-      </div>
-      <span class="ep-sub-go">Edit</span></div></div><div class="ep-section-item" data-section-id="contact">
+      <span class="ep-sub-go">Edit</span></div></div><div class="ep-section-item focused" data-section-id="contact">
     <span class="ep-section-icon">✉</span>
     <span class="ep-section-name">Contact</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
-      <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-contact" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
+      <span class="ep-chevron" style="font-size: 0.6rem; color: var(--muted); transition: transform 0.2s; display: inline-block; margin-left: auto; transform: rotate(180deg);">▾</span>
+    </div></div><div id="ep-sub-contact" class="ep-sub" style="display: block;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Contact heading line 2</div>
-        <div class="ep-field-prev">note.</div>
+        <div class="ep-field-prev">message</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
@@ -478,25 +463,25 @@
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">LinkedIn name</div>
-        <div class="ep-field-prev">Pilar Martín-Peña Rojo</div>
+        <div class="ep-field-prev">note.</div>
       </div>
       <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Discord handle</div>
+        <div class="ep-field-prev">pilarmprojo@gmail.com</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">contact-availability</div>
+        <div class="ep-field-prev">Pilar Martín-Peña Rojo</div>
+      </div>
+      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
+      <span class="ep-dot"></span>
+      <div style="flex:1;overflow:hidden">
+        <div class="ep-field-lbl">footer-copy</div>
         <div class="ep-field-prev">@pilumpr</div>
-      </div>
-      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
-      <span class="ep-dot"></span>
-      <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 5</div>
-        <div class="ep-field-prev">Available for new roles · Ma</div>
-      </div>
-      <span class="ep-sub-go">Edit</span></div><div class="ep-section-item ep-field-item">
-      <span class="ep-dot"></span>
-      <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">Field 6</div>
-        <div class="ep-field-prev">© Pilar Martín-Peña Rojo · 2</div>
       </div>
       <span class="ep-sub-go">Edit</span></div></div></div>
       <div id="ep-fields-area" style="margin-top:.5rem;border-top:1px solid var(--faint);padding-top:.5rem;display:none">
@@ -566,7 +551,7 @@
     </div>
 
     <!-- DESIGN TAB -->
-    <div class="ep-tab-pane active" id="tab-design">
+    <div class="ep-tab-pane" id="tab-design">
       <div class="ep-dsn-label">Theme presets</div>
       <div id="ep-presets" class="ep-presets"><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#f4efe3"></i><i style="background:#c8402e"></i><i style="background:#24211b"></i></span><span class="ep-preset-name">Notebook</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#e4ecf2"></i><i style="background:#1f6feb"></i><i style="background:#152435"></i></span><span class="ep-preset-name">Blueprint</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#1f1b16"></i><i style="background:#e0553f"></i><i style="background:#efe6d4"></i></span><span class="ep-preset-name">Midnight</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#f6ebe6"></i><i style="background:#c05678"></i><i style="background:#2b2320"></i></span><span class="ep-preset-name">Rosé</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#eceee2"></i><i style="background:#b5622e"></i><i style="background:#20261d"></i></span><span class="ep-preset-name">Forest</span></div><div class="ep-preset"><span class="ep-preset-sw"><i style="background:#eeeae4"></i><i style="background:#141414"></i><i style="background:#1c1c1c"></i></span><span class="ep-preset-name">Mono</span></div></div>
       <div class="ep-dsn-label">Colors — click a swatch</div>
@@ -575,8 +560,8 @@
         <input class="ep-hex" value="#F4EFE3" data-hk="bg" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Ink / text</label>
         <span class="ep-swatch"><input type="color" value="#24211b" data-ck="text"></span>
         <input class="ep-hex" value="#24211B" data-hk="text" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Accent (pen)</label>
-        <span class="ep-swatch"><input type="color" value="#c8402e" data-ck="accent"></span>
-        <input class="ep-hex" value="#C8402E" data-hk="accent" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Blue ink</label>
+        <span class="ep-swatch"><input type="color" value="#24211b" data-ck="accent"></span>
+        <input class="ep-hex" value="#24211B" data-hk="accent" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Blue ink</label>
         <span class="ep-swatch"><input type="color" value="#2f5c8f" data-ck="blue"></span>
         <input class="ep-hex" value="#2F5C8F" data-hk="blue" spellcheck="false" maxlength="7"></div><div class="ep-color-row"><label>Highlighter</label>
         <span class="ep-swatch"><input type="color" value="#f4d24a" data-ck="yellow"></span>

@@ -10,23 +10,26 @@
    Loaded AFTER portfolio.css. Both declare :root, so source order is
    what makes these win — keep the link order that way.
 
-   Values are computeVars() output (see shared/site.js); the derived
-   ones — bg2/bg3/card-bg/muted/faint/accent2/sticky/grid — are
-   calculated from bg, text, accent and yellow, so edit through the
-   editor to keep them consistent.
+   Values are computeVars() output (see shared/site.js). Only bg, text,
+   accent, blue, yellow and green are chosen; the rest — bg2/bg3/
+   card-bg/muted/faint/accent2/sticky/grid and the -rgb bases — are
+   derived from those, so edit through the editor to keep them in step.
+
+   Source theme: paper #f4efe3, ink #24211b, accent #4f4a43.
    ═══════════════════════════════════════════ */
 :root {
-  --bg:       #f4efe3;
+  --bg:       #f4efe3;   /* natural cream parchment */
   --bg2:      #e8e3d8;
   --bg3:      #dcd7cc;
   --card-bg:  #ede8dc;
   --card-bg2: #e3ded3;
-  --text:     #24211b;
+  --text:     #24211b;   /* ink */
   --white:    #24211b;
   --muted:    #77736b;
   --faint:    #c3bfb6;
-  --accent:   #241f31;
-  --accent2:  #3a3546;
+  --accent:   #4f4a43;   /* warm dark grey — reads as an accent against
+                            the ink without going navy or black */
+  --accent2:  #615c56;
   --blue:     #2f5c8f;
   --yellow:   #f4d24a;
   --sticky:   #f5d658;
@@ -35,9 +38,7 @@
   --grid2:    rgba(36,33,27,0.085);
   /* Derivation bases — every translucent shade in portfolio.css mixes
      from one of these, so shadows and tints follow the theme too. */
-  --accent-rgb: 36,31,49;
+  --accent-rgb: 79,74,67;
   --text-rgb:   36,33,27;
   --yellow-rgb: 244,210,74;
-  --fd: 'Bricolage Grotesque', sans-serif;
-  --fb: 'Space Grotesk', sans-serif;
 }

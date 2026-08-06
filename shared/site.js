@@ -539,6 +539,60 @@ function insertProjectCard() {
   card.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
+/* ─── EDUCATION LIST ───────────────────────
+   Add, remove and reorder schools. The list is saved as one blob rather
+   than field by field, because the number of fields changes — which is
+   also why every editable field on this page carries an explicit
+   data-ed key now, so inserting an entry can't shift anyone else's.
+   ───────────────────────────────────────── */
+function eduList() { return document.getElementById('edu-list'); }
+
+function eduItemHTML(key) {
+  return `<div class="edu-item" data-edu="${key}">
+    <div class="edu-dot"></div>
+    <div class="edu-body">
+      <div class="edu-name" data-label="School name" data-ed="${key}-name" contenteditable="${editing}" spellcheck="false">School or course</div>
+      <div class="edu-sub" data-label="Degree / detail" data-ed="${key}-sub" contenteditable="${editing}" spellcheck="false">Qualification · Place</div>
+    </div>
+    <span class="edu-ctrl">
+      <button onclick="eduMove(this,-1)" title="Move up">↑</button>
+      <button onclick="eduMove(this,1)" title="Move down">↓</button>
+      <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
+    </span>
+  </div>`;
+}
+
+function eduAdd() {
+  const list = eduList();
+  if (!list) return;
+  const key = 'edu-' + Date.now().toString(36);
+  list.insertAdjacentHTML('beforeend', eduItemHTML(key));
+  autoSave();
+  buildSectionList();
+  const name = list.lastElementChild?.querySelector('.edu-name');
+  name?.scrollIntoView({ behavior:'smooth', block:'center' });
+  if (editing && name) { name.focus(); document.getSelection()?.selectAllChildren(name); }
+}
+
+function eduDel(btn) {
+  const item = btn.closest('.edu-item');
+  if (!item) return;
+  const name = item.querySelector('.edu-name')?.textContent.trim() || 'this entry';
+  if (!confirm(`Remove "${name}" from your education?`)) return;
+  item.remove();
+  autoSave();
+  buildSectionList();
+}
+
+function eduMove(btn, dir) {
+  const item = btn.closest('.edu-item');
+  const sib = dir < 0 ? item?.previousElementSibling : item?.nextElementSibling;
+  if (!item || !sib) return;
+  dir < 0 ? sib.before(item) : sib.after(item);
+  autoSave();
+  buildSectionList();
+}
+
 function deleteProjectCard(id, e) {
   e.preventDefault(); e.stopPropagation();
   const card = document.querySelector(`.project[data-custom-card="${id}"]`);
@@ -645,6 +699,7 @@ function autoSave() {
     data[key] = el.innerHTML;
   });
   data['__added__'] = document.getElementById('added-blocks')?.innerHTML || '';
+  data['__edu__'] = eduList()?.innerHTML || '';
   const customCards = [...document.querySelectorAll('.project[data-custom-card]')];
   data['__custom_cards__'] = customCards.map(c => ({ id: c.dataset.customCard, html: c.outerHTML }));
   try { localStorage.setItem('pmpr_portfolio_v2', JSON.stringify(data)); } catch (e) {}
@@ -661,6 +716,28 @@ function loadSaved() {
     const raw = localStorage.getItem('pmpr_portfolio_v2');
     if (!raw) return;
     const data = JSON.parse(raw);
+
+    // Fields used to be keyed by their position in the document, which broke
+    // the moment one was added or removed. They have names now; carry the old
+    // positional values across once, while the document still matches the
+    // order they were saved in.
+    if (!data.__keyed__) {
+      document.querySelectorAll('[data-ed]').forEach((el, i) => {
+        const k = el.dataset.ed;
+        if (k && data[k] === undefined && data['field_' + i] !== undefined) data[k] = data['field_' + i];
+      });
+      data.__keyed__ = 1;
+      try { localStorage.setItem('pmpr_portfolio_v2', JSON.stringify(data)); } catch (e) {}
+    }
+
+    // The education list is restored whole — its entries are added and
+    // removed, so it can't be put back field by field.
+    const edu = eduList();
+    if (edu && data['__edu__']) {
+      edu.innerHTML = data['__edu__'];
+      edu.querySelectorAll('[data-ed]').forEach(el => { el.contentEditable = String(!!editing); });
+    }
+
     document.querySelectorAll('[data-ed]').forEach((el, i) => {
       const key = el.dataset.ed || 'field_' + i;
       if (data[key] !== undefined) el.innerHTML = data[key];

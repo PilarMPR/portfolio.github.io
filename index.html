@@ -26,15 +26,15 @@
 <!-- ═══ HERO ═════════════════════════════ -->
 <section id="hero" class="">
   <div class="hero-inner">
-    <div class="hero-kicker"><span data-label="Job title + location" data-ed="" contenteditable="false" spellcheck="false">Game Designer &amp; Producer · Madrid</span></div>
+    <div class="hero-kicker"><span data-label="Job title + location" data-ed="hero-role" contenteditable="false" spellcheck="false">Game Designer &amp; Producer · Madrid</span></div>
     <h1 class="hero-name">
       <span class="line"><span>PILAR</span></span>
-      <span class="line"><span data-ed="" contenteditable="false" spellcheck="false">MARTÍN-</span></span>
+      <span class="line"><span data-ed="hero-name" contenteditable="false" spellcheck="false">MARTÍN-</span></span>
       <span class="line"><span>PEÑA ROJO.</span></span>
     </h1>
     <div class="scribble scribble-hero">she designs the rules,<br>not the art ↗</div>
     <div class="hero-foot">
-      <p class="hero-tagline" data-label="Hero description" data-ed="" contenteditable="false" spellcheck="false">
+      <p class="hero-tagline" data-label="Hero description" data-ed="hero-tagline" contenteditable="false" spellcheck="false">
         I build the machinery players never see — the loops, economies and
         rules that make a game click. Right now I'm leading design on
         <em>Hot Potato</em> at Wild Alchemists.
@@ -55,7 +55,7 @@
       <div class="spec-kicker reveal on">// FOUR GAMES, TAKEN APART</div>
       <h2 class="reveal on">Work<br><span class="log">Log.</span></h2>
     </div>
-    <p class="reveal d1 on" data-label="Work section subtitle" data-ed="" contenteditable="false" spellcheck="false">Four shipped games, pulled apart into the systems that make them tick.</p>
+    <p class="reveal d1 on" data-label="Work section subtitle" data-ed="work-subtitle" contenteditable="false" spellcheck="false">Four shipped games, pulled apart into the systems that make them tick.</p>
   </div>
 
   <div class="projects">
@@ -186,11 +186,11 @@
     <h2>About<br>the<br><em>Author.</em></h2>
 
     <div class="about-bio">
-      <p data-ed="" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
-      <div class="about-pull" data-label="Pull quote" data-ed="" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</div>
-      <p data-ed="" contenteditable="false" spellcheck="false">My passion is <strong>mechanic design</strong>: how to tell a story through player actions. I'm also drawn to <strong>educational games</strong>, where the challenge is making something that genuinely teaches without sacrificing game feel.</p>
-      <p data-ed="" contenteditable="false" spellcheck="false">Currently Lead Designer &amp; Producer at Wild Alchemists, working on <em>Hot Potato</em> — Audience Award winner at Match in Games 2025. Based in Madrid.</p>
-      <p data-ed="" style="color:var(--muted)" contenteditable="false" spellcheck="false">Outside of games: music, reading, and sport.</p>
+      <p data-ed="about-p1" contenteditable="false" spellcheck="false">I've been fascinated by videogames since I was young — from the rooftops of Assassin's Creed Brotherhood to the depths of Subnautica. Understanding the mechanics behind that feeling is what led me to game design.</p>
+      <div class="about-pull" data-label="Pull quote" data-ed="about-quote" contenteditable="false" spellcheck="false">"The most powerful moments in games are the ones where you understand something without being told — where the rule and the meaning arrive at the same time."</div>
+      <p data-ed="about-p2" contenteditable="false" spellcheck="false">My passion is <strong>mechanic design</strong>: how to tell a story through player actions. I'm also drawn to <strong>educational games</strong>, where the challenge is making something that genuinely teaches without sacrificing game feel.</p>
+      <p data-ed="about-p3" contenteditable="false" spellcheck="false">Currently Lead Designer &amp; Producer at Wild Alchemists, working on <em>Hot Potato</em> — Audience Award winner at Match in Games 2025. Based in Madrid.</p>
+      <p data-ed="about-p4" style="color:var(--muted)" contenteditable="false" spellcheck="false">Outside of games: music, reading, and sport.</p>
     </div>
 
     <div class="about-ctas">
@@ -198,29 +198,45 @@
       <a href="javascript:void(0)" onclick="scrollToSection('contact')" class="btn btn-ghost">Get in touch</a>
     </div>
 
-    <div class="edu-list">
-      <div class="edu-item">
+    <div class="edu-list" id="edu-list">
+      <div class="edu-item" data-edu="edu-1">
         <div class="edu-dot"></div>
-        <div>
-          <div class="edu-name" data-label="School name" data-ed="" contenteditable="false" spellcheck="false">UDIT — Universidad de Diseño y Tecnología</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="" contenteditable="false" spellcheck="false">Game Design &amp; Development · Madrid</div>
+        <div class="edu-body">
+          <div class="edu-name" data-label="School name" data-ed="edu-1-name" contenteditable="false" spellcheck="false">UDIT — Universidad de Diseño y Tecnología</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-1-sub" contenteditable="false" spellcheck="false">Game Design &amp; Development · Madrid</div>
         </div>
+        <span class="edu-ctrl">
+          <button onclick="eduMove(this,-1)" title="Move up">↑</button>
+          <button onclick="eduMove(this,1)" title="Move down">↓</button>
+          <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
+        </span>
       </div>
-      <div class="edu-item">
+      <div class="edu-item" data-edu="edu-2">
         <div class="edu-dot"></div>
-        <div>
-          <div class="edu-name" data-label="School name" data-ed="" contenteditable="false" spellcheck="false">Runnymede College</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="" contenteditable="false" spellcheck="false">International Baccalaureate · Madrid</div>
+        <div class="edu-body">
+          <div class="edu-name" data-label="School name" data-ed="edu-2-name" contenteditable="false" spellcheck="false">Runnymede College</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-2-sub" contenteditable="false" spellcheck="false">International Baccalaureate · Madrid</div>
         </div>
+        <span class="edu-ctrl">
+          <button onclick="eduMove(this,-1)" title="Move up">↑</button>
+          <button onclick="eduMove(this,1)" title="Move down">↓</button>
+          <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
+        </span>
       </div>
-      <div class="edu-item">
+      <div class="edu-item" data-edu="edu-3">
         <div class="edu-dot"></div>
-        <div>
-          <div class="edu-name" data-label="School name" data-ed="" contenteditable="false" spellcheck="false">Lakefield College School</div>
-          <div class="edu-sub" data-label="Degree / detail" data-ed="" contenteditable="false" spellcheck="false">International Exchange · Canada</div>
+        <div class="edu-body">
+          <div class="edu-name" data-label="School name" data-ed="edu-3-name" contenteditable="false" spellcheck="false">Lakefield College School</div>
+          <div class="edu-sub" data-label="Degree / detail" data-ed="edu-3-sub" contenteditable="false" spellcheck="false">International Exchange · Canada</div>
         </div>
+        <span class="edu-ctrl">
+          <button onclick="eduMove(this,-1)" title="Move up">↑</button>
+          <button onclick="eduMove(this,1)" title="Move down">↓</button>
+          <button class="del" onclick="eduDel(this)" title="Remove this entry">🗑</button>
+        </span>
       </div>
     </div>
+    <button class="edu-add" onclick="eduAdd()">+ Add education entry</button>
   </div>
 
   <div class="about-right reveal d2 on">
@@ -273,34 +289,34 @@
     <div class="slabel reveal on">Contact</div>
     <h2 class="contact-h2 reveal on">
       Leave a<br>
-      <span class="dim" data-label="Contact heading line 2" data-ed="" contenteditable="false" spellcheck="false">note.</span>
+      <span class="dim" data-label="Contact heading line 2" data-ed="contact-line2" contenteditable="false" spellcheck="false">note.</span>
     </h2>
     <div class="channels">
       <!-- 📝 EDIT: update href + ch-val text for your email -->
       <a href="mailto:pilarmprojo@gmail.com" class="ch reveal">
         <div class="ch-lbl">Email</div>
-        <div class="ch-val" data-label="Email address" data-ed="" contenteditable="false" spellcheck="false">pilarmprojo@gmail.com</div>
+        <div class="ch-val" data-label="Email address" data-ed="contact-email" contenteditable="false" spellcheck="false">pilarmprojo@gmail.com</div>
         <div class="ch-sub">Preferred contact ↗</div>
       </a>
       <!-- 📝 EDIT: update href for your LinkedIn profile -->
       <a href="http://www.linkedin.com/in/pilarmartinpenarojo-362412217" target="_blank" class="ch reveal d1">
         <div class="ch-lbl">LinkedIn</div>
-        <div class="ch-val" data-label="LinkedIn name" data-ed="" contenteditable="false" spellcheck="false">Pilar Martín-Peña Rojo</div>
+        <div class="ch-val" data-label="LinkedIn name" data-ed="contact-linkedin" contenteditable="false" spellcheck="false">Pilar Martín-Peña Rojo</div>
         <div class="ch-sub">Let's connect ↗</div>
       </a>
       <!-- 📝 EDIT: add your Twitter/X href if you have one -->
       <div class="ch reveal d2">
         <div class="ch-lbl">Discord</div>
-        <div class="ch-val" data-label="Discord handle" data-ed="" contenteditable="false" spellcheck="false">@pilumpr</div>
+        <div class="ch-val" data-label="Discord handle" data-ed="contact-discord" contenteditable="false" spellcheck="false">@pilumpr</div>
         <div class="ch-sub">Also available here</div>
       </div>
     </div>
     <div class="contact-foot reveal">
       <span class="status">
         <span class="status-dot"></span>
-        <span data-ed="" contenteditable="false" spellcheck="false">Available for new roles · Madrid, Spain</span>
+        <span data-ed="contact-availability" contenteditable="false" spellcheck="false">Available for new roles · Madrid, Spain</span>
       </span>
-      <span class="copy" data-ed="" contenteditable="false" spellcheck="false">© Pilar Martín-Peña Rojo · 2025</span>
+      <span class="copy" data-ed="footer-copy" contenteditable="false" spellcheck="false">© Pilar Martín-Peña Rojo · 2025</span>
     </div>
   </div>
 </section>
@@ -480,6 +496,12 @@
       <button class="ep-add-btn" onclick="insertProjectCard()">
         <span class="ep-add-btn-icon">🎮</span>
         <span class="ep-add-btn-label">New project card</span>
+      </button>
+      <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
+      <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">About</div>
+      <button class="ep-add-btn" onclick="eduAdd()">
+        <span class="ep-add-btn-icon">🎓</span>
+        <span class="ep-add-btn-label">Education entry</span>
       </button>
       <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
       <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">Content blocks</div>

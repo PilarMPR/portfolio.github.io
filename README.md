@@ -188,7 +188,9 @@ Both exclude private entries. Export gives you a single self-contained page — 
 
   It used to be baked into each page's `<html style>` instead, which meant a theme change only reached the page you published from. Doing that twice left the site with three different accents at once — near-black on the landing page, navy on Block City, the original red everywhere else. If you add anything themed, put it in `theme.css`, not on a page.
 
-  Known gap: about a dozen decorative rules in `portfolio.css` still hardcode the original red as `rgba(200,64,46,…)` — small underlines, hover shadows, tag borders — so those don't follow the accent yet. (`--text-rgb`, referenced by an earlier version of this note, was never actually implemented.)
+  Translucent shades derive from three bases the theme emits — `--accent-rgb`, `--text-rgb`, `--yellow-rgb` — so rules write `rgba(var(--text-rgb),.1)` and every drop shadow, label rule and highlighter tint follows the theme. Around 70 of those used to be literals from the original red-pen design, which meant changing the accent barely changed anything and the dark `Midnight` preset rendered dark shadows on dark paper.
+
+  One deliberate literal remains: the lightbox backdrop. It has to stay dark under every theme, since its own chrome is light to sit on top of it.
 
 ### Responsive
 

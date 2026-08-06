@@ -33,6 +33,11 @@
   --green:    #4f7a4a;
   --grid:     rgba(36,33,27,0.05);
   --grid2:    rgba(36,33,27,0.085);
+  /* Derivation bases — every translucent shade in portfolio.css mixes
+     from one of these, so shadows and tints follow the theme too. */
+  --accent-rgb: 36,31,49;
+  --text-rgb:   36,33,27;
+  --yellow-rgb: 244,210,74;
   --fd: 'Bricolage Grotesque', sans-serif;
   --fb: 'Space Grotesk', sans-serif;
 }

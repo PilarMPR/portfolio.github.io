@@ -542,19 +542,16 @@ function enableCaseEditing() {
   ensureWidgetIds();
   decorateWidgets();
 
+  /* The dashed outline and focus highlight are pure CSS —
+     `body.editing #case-view [contenteditable="true"]` in portfolio.css.
+     They used to be written here as inline styles, which is how a set of
+     them got serialized into a published page and shipped dashed boxes
+     to visitors. Styling that only ever lives in a stylesheet can't leak
+     that way. */
   csFields().forEach(el => {
     el.contentEditable = 'true';
     el.spellcheck = false;
-    el.style.outline = '1px dashed rgba(200,64,46,.25)';
-    el.style.borderRadius = '2px';
-    el.style.cursor = 'text';
-    el.addEventListener('focus', () => {
-      el.style.outline = '2px solid var(--accent)';
-      el.style.background = 'rgba(200,64,46,.05)';
-    });
     el.addEventListener('blur', () => {
-      el.style.outline = '1px dashed rgba(200,64,46,.25)';
-      el.style.background = '';
       markBlankFields();
       saveCaseStudy(PAGE.id);
     });
@@ -1461,6 +1458,9 @@ function _mix(a,b,t){ const x=_hex(a),y=_hex(b); return _toHex(x.r+(y.r-x.r)*t, 
 function _shade(h,amt){ return _mix(h, amt>=0?'#ffffff':'#000000', Math.abs(amt)); }
 function _lum(h){ const c=_hex(h); return (0.299*c.r+0.587*c.g+0.114*c.b)/255; }
 function _rgba(h,a){ const c=_hex(h); return `rgba(${c.r},${c.g},${c.b},${a})`; }
+/* Bare "r,g,b" so a rule can pick its own alpha: rgba(var(--accent-rgb),.3).
+   That's how the theme reaches the ~70 shades that used to be literals. */
+function _triplet(h){ const c=_hex(h); return `${c.r},${c.g},${c.b}`; }
 function computeVars(t){
   const dark = _lum(t.bg) < 0.4;
   const s = dark ? 1 : -1;
@@ -1478,6 +1478,12 @@ function computeVars(t){
     '--yellow': t.yellow, '--sticky': _shade(t.yellow, 0.08),
     '--green': t.green,
     '--grid': _rgba(t.text, 0.05), '--grid2': _rgba(t.text, 0.085),
+    /* Derivation bases. Every translucent shade in portfolio.css mixes
+       from one of these, so a theme change reaches the drop shadows,
+       label rules and highlighter tints too — not just the solid fills. */
+    '--accent-rgb': _triplet(t.accent),
+    '--text-rgb':   _triplet(t.text),
+    '--yellow-rgb': _triplet(t.yellow),
   };
 }
 function applyTheme(t){

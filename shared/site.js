@@ -759,6 +759,7 @@ function saveCaseStudy(id) {
   const aside = caseView.querySelector('.sh-aside');
   if (aside && aside.dataset.touched) data.__widgets__ = cleanAsideHTML(aside);
 
+  data.__savedAt__ = Date.now();        // so a later publish can outrank it
   try { localStorage.setItem('pmpr_cs_fields_' + id, JSON.stringify(data)); } catch (e) {}
 }
 
@@ -1132,14 +1133,70 @@ function autoSave() {
   data['__edu__'] = eduList()?.innerHTML || '';
   const customCards = [...document.querySelectorAll('.project[data-custom-card]')];
   data['__custom_cards__'] = customCards.map(c => ({ id: c.dataset.customCard, html: c.outerHTML }));
+  data['__savedAt__'] = Date.now();     // so a later publish can outrank it
   try { localStorage.setItem('pmpr_portfolio_v2', JSON.stringify(data)); } catch (e) {}
   dlSave();
+}
+
+/* ─── LOCAL DRAFTS vs PUBLISHED ────────────
+   Edits live in this browser until you publish. That's the point — but
+   it means a browser can hold a draft that the live file has since moved
+   past, because someone published from somewhere else. Replaying that
+   draft made the newer content look like it never arrived.
+
+   buildPublishHTML() stamps <html data-pub>. A draft is stale when the
+   file was published after the draft was last touched; a stale draft is
+   set aside rather than applied, and never silently discarded. */
+function publishedAt() { return parseInt(document.documentElement.dataset.pub, 10) || 0; }
+
+function draftIsStale(data) {
+  const savedAt = data && data.__savedAt__;
+  if (!savedAt) return false;          // pre-dates stamping — leave it alone
+  return publishedAt() > savedAt;
+}
+
+/* Park it under its own key so nothing is lost, and say so. */
+function parkStaleDraft(key, data) {
+  try {
+    localStorage.setItem(key + '__stale', JSON.stringify(data));
+    localStorage.removeItem(key);
+  } catch (e) {}
+  showDraftNotice(key);
+}
+
+function showDraftNotice(key) {
+  if (document.getElementById('draft-notice')) return;
+  const when = new Date(publishedAt()).toLocaleString();
+  const bar = document.createElement('div');
+  bar.id = 'draft-notice';
+  bar.innerHTML =
+    `<span>This browser had older unpublished edits. Showing the version published ${when} instead.</span>` +
+    `<button type="button" id="draft-restore">Use my edits</button>` +
+    `<button type="button" id="draft-dismiss">Dismiss</button>`;
+  document.body.appendChild(bar);
+  bar.querySelector('#draft-dismiss').onclick = () => bar.remove();
+  bar.querySelector('#draft-restore').onclick = () => {
+    try {
+      const d = localStorage.getItem(key + '__stale');
+      if (d) {
+        // Choosing the draft is asserting it as current — otherwise it's
+        // still older than the page stamp and gets parked again on reload,
+        // and the button does nothing forever.
+        const data = JSON.parse(d);
+        data.__savedAt__ = Date.now();
+        localStorage.setItem(key, JSON.stringify(data));
+        localStorage.removeItem(key + '__stale');
+      }
+    } catch (e) {}
+    location.reload();
+  };
 }
 
 function loadSaved() {
   if (IS_PROJECT) {
     const saved = loadSavedCaseContent(PAGE.id);
     if (!saved || !caseView) return;
+    if (draftIsStale(saved)) { parkStaleDraft('pmpr_cs_fields_' + PAGE.id, saved); return; }
     // Restore the sidebar's own structure first, so the fields inside it
     // exist before their text is put back.
     const aside = caseView.querySelector('.sh-aside');
@@ -1159,6 +1216,7 @@ function loadSaved() {
     const raw = localStorage.getItem('pmpr_portfolio_v2');
     if (!raw) return;
     const data = JSON.parse(raw);
+    if (draftIsStale(data)) { parkStaleDraft('pmpr_portfolio_v2', data); return; }
 
     // Fields used to be keyed by their position in the document, which broke
     // the moment one was added or removed. They have names now; carry the old
@@ -1240,8 +1298,10 @@ async function buildExportHTML() {
 
   // Both sheets, in order — theme.css after portfolio.css, because it
   // wins on source order alone. Swap them and the export loses its colours.
+  // *= not $= — a published page's links carry a ?v= cache-buster, so an
+  // "ends with" match would find nothing and the export would ship naked.
   for (const name of ['portfolio.css', 'theme.css']) {
-    const link = doc.querySelector(`link[rel="stylesheet"][href$="${name}"]`);
+    const link = doc.querySelector(`link[rel="stylesheet"][href*="${name}"]`);
     if (!link) continue;
     const st = doc.createElement('style');
     st.textContent = await fetchText(asset('shared/' + name));
@@ -1652,6 +1712,21 @@ function buildPublishHTML(opts) {
   // up with three different accents. An export has no sibling files, so
   // it keeps its inline theme.
   if (!forExport) clone.removeAttribute('style');
+
+  /* Stamp when this page was published. A browser holding an older local
+     draft can then tell that the file has moved on since, instead of
+     silently replaying its own copy over it — which is what made edits
+     published from one machine look like they never arrived on another.
+     The same stamp busts the cache on the shared files, so a stale
+     site.js can't keep publishing with last month's behaviour. */
+  if (!forExport) {
+    const stamp = Date.now();
+    clone.dataset.pub = String(stamp);
+    clone.querySelectorAll('link[rel="stylesheet"][href*="shared/"], script[src*="shared/"]').forEach(el => {
+      const attr = el.tagName === 'LINK' ? 'href' : 'src';
+      el.setAttribute(attr, el.getAttribute(attr).split('?')[0] + '?v=' + stamp);
+    });
+  }
   clone.querySelector('#lightbox')?.classList.remove('open');
   const fb = clone.querySelector('#fmt-bar');
   if (fb) { fb.classList.remove('show'); fb.removeAttribute('style'); }

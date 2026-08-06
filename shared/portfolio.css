@@ -1340,3 +1340,30 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
     scroll-behavior:auto !important;
   }
 }
+
+/* ═══ STALE DRAFT NOTICE ═══════════════════
+   Shown when this browser held edits older than the published page —
+   someone published from somewhere else since. The draft is parked, not
+   dropped, so "Use my edits" can put it back.
+   ═════════════════════════════════════════ */
+#draft-notice {
+  position:fixed; left:50%; bottom:1.1rem; transform:translateX(-50%);
+  z-index:8000; max-width:min(680px, calc(100vw - 2rem));
+  display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+  padding:.75rem 1rem; border-radius:4px;
+  background:var(--bg2); border:1.5px solid var(--text);
+  box-shadow:4px 5px 0 rgba(var(--text-rgb),.18);
+  font-family:var(--fb); font-size:.82rem; color:var(--text); line-height:1.5;
+}
+#draft-notice span { flex:1; min-width:14rem; }
+#draft-notice button {
+  font-family:var(--fm); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase;
+  padding:.5rem .8rem; min-height:36px; cursor:pointer; border-radius:3px;
+  border:1.5px solid var(--text); background:var(--bg); color:var(--text);
+  transition:background .15s, color .15s, border-color .15s;
+}
+#draft-notice button:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+#draft-notice #draft-restore { background:var(--text); color:var(--bg); }
+@media(max-width:620px){
+  #draft-notice { left:.75rem; right:.75rem; bottom:.75rem; transform:none; max-width:none; }
+}

@@ -224,3 +224,11 @@ On a small screen the editor panel docks to the bottom of the screen instead
 of the left edge, and collapses to a peek so you can see the page you're
 editing. Tap the handle or the "Edit mode" header to expand it; picking a
 section or field collapses it again so you land on what you selected.
+
+### Editing on more than one machine
+
+Edits live in **this browser** until you hit **Save & publish** — that part is by design. What wasn't by design: a browser holding an older draft used to replay it over whatever had been published since, so work published from your laptop looked like it never arrived on your desktop.
+
+Publishing now stamps the page with the time. If a browser's draft is older than the page it just loaded, the draft is set aside instead of applied, and a bar tells you so with **Use my edits** to put it back — nothing is thrown away. A draft newer than the published page still wins, silently, which is the normal state while you're working.
+
+The same stamp cache-busts `shared/site.js` and the stylesheets. Before that, a tab could sit on a months-old `site.js` and publish with its old behaviour — which is how a theme change got reverted by an ordinary content publish.

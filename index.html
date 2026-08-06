@@ -13,7 +13,7 @@
 <div id="cursor" class=""></div>
 
 <!-- Nav -->
-<nav id="nav" class="solid">
+<nav id="nav" class="">
   <span class="nav-logo" id="nav-logo">Pilar MPR</span>
   <ul class="nav-links">
     <li><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a></li>
@@ -34,11 +34,7 @@
     </h1>
     <div class="scribble scribble-hero">she designs the rules,<br>not the art ↗</div>
     <div class="hero-foot">
-      <p class="hero-tagline" data-label="Hero description" data-ed="hero-tagline" contenteditable="false" spellcheck="false">
-        I build the machinery players never see — the loops, economies and
-        rules that make a game click. Right now I'm leading design on
-        <em>Hot Potato</em> at Wild Alchemists.
-      </p>
+      <p class="hero-tagline" data-label="Hero description" data-ed="hero-tagline" contenteditable="false" spellcheck="false" style="">My ultimate passion is designing the experience that inmerses you in a whole new universe</p>
       <div class="hero-btns">
         <a href="javascript:void(0)" onclick="scrollToSection('work')" class="btn btn-white">See my work ↓</a>
         <a href="javascript:void(0)" onclick="scrollToSection('contact')" class="btn btn-ghost">Get in touch</a>
@@ -341,22 +337,22 @@
   </div>
 
   <div class="ep-tabs">
-    <button class="ep-tab" onclick="switchTab('sections',this)">Sections</button>
-    <button class="ep-tab active" onclick="switchTab('add',this)">+ Add</button>
+    <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
+    <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
     <button class="ep-tab" onclick="switchTab('devlog',this)">Dev Log</button>
     <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
   </div>
 
   <div class="ep-body">
     <!-- SECTIONS TAB -->
-    <div class="ep-tab-pane" id="tab-sections">
-      <div id="ep-section-list"><div class="ep-section-item" data-section-id="hero">
+    <div class="ep-tab-pane active" id="tab-sections">
+      <div id="ep-section-list"><div class="ep-section-item focused" data-section-id="hero">
     <span class="ep-section-icon">🏠</span>
     <span class="ep-section-name">Hero</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
-      <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-hero" class="ep-sub"><div class="ep-section-item ep-field-item">
+      <span class="ep-chevron" style="font-size: 0.6rem; color: var(--muted); transition: transform 0.2s; display: inline-block; margin-left: auto; transform: rotate(180deg);">▾</span>
+    </div></div><div id="ep-sub-hero" class="ep-sub" style="display: block;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Job title + location</div>
@@ -380,13 +376,13 @@
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-work" class="ep-sub"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
+    </div></div><div id="ep-sub-work" class="ep-sub" style="display: none;"><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🥔</span><span class="ep-section-name">Hot Potato</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🏙</span><span class="ep-section-name">Block City</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">🤖</span><span class="ep-section-name">Healthy Jeart</span><span class="ep-sub-go">Open ✏</span></div><div class="ep-section-item ep-sub-item"><span class="ep-section-icon" style="font-size:.85rem">👾</span><span class="ep-section-name">Create Your Own Monster</span><span class="ep-sub-go">Open ✏</span></div></div><div class="ep-section-item" data-section-id="about">
     <span class="ep-section-icon">👤</span>
     <span class="ep-section-name">About</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-about" class="ep-sub"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-about" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">about-p1</div>
@@ -470,7 +466,7 @@
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
       
       <span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>
-    </div></div><div id="ep-sub-contact" class="ep-sub"><div class="ep-section-item ep-field-item">
+    </div></div><div id="ep-sub-contact" class="ep-sub" style="display: none;"><div class="ep-section-item ep-field-item">
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
         <div class="ep-field-lbl">Contact heading line 2</div>
@@ -514,7 +510,7 @@
     </div>
 
     <!-- ADD TAB -->
-    <div class="ep-tab-pane active" id="tab-add">
+    <div class="ep-tab-pane" id="tab-add">
       <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.75rem .25rem .4rem">Work / Projects</div>
       <button class="ep-add-btn" onclick="insertProjectCard()">
         <span class="ep-add-btn-icon">🎮</span>

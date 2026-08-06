@@ -174,6 +174,7 @@ Both exclude private entries. Export gives you a single self-contained page — 
 ## Tips
 
 - Images are committed as real files, so page weight stays low — but the repo still grows. Resize screenshots before uploading; keep clips to a few seconds.
+- **Don't publish animated GIFs.** A GIF is stuck with 256 dithered colours and no interframe compression — the one on Healthy Jeart was 1.5 MB for 1.4 seconds. Save animations as **animated WebP** instead: it's still an `<img>`, so the gallery and lightbox handle it with no special casing, and it came out 68% smaller *and* cleaner (no dither noise in flat areas). Any modern browser plays it.
 - The CV link is just a URL — host the PDF anywhere (Drive, Dropbox, your repo) and paste the public link.
 - The tagline, bio, and case-study text fields all preserve line breaks.
 - Status dot in the contact section is hard-coded as "Available for projects" — edit `index.html` directly to change the wording.

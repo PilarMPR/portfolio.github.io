@@ -13,27 +13,39 @@ They drift every time the browser publishes; re-verify before acting.
 
 ---
 
-### OPT-01 · No global error handler · impact high · effort low · open
+### OPT-01 · No global error handler · impact high · effort low · done
 Evidence: zero `console.error/warn/log` in 3056 lines of `shared/site.js`; no
 `window.onerror`, no `unhandledrejection`. A throw inside any handler is
 completely invisible. Fix: ~10 lines near the top of `site.js` routing both into
 `console.error` plus `dlToast()`. Catch: `dlToast()` (:1908) no-ops without
 `#de-toast`, and the handler must stay silent for ordinary visitors on the
 published page.
+**Done 2026-08-08** in `e8d47d4` as `reportError()` (shared/site.js:31) — logs
+always, toasts only while `body.editing`, wired to both `error` and
+`unhandledrejection`.
 
-### OPT-02 · 20 silent `catch (e) {}` · impact high · effort med · open
+### OPT-02 · 20 silent `catch (e) {}` · impact high · effort med · done
 Evidence: shared/site.js:763, 1086, 1106, 1137, 1231 are `localStorage` writes —
 a quota failure is indistinguishable from a successful save, so the user loses
 work believing it saved. Fix: a `safeSet(key, val)` helper that toasts on
 failure; convert those five sites first. Catch: `dlSave()` (:1919) already
 surfaces quota failure correctly — match that pattern rather than inventing a
 second one.
+**Done 2026-08-08** in `e8d47d4`. `safeSet()` (shared/site.js:40) now fronts all
+11 writes; silent catches 20 → 11. Bigger than filed: `parkStaleDraft()` and the
+draft-restore path each removed the original *after* a write that could throw, so
+a full quota deleted the only copy — the very thing parking exists to prevent.
+Both now remove only once the write is confirmed.
 
-### OPT-03 · `ghPublish()` never re-reads the head sha · impact high · effort low · open
+### OPT-03 · `ghPublish()` never re-reads the head sha · impact high · effort low · done
 Evidence: read at shared/site.js:1777, used as `parents` at :1815, ref `PATCH`ed
 at :1816. Two publishes (two tabs open, or a slow media upload) collide and
 surface only as `alert('Publish failed: 422 …')`. Fix: re-`GET` the ref
 immediately before the PATCH and abort with a human-readable message if it moved.
+**Done 2026-08-08** in `e8d47d4` — re-reads the ref just before committing and
+stops with a sentence saying nothing was overwritten and the edits are still in
+the browser. Never exercised against a real concurrent publish; the abort path is
+unverified.
 
 ### OPT-04 · Publish is non-transactional · impact med · effort high · open
 Evidence: media blobs are created before the ref moves in `ghPublish()`

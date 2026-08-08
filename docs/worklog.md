@@ -270,3 +270,24 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
 - note: safe-push refuses rather than resolves. It will not rebase for you —
   which side of an HTML conflict wins is a judgement about the user's published
   content (R1/R8), not something a script should decide.
+
+### 2026-08-08 · ERR · safe-push.sh flagged itself as a secret leak
+- what: first real use of `docs/safe-push.sh` refused at step 4 —
+  `possible secret or local path in the outgoing diff (R9)`. The match was the
+  scanner's own source line: the diff adds a line containing the pattern, and
+  the pattern matches itself.
+- checks: checks.sh ok · smoke.sh ok 5 pages
+- push: not pushed
+- note: caught by the tool on its own first outing, which is the good version
+  of this. A secret scanner that cries wolf on every commit touching itself is
+  a scanner people learn to bypass.
+
+### 2026-08-08 · FIX · Bracket the pattern so it cannot match itself
+- what: `gh[p]_`, `github[_]pat_`, `[/]home[/][a-z]+[/]` — the `grep [c]ommand`
+  trick. First attempt still self-matched because the *comment* explaining the
+  fix spelled the literal token prefix twice; reworded, and the comment now
+  says not to spell one anywhere in the file.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: appended a fake token
+  and a fake local path to worklog.md — both still caught (2 matches); scanning
+  the script's own diff now returns 0
+- push: this commit

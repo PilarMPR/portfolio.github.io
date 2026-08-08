@@ -45,7 +45,11 @@ bash docs/checks.sh || die "docs/checks.sh failed"
 bash docs/smoke.sh  || die "docs/smoke.sh failed"
 
 # 4. R9 — docs/ ships publicly via GitHub Pages. Last look before it does.
-leaked=$(git diff "origin/main..HEAD" | grep -nE '^\+.*(ghp_|github_pat_|/home/[a-z]+/)' || true)
+#    The bracket classes keep the pattern from matching itself, so scanning a
+#    diff that adds this very script does not report the script as a leak. Do
+#    not spell any token prefix literally anywhere in this file, comments
+#    included — that is exactly how this check first failed.
+leaked=$(git diff "origin/main..HEAD" | grep -nE '^\+.*(gh[p]_|github[_]pat_|[/]home[/][a-z]+[/])' || true)
 [ -z "$leaked" ] || { echo "$leaked"; die "possible secret or local path in the outgoing diff (R9)"; }
 
 echo "$ahead commit(s) to push:"

@@ -2114,8 +2114,15 @@ async function dlMediaFallback(el) {
   else           el.style.display = 'none';   // thumbnail — the number shows through
 }
 
+/* Waiting to be committed: uploaded, not yet published, and not held back for
+   being private. Publishing a private entry's media would leak it (see
+   dlPrivateOnlyMedia); it stays in IndexedDB and goes up if the entry is ever
+   made public. */
 async function dlPendingMedia() {
-  try { return (await mediaAll() || []).filter(r => !r.published); }
+  try {
+    const held = dlPrivateOnlyMedia();
+    return (await mediaAll() || []).filter(r => !r.published && !held.has(r.path));
+  }
   catch (e) { return []; }
 }
 
@@ -2156,17 +2163,31 @@ function dlStoreFile(file, projId, entryId) {
   });
 }
 
-/* Every media reference currently held by any entry. Used before deleting
-   a file — duplicating a block copies the reference, so the same upload can
-   be pointed at from two places and must survive losing one of them. */
-function dlMediaRefs() {
+/* Every media reference currently held by an entry — all of them, or only
+   those `pick` accepts. Used before deleting a file — duplicating a block
+   copies the reference, so the same upload can be pointed at from two places
+   and must survive losing one of them. */
+function dlMediaRefs(pick) {
   const out = [];
   const take = r => { if (r && r.path) out.push(r.path); };
   Object.keys(DEVLOG).forEach(p => dlEntries(p).forEach(e => {
+    if (pick && !pick(e)) return;
     take(e.hero);
     (e.blocks || []).forEach(b => { take(b.src); take(b.a); take(b.b); dlGalItems(b).forEach(take); });
   }));
   return out;
+}
+
+/* Files that only private entries point at. Private entries are stripped from
+   every publish (dlPublicData), so committing their media would put it in a
+   public repo with nothing on the site referencing it — the one way private
+   content still reached GitHub. A file a public entry also uses is not
+   private-only and still publishes. Uploads that live outside the dev log
+   (card art, hero images, the profile photo) appear in neither set, so they
+   are unaffected. */
+function dlPrivateOnlyMedia() {
+  const shown = new Set(dlMediaRefs(e => !e.private));
+  return new Set(dlMediaRefs(e => e.private).filter(p => !shown.has(p)));
 }
 
 /* Call *after* the reference has been removed from the entry. */

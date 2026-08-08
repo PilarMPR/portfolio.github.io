@@ -120,3 +120,29 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   commit; `.claude/settings.json` takes effect only on the next session start
 - next: OPT-12 (make doc line-number rot a check failure) is the natural
   follow-on, since it protects everything written this session
+
+### 2026-08-08 · OK · Stop publishing media that only private entries reference
+- what: `dlPendingMedia()` (site.js:2121) committed every unpublished IndexedDB
+  record, with no reference to `entry.private` anywhere in the path — so a
+  private entry's *text* was correctly stripped by `dlPublicData()` while its
+  images were committed to the public repo by `ghPublish()` (:1800). Added
+  `dlPrivateOnlyMedia()` (:2188) = refs(private) − refs(public), and excluded
+  those paths from `dlPendingMedia()`. Rather than write a third media walker to
+  keep in sync, gave `dlMediaRefs()` (:2170) an optional `pick` filter; the
+  no-arg call in `dlDropMedia()` (:2194) is unchanged, so local GC still sees
+  private entries and will not delete a private entry's file from IndexedDB.
+  Held-back files stay `published:false` and go up if the entry is made public.
+  Uploads outside the dev log (card art, hero, profile photo) are in neither
+  set and are unaffected.
+- checks: checks.sh ok · manual: **not verified in a browser** — no JS engine
+  and no driveable browser in this environment (the 2026-08-07 ERR entry is
+  still open). Verified statically: both call sites of each changed function,
+  boot order (`dlLoad()` at :3077 precedes `mediaBoot()`, so `DEVLOG` is
+  populated before the first badge render), and that `e.private` undefined
+  reads as public.
+- push: this commit
+- note: raised OPT-16 — the repo still never deletes an asset, so this stops new
+  leaks but does not clean the ones already committed. The auto-delete half of
+  that idea is not safe as first sketched: a publish sees only its own page, and
+  card/hero/profile uploads never appear in `dlMediaRefs()`, so deleting
+  everything absent from it would wipe every live card image.

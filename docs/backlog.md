@@ -121,3 +121,17 @@ only `asset()` at :17 survived. Fix options: (a) cite function names only and
 drop line numbers, (b) extend `checks.sh` to assert each cited line still
 contains the named symbol. (b) is better — it makes rot a check failure instead
 of silent misinformation. Catch: needs a parseable citation format in the doc.
+
+### OPT-16 · Published assets are never garbage-collected · impact med · effort high · open
+Evidence: `dlDropMedia()` (shared/site.js:2194) deletes from IndexedDB only, and
+`ghPublish()` (shared/site.js:1800-1824) only ever *adds* tree entries — so a
+file stays in the repo forever once committed, even after the block, entry or
+project referencing it is gone. Commit `f183182` cleaned 10 MB of exactly this
+by hand. Fix: emit `{path, sha:null}` tree entries for unreachable `assets/`
+files during publish. Catch: reachability cannot be computed from one page. A
+publish sees only its own DOM, and non-devlog uploads (card art, hero images,
+the profile photo) are referenced from page markup and `localStorage`, never
+from `DEVLOG` — so deleting "anything not in `dlMediaRefs()`" would destroy
+every live card image. A safe version has to fetch all five published pages and
+union their `assets/` references with `dlMediaRefs()` first, which also means
+deciding what happens when that fetch fails (answer: publish nothing).

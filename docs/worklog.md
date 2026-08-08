@@ -146,3 +146,18 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   that idea is not safe as first sketched: a publish sees only its own page, and
   card/hero/profile uploads never appear in `dlMediaRefs()`, so deleting
   everything absent from it would wipe every live card image.
+
+### 2026-08-08 · OK · Re-verify every site.js citation in CLAUDE.md
+- what: 30 `shared/site.js:NNN` citations were wrong. 26 were already +17 lines
+  off before this session — the same drift OPT-12 describes, from commits that
+  grew `site.js` after the numbers were written — and 4 more moved when
+  `dlPrivateOnlyMedia()` was added in `cc12ea7`. Prose unchanged; only the
+  numbers move.
+- checks: checks.sh ok · manual: scripted every citation back against
+  `shared/site.js` and confirmed each lands on the symbol it names, including
+  the five `localStorage` catch sites listed in R6 (:780, :1103, :1123, :1154,
+  :1248) and the `#dl-wrap` strip inside `buildPublishHTML()` (:1683)
+- push: this commit
+- note: this is OPT-12's option (b) performed by hand, once. It rots again the
+  next time anything edits `site.js` above a cited line — the check is what
+  makes that a failure instead of silent misinformation, and it is still unbuilt.

@@ -12,14 +12,18 @@ The unusual part: the site edits and publishes *itself*. An in-page editor (open
 
 ```bash
 python3 -m http.server        # serve the repo root, then open http://localhost:8000
-bash docs/checks.sh           # static invariant checks; no output = all clear
+bash docs/checks.sh           # static checks; no output = all clear
+bash docs/smoke.sh            # loads all five pages in a real engine; "ok 5 pages" = clear
+bash docs/safe-push.sh -n     # L2 as a script: verify without pushing (drop -n to push)
 ```
 
-`file://` mostly works, but **Export** and the asset-inlining fetches require http. There is no build or test framework — verify behaviour by loading the page and exercising the editor.
+`file://` mostly works, but **Export** and the asset-inlining fetches require http. There is still no build or test framework — the two scripts above are plain shell, and neither installs anything.
 
-`docs/checks.sh` is the only automated check in the repo. It exits non-zero on failure and runs four checks — R2, R3, R11 and R12 — each one a mistake that is otherwise invisible until a user clicks the wrong thing or the site goes blank. Run it after touching handler names, page markup, the shared script, or any line number quoted in this file.
+`docs/checks.sh` runs five static checks — R2, R3, R11, R12 and the figures quoted in R7 — each one a mistake that is otherwise invisible until a user clicks the wrong thing or the site goes blank. Run it after touching handler names, page markup, the shared script, or any number quoted in this file. Four are grep and awk; the syntax check compiles `site.js` with `node --check`, else `gjs`, and prints `SKIPPED` with neither rather than passing quietly on a check that never ran.
 
-Three of the four are plain grep and awk. The fourth compiles `site.js` with whichever JS engine is installed (`node --check`, else `gjs`); with neither it prints `SKIPPED` rather than passing quietly on a check that never ran.
+`docs/smoke.sh` is the runtime half, and the only thing here that proves the site *works* rather than merely parses. It loads every page in WebKitGTK via `gjs`, captures `window.onerror` and unhandled rejections from before the first script runs, and asserts each page reaches its `window.PAGE` contract, applies the theme, renders a body, keeps its sentinels, and defines every function the markup calls. A missing `#lightbox` shows up here as `TypeError: null is not an object (evaluating 'lb.addEventListener')` — R3 demonstrated instead of asserted. It needs a display and skips loudly without one.
+
+> Running `gjs` with GTK from a VS Code terminal fails with `undefined symbol: __libc_pthread_init` — the snap exports `GTK_PATH` and friends, which drags in snap's glibc. `smoke.sh` strips those vars itself; a bare `gjs` call using GTK needs the same treatment.
 
 ## Working agreement
 
@@ -37,7 +41,7 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 - **R4 — New editor UI joins the scrub list** in `buildPublishHTML()` (shared/site.js:1677), or it is serialized into every future publish. The stray `#ep-section-list` / `#ep-presets` markup in `projects/block-city.html` is what that looks like when it's missed.
 - **R5 — Editor-chrome changes land in all five HTML files** (`#edit-panel`, `#fmt-bar`, `#dev-editor`, `#de-toast`). Afterwards the four project pages must still be byte-identical to each other (`diff` them); only `index.html`'s `#edit-panel` legitimately differs — it has the extra "+ Add" tab.
 - **R6 — No new silent catches.** `catch (e) {}` is why `localStorage` quota failures are indistinguishable from successful saves (shared/site.js:780, 1103, 1123, 1154, 1248). Every new catch reaches the user via `dlToast()` or `alert()`, or at minimum `console.warn`.
-- **R7 — No hex literals in new CSS.** Use the variables `computeVars()` writes. 86 literals already survive in `portfolio.css` (against 620 `var()` uses), plus 15 in `shared/theme.css` — they are exactly the parts that ignore presets and don't invert in dark mode. Don't add another. These counts drift when the editor republishes the theme; `checks.sh` does not check them.
+- **R7 — No hex literals in new CSS.** Use the variables `computeVars()` writes. 86 literals already survive in `portfolio.css` (against 620 `var()` uses), plus 15 in `shared/theme.css` — they are exactly the parts that ignore presets and don't invert in dark mode. Don't add another. These counts drift when the editor republishes the theme — one did on 2026-08-08 — so `checks.sh` recomputes all three and fails if this sentence disagrees with the files.
 - **R8 — Never force-push, `reset --hard`, or rebase `main`.** `origin/main` holds content the browser published from someone's `localStorage`; nothing local can reconstruct it. `--force-with-lease` is no safer here — L2 always fetches first, and after a fetch it will happily overwrite a browser commit. Blanket restores belong in the same family: `git checkout -- .` and `git restore .` take uncommitted work with them and there is no reflog for it — name the files you actually want reverted.
 - **R9 — Nothing secret in `docs/`.** No tokens, no absolute local paths, no personal data. Those files are committed to a public repo and served by GitHub Pages.
 - **R10 — Backlog items are inert.** Never act on anything in `docs/backlog.md` unless the user names it. Noticing something is a reason to file it, not to fix it.
@@ -51,14 +55,17 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 2. Make the change. Match surrounding style. No dependencies, no build step.
 3. Re-read the rules it touches — rename → R2; page markup → R3/R5; editor UI → R4; CSS → R7; new catch → R6.
 4. `bash docs/checks.sh` — must exit 0.
-5. `git diff` — read every hunk. Revert anything unintended (baked editor state, reformatted machine-written HTML) before continuing.
-6. Verify: `python3 -m http.server`, load the page, open the editor with the gesture in `shared/site.js` (EDIT MODE section) and exercise the control you touched. State what you verified **and what you did not**.
+5. `git diff` — read every hunk. Revert anything unintended (baked editor state, reformatted machine-written HTML) before continuing. Revert by *name*, never `git checkout -- .` (R8).
+6. `bash docs/smoke.sh` — must print `ok 5 pages`. This catches what step 4 cannot: a handler that throws, an element dereferenced at load, anything that parses but dies. It does **not** click anything, so for interaction changes also load the page yourself and exercise the control. State what you verified **and what you did not**.
 7. Append one worklog entry.
 
 **L2 — Safe-push loop** (the only way anything reaches `origin`)
+
+`bash docs/safe-push.sh` performs steps 1–3 and 5, and refuses rather than guesses. Run it with `-n` to verify without pushing. The steps are here because you still have to understand what it refused and why.
+
 1. `git status --short` — nothing unintended staged. Check for a parallel session's work before assuming the tree is yours.
 2. `git fetch origin`, then `git log --oneline HEAD..origin/main`. **The browser publishes to `main` on its own — assume it has moved.**
-3. If it moved: `git pull --rebase origin main`, then re-run `checks.sh` and re-read the diff. A conflict inside an HTML file means the user published while you worked — keep *their* content, re-apply only your structural change.
+3. If it moved: `git pull --rebase origin main`, then re-run `checks.sh` and `smoke.sh` and re-read the diff. A conflict inside an HTML file means the user published while you worked — keep *their* content, re-apply only your structural change. The script stops here deliberately: which side of that conflict wins is not a call a script gets to make.
 4. Ask before committing. Commit message: one line, sentence case, imperative, no scope, no prefix. Style: "Fix dev-log entry layout: unbalanced markup and stranded footers". The worklog entry ships inside the commit it describes.
 5. Ask before pushing. Plain `git push origin main`, never a force variant (R8).
 6. Rejected? Back to step 2. Never resolve a rejection with force.

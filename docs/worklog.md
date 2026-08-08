@@ -217,3 +217,56 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   wrong within minutes of being written. Corrected, and R7 now says outright
   that these counts drift and are not checked. Prose numbers rot exactly like
   line numbers do — check-citations only covers `shared/site.js:NNN`.
+
+### 2026-08-08 · FIX · Runtime verification works — closes the 2026-08-07 ERR
+- what: `docs/smoke.sh` + `docs/smoke.js` load all five pages in WebKitGTK via
+  `gjs` (the `WebKit2-4.1` typelib is installed) and fail on anything that
+  throws. A user script installed at document-start captures `window.onerror`
+  and `unhandledrejection` before any page script runs; each page must then
+  reach its `window.PAGE` contract, apply the theme, render a body, keep all
+  six sentinels, and define every function the markup calls.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: fault-injected three
+  runtime-only faults, all caught — an undefined call appended to site.js
+  (`ReferenceError … @ site.js:3099`, on all five pages), `openGallery` renamed
+  (`handlers not defined at runtime`), and `id="lightbox"` stripped from
+  hot-potato.html, which surfaced *both* the missing element and
+  `TypeError: null is not an object (evaluating 'lb.addEventListener')` at
+  site.js:1472
+- push: this commit
+- note: the old ERR blamed the environment; the environment was fine. VS Code's
+  snap exports `GTK_PATH`, `GDK_PIXBUF_MODULEDIR`, `LOCPATH` and friends, which
+  make `gjs` load snap's glibc and die with `undefined symbol:
+  __libc_pthread_init`. Stripping ten env vars is the whole fix. Firefox
+  headless was never the only option — it was just the first one tried.
+  R3 is now demonstrated rather than asserted: fault C is the exact failure
+  the rule describes.
+
+### 2026-08-08 · OK · Two false assertions found by writing the smoke test
+- what: the first probe asserted `.proj-card, .sh-sec` — `.proj-card` exists
+  nowhere in the repo and `.sh-sec` is project-pages-only, so index.html
+  "failed" on a selector that was simply wrong. The second used `innerText`
+  with a threshold of 200; measured values were index 2563 and *every* project
+  page 198–205, because case-study sections are revealed by an
+  IntersectionObserver and are `display:none` offscreen. The threshold sat
+  inside the natural cluster and would have flaked at random.
+- checks: checks.sh ok · smoke.sh ok 5 pages
+- push: this commit
+- note: fixed by counting `section, .sh-sec` (both roles), switching to
+  `textContent`, and giving the offscreen window a 1280x900 viewport so media
+  queries and observers behave. Worth recording that both failures were in the
+  test, not the site — R1 says don't hand-edit page content, and the first
+  instinct on a red check is to go change the page.
+
+### 2026-08-08 · OK · checks.sh checks its own prose; L2 becomes a script
+- what: `check-counts` recomputes the three figures R7 quotes plus R11's
+  citation total and fails if CLAUDE.md disagrees — the gap that let R7 go
+  stale within minutes when a publish rewrote theme.css. `docs/safe-push.sh`
+  runs L2 mechanically: refuses on a dirty tree, on origin being ahead, on
+  either script failing, or on a token or local path in the outgoing diff.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: appended a hex literal
+  to theme.css and check-counts reported `is 16 … expected "plus 16 in
+  shared/theme.css"`; ran safe-push.sh -n against a dirty tree and it refused
+- push: this commit
+- note: safe-push refuses rather than resolves. It will not rebase for you —
+  which side of an HTML conflict wins is a judgement about the user's published
+  content (R1/R8), not something a script should decide.

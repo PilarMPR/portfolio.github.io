@@ -91,4 +91,22 @@ cites=$(awk '
 ' shared/site.js CLAUDE.md)
 if [ -n "$cites" ]; then printf '%s\n' "$cites"; fail=1; fi
 
+# check-counts (R7, R11) — CLAUDE.md quotes figures about the codebase, and those
+# rot exactly like line numbers do: a browser publish rewrote shared/theme.css on
+# 2026-08-08 and R7's hex count was wrong within minutes of being written. Each
+# number below is recomputed and matched against the sentence that states it, so
+# the doc cannot quietly drift from the code it describes.
+count_says() {   # count_says <actual> <fixed string CLAUDE.md must contain> <what>
+  grep -qF "$2" CLAUDE.md || { echo "COUNT $3 is $1, CLAUDE.md does not say so (expected: \"$2\")"; fail=1; }
+}
+hexp=$(grep -oE '#[0-9a-fA-F]{3,8}\b' shared/portfolio.css | wc -l)
+hext=$(grep -oE '#[0-9a-fA-F]{3,8}\b' shared/theme.css | wc -l)
+vars=$(grep -oE 'var\(--' shared/portfolio.css | wc -l)
+ncit=$(awk 'index($0,"shared/site.js"){s=$0
+  while (match(s, /shared\/site\.js:[0-9]+|:[0-9]+/)) { c++; s = substr(s, RSTART + RLENGTH) }} END{print c+0}' CLAUDE.md)
+count_says "$hexp" "$hexp literals already survive in \`portfolio.css\`" "portfolio.css hex literals"
+count_says "$vars" "against $vars \`var()\` uses"                        "portfolio.css var() uses"
+count_says "$hext" "plus $hext in \`shared/theme.css\`"                  "theme.css hex literals"
+count_says "$ncit" "re-resolves all $ncit against the file"              "site.js citations in CLAUDE.md"
+
 exit $fail

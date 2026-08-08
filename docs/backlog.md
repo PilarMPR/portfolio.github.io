@@ -87,6 +87,33 @@ Evidence: `entry-writing-edit-mode-lo5i0u`, `game-dev-portfolio-container-ng1hf4
 `responsive-portfolio-git-mh7yf9`. Fix: delete once the user confirms none are
 wanted. Catch: deleting a remote branch is irreversible from here — confirm each.
 
+### OPT-13 · Browser-extension attributes bake into published pages · impact med · effort low · open
+Evidence: `data-lt-installed="true"` sits on `<html>` in both `index.html` and
+`projects/block-city.html` — a LanguageTool attribute, captured because
+`buildPublishHTML()` clones the live `document.documentElement`. It re-bakes on
+every publish from that browser, and any other extension that decorates the DOM
+lands the same way. Fix: in the scrub list, drop `data-*` attributes on the
+clone's root except `pub` and `readonly` (both set deliberately at :1724/:1754).
+Catch: allow-list, not deny-list — a deny-list needs updating per extension.
+
+### OPT-14 · Scroll state baked onto `#nav` · impact low · effort low · open
+Evidence: `projects/block-city.html:17` is `<nav id="nav" class="solid">`. The
+`solid` class is written by the IntersectionObserver at shared/site.js:76 and
+was frozen at publish time, so the page now loads with a solid nav until the
+first scroll event re-computes it. Fix: one line in the scrub list next to the
+`#cursor` reset at :1745. Catch: only `solid` — `#nav` has no other classes
+today, so don't blanket-clear `className`.
+
+### OPT-15 · The editor gesture is readable in the served JS · impact low · effort high · open
+Evidence: `shared/site.js` is served to every visitor, so the Alt+3-click
+gesture in its EDIT MODE section is discoverable by anyone who opens it. The
+docs deliberately omit it (README, CLAUDE.md, SPEC.md all point at the code
+instead), but the code itself cannot hide. Fix: nothing cheap — a real gate
+means the gesture checks a value that isn't in the bundle (a hash compared
+against a typed passphrase). Catch: probably not worth it. Publishing already
+requires the GitHub token in `localStorage`, so the realistic worst case from a
+found gesture is a visitor editing their own local copy of the page.
+
 ### OPT-12 · Doc line numbers rot on every publish · impact med · effort med · open
 Evidence: 17 upstream commits on 2026-08-07 grew `site.js` 2465 → 3056 lines and
 invalidated 18 of the 19 `shared/site.js:NNN` citations in `CLAUDE.md` at once —

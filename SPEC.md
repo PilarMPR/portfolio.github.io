@@ -33,7 +33,8 @@
 - **Layout**: 2-column grid (projects), single column mobile
 
 ## 5. Editor Features
-- **Access**: Tap logo 6x to open editor panel
+- **Access**: a hidden gesture on the logo opens the editor panel. Not written
+  down here — this repo is public. See the EDIT MODE section of `shared/site.js`.
 - **Customize**:
   - [x] Name, title, tagline
   - [x] Profile photo (upload)

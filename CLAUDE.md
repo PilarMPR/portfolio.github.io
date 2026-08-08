@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A static portfolio site (game designer, GitHub Pages) with **no build step, no dependencies, no tests**. Plain HTML/CSS/vanilla JS served as-is (`.nojekyll`).
 
-The unusual part: the site edits and publishes *itself*. An in-page editor (click the nav logo 6× quickly) makes the page editable, stores edits in the browser, and commits the current page back to this repo through the GitHub API. Most commits in `git log` ("Update portfolio content via in-page editor") were written by the site, not by hand.
+The unusual part: the site edits and publishes *itself*. An in-page editor (opened by a hidden modifier gesture on the nav logo — see the EDIT MODE section of `shared/site.js`; deliberately not spelled out in the docs, which are public) makes the page editable, stores edits in the browser, and commits the current page back to this repo through the GitHub API. Most commits in `git log` ("Update portfolio content via in-page editor") were written by the site, not by hand.
 
 ## Commands
 
@@ -48,7 +48,7 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 3. Re-read the rules it touches — rename → R2; page markup → R3/R5; editor UI → R4; CSS → R7; new catch → R6.
 4. `bash docs/checks.sh` — must exit 0.
 5. `git diff` — read every hunk. Revert anything unintended (baked editor state, reformatted machine-written HTML) before continuing.
-6. Verify: `python3 -m http.server`, load the page, click the nav logo 6× and exercise the control you touched. State what you verified **and what you did not**.
+6. Verify: `python3 -m http.server`, load the page, open the editor with the gesture in `shared/site.js` (EDIT MODE section) and exercise the control you touched. State what you verified **and what you did not**.
 7. Append one worklog entry.
 
 **L2 — Safe-push loop** (the only way anything reaches `origin`)

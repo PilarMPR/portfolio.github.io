@@ -174,23 +174,40 @@ const SECTIONS = [
   { id:'contact', icon:'✉',  name:'Contact' },
 ];
 
-/* Six quick clicks on the logo open the editor. On a project page the logo is
-   a real link home, so the first click would leave the page and the gesture
-   could never finish — hold the navigation until the clicks stop instead. */
+/* Alt + three quick clicks on the logo open the editor. The modifier is what
+   does the hiding: an unmodified click is never intercepted, so the logo stays
+   an ordinary link home and no amount of clicking around finds edit mode.
+   It also drops the old gesture's 420ms navigation delay on every logo click.
+   Alt+click means "save link target" in some browsers — preventDefault() on
+   the modified click suppresses that. */
 const navLogo = document.getElementById('nav-logo');
-const navLogoHref = navLogo.getAttribute('href');
 
 navLogo.addEventListener('click', e => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey) return;   // open-in-new-tab still works
-  if (navLogoHref) e.preventDefault();
+  // Plain click navigates; ctrl/cmd/shift still open the link in a new tab.
+  if (!e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
   logoClicks++;
   clearTimeout(logoTimer);
-  if (logoClicks >= 6) { logoClicks = 0; toggleEdit(); return; }
-  logoTimer = setTimeout(() => {
-    logoClicks = 0;
-    if (navLogoHref) location.href = navLogoHref;     // it was an ordinary click after all
-  }, 420);
+  if (logoClicks >= 3) { logoClicks = 0; toggleEdit(); return; }
+  logoTimer = setTimeout(() => { logoClicks = 0; }, 700);
 });
+
+/* The "Open ✏" links hand off to a project page with ?edit=1. That param on
+   its own is a plaintext way in for anyone who ever sees the URL, so it only
+   counts when this tab set the matching handoff immediately before navigating.
+   sessionStorage survives the navigation and is scoped to the one tab. */
+const ED_HANDOFF = 'pmpr_ed_handoff';
+function edHandoffSet() {
+  try { sessionStorage.setItem(ED_HANDOFF, '1'); }
+  catch (e) { console.warn('Editor handoff could not be stored; ?edit will be ignored on arrival.', e); }
+}
+function edHandoffTake() {
+  try {
+    const ok = sessionStorage.getItem(ED_HANDOFF) === '1';
+    sessionStorage.removeItem(ED_HANDOFF);   // one arrival per handoff
+    return ok;
+  } catch (e) { console.warn('Editor handoff could not be read; staying closed.', e); return false; }
+}
 
 /* ─── EDITOR SHEET (small screens) ─────────
    Below the stack breakpoint #edit-panel is docked to the bottom edge and
@@ -483,7 +500,7 @@ function toggleSubItems(id, itemEl) {
 /* ─── EDIT A CASE STUDY IN THE MODAL ────── */
 function openCaseEdit(id) {
   // Another project's case study lives on another page.
-  if (!IS_PROJECT || id !== PAGE.id) { location.href = projectHref(id) + '?edit=1'; return; }
+  if (!IS_PROJECT || id !== PAGE.id) { edHandoffSet(); location.href = projectHref(id) + '?edit=1'; return; }
   showCaseView();
   enableCaseEditing();
   caseView.scrollIntoView({ behavior:'smooth', block:'start' });
@@ -2473,6 +2490,7 @@ function dlSelectedProject() {
 /* From the landing page, jump to where the entry actually lives. */
 function dlGoToProject(projId, entryId, andNew) {
   const q = '?edit=1' + (andNew ? '&new=1' : '');
+  edHandoffSet();
   location.href = projectHref(projId) + q + (entryId ? '#/dev/' + entryId : '');
 }
 
@@ -3047,9 +3065,11 @@ if (IS_PROJECT) {
 }
 dlRoute();
 
-/* projects/x.html?edit=1 — arriving from "Open ✏" on the landing page */
+/* projects/x.html?edit=1 — arriving from "Open ✏" on the landing page. The
+   param alone opens nothing: edHandoffTake() requires that this same tab was
+   already in edit mode when it followed the link. */
 const _q = new URLSearchParams(location.search);
-if (_q.get('edit')) {
+if (_q.get('edit') && edHandoffTake()) {
   toggleEdit();
   switchTab('devlog', document.querySelectorAll('.ep-tab')[2]);
   if (_q.get('new')) dlAddEntry();

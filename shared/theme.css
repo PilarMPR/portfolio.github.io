@@ -1,44 +1,29 @@
-/* ═══════════════════════════════════════════
-   SITE THEME — one file, every page.
-
-   Written by "Save & publish"; change it through the editor's Design
-   tab rather than by hand. It lives here instead of in each page's
-   <html style> so a theme change updates the whole site, not just the
-   page you happened to be on. That is exactly how the site ended up
-   with three different accents at once.
-
-   Loaded AFTER portfolio.css. Both declare :root, so source order is
-   what makes these win — keep the link order that way.
-
-   Values are computeVars() output (see shared/site.js). Only bg, text,
-   accent, blue, yellow and green are chosen; the rest — bg2/bg3/
-   card-bg/muted/faint/accent2/sticky/grid and the -rgb bases — are
-   derived from those, so edit through the editor to keep them in step.
-
-   Source theme: paper #f4efe3, ink #24211b, accent #4f4a43.
-   ═══════════════════════════════════════════ */
+/* SITE THEME — one file, every page.
+   Written by "Save & publish"; change it through the editor's
+   Design tab rather than by hand. Loaded after portfolio.css,
+   and both declare :root, so that link order is what makes
+   these win — keep it. */
 :root {
-  --bg:       #f4efe3;   /* natural cream parchment */
-  --bg2:      #e8e3d8;
-  --bg3:      #dcd7cc;
-  --card-bg:  #ede8dc;
+  --bg: #f4efe3;
+  --bg2: #e8e3d8;
+  --bg3: #dcd7cc;
+  --card-bg: #ede8dc;
   --card-bg2: #e3ded3;
-  --text:     #24211b;   /* ink */
-  --white:    #24211b;
-  --muted:    #77736b;
-  --faint:    #c3bfb6;
-  --accent:   #4f4a43;   /* warm dark grey — reads as an accent against
-                            the ink without going navy or black */
-  --accent2:  #615c56;
-  --blue:     #2f5c8f;
-  --yellow:   #f4d24a;
-  --sticky:   #f5d658;
-  --green:    #4f7a4a;
-  --grid:     rgba(36,33,27,0.05);
-  --grid2:    rgba(36,33,27,0.085);
-  /* Derivation bases — every translucent shade in portfolio.css mixes
-     from one of these, so shadows and tints follow the theme too. */
-  --accent-rgb: 79,74,67;
-  --text-rgb:   36,33,27;
+  --text: #24211b;
+  --white: #24211b;
+  --muted: #77736b;
+  --faint: #c3bfb6;
+  --accent: #24211b;
+  --accent2: #3a3732;
+  --blue: #2f5c8f;
+  --yellow: #f4d24a;
+  --sticky: #f5d658;
+  --green: #4f7a4a;
+  --grid: rgba(36,33,27,0.05);
+  --grid2: rgba(36,33,27,0.085);
+  --accent-rgb: 36,33,27;
+  --text-rgb: 36,33,27;
   --yellow-rgb: 244,210,74;
+  --fd: 'Bricolage Grotesque', sans-serif;
+  --fb: 'Space Grotesk', sans-serif;
 }

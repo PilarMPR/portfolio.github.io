@@ -114,13 +114,21 @@ against a typed passphrase). Catch: probably not worth it. Publishing already
 requires the GitHub token in `localStorage`, so the realistic worst case from a
 found gesture is a visitor editing their own local copy of the page.
 
-### OPT-12 · Doc line numbers rot on every publish · impact med · effort med · open
+### OPT-12 · Doc line numbers rot on every publish · impact med · effort med · done
 Evidence: 17 upstream commits on 2026-08-07 grew `site.js` 2465 → 3056 lines and
 invalidated 18 of the 19 `shared/site.js:NNN` citations in `CLAUDE.md` at once —
 only `asset()` at :17 survived. Fix options: (a) cite function names only and
 drop line numbers, (b) extend `checks.sh` to assert each cited line still
 contains the named symbol. (b) is better — it makes rot a check failure instead
 of silent misinformation. Catch: needs a parseable citation format in the doc.
+**Done 2026-08-08** as option (b), now rule R11 — `check-citations` in
+`docs/checks.sh` re-resolves all 28 citations on every run. The "parseable
+format" catch resolved softer than expected: a citation passes if *any*
+backticked symbol on its line appears at the cited line. Binding each number to
+one symbol is not decidable from prose (`"on top of `HEAD` … hardcoded in `GH`
+(site.js:1649)"` binds HEAD), and a strict pairing produced 6 false positives on
+the existing text. The loose rule still fails on real drift, because when the
+file grows none of the line's symbols match.
 
 ### OPT-16 · Published assets are never garbage-collected · impact med · effort high · open
 Evidence: `dlDropMedia()` (shared/site.js:2194) deletes from IndexedDB only, and

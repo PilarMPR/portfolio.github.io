@@ -161,3 +161,59 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
 - note: this is OPT-12's option (b) performed by hand, once. It rots again the
   next time anything edits `site.js` above a cited line — the check is what
   makes that a failure instead of silent misinformation, and it is still unbuilt.
+
+### 2026-08-08 · OK · checks.sh gains a syntax check and a citation check
+- what: `docs/checks.sh` — two new checks, plus rules R11/R12 in CLAUDE.md.
+  **check-syntax**: `site.js` is one flat script with no module graph, so a
+  stray brace blanks all five pages and nothing here would notice. Compiles it
+  via `node --check`, else `gjs` + `new Function(src)` — which parses without
+  executing, so the browser globals it touches at load are irrelevant. Prints
+  `SKIPPED` with neither engine rather than passing on a check that never ran.
+  **check-citations**: re-resolves all 28 `shared/site.js:NNN` citations in
+  CLAUDE.md against the file. Closes OPT-12.
+- checks: checks.sh ok · manual: fault-injected all four checks and confirmed
+  each fails on its own fault — renamed `toggleEdit` (R2), stripped
+  `id="de-toast"` (R3), appended `function broken( {` (R12), and inserted 20
+  lines at site.js:20 to simulate a publish growing the file (R11, flagged 4
+  citations). Baseline and post-restore runs both exit 0.
+- push: this commit
+- note: the strict version of check-citations — bind each line number to one
+  symbol — produced 6 false positives on the existing prose, because backticked
+  words like `HEAD`, `id` and `3` sit between a symbol and its number. Relaxed
+  to "any backticked symbol on the line appears at the cited line". Less precise
+  per citation, unchanged against real drift, and it no longer cries wolf.
+
+### 2026-08-08 · ERR · git checkout -- . destroyed the uncommitted checks.sh
+- what: the fault-injection harness restored with `git checkout -- .` between
+  cases. `docs/checks.sh` was itself uncommitted, so the first restore reverted
+  it to the two-check version committed in `ce72929` — faults 3 and 4 then
+  "passed" against checks that no longer existed. The exit 0 was real; the
+  checks were not there to fail.
+- checks: checks.sh ok (the old two-check one — which is the bug)
+- push: not pushed
+- note: a passing check that never ran is the exact failure check-syntax was
+  written to avoid, reproduced by the harness testing it.
+
+### 2026-08-08 · FIX · Restore named files only, never the whole tree
+- what: rewrote `docs/checks.sh` from the session transcript and re-ran the
+  harness with `git checkout -- shared/site.js projects/hot-potato.html` — the
+  two files actually faulted. Added a `diff` against a scratchpad copy at the
+  end to prove `checks.sh` survived, and re-ran all four cases from a verified
+  baseline.
+- checks: checks.sh ok · manual: all four faults caught, tree clean afterwards
+- push: this commit
+- note: extended R8 to cover blanket restores. `git checkout -- .` and
+  `git restore .` sit with force-push and `reset --hard`: they take uncommitted
+  work and there is no reflog for it. Name the files you want reverted.
+
+### 2026-08-08 · OK · Rebased onto a browser publish mid-task
+- what: L2 step 2 found `38bc3e9` (a publish, +2 media) on origin while the
+  checks work was uncommitted. Rebased with `--autostash`, clean. It rewrote
+  `projects/healthy-jeart.html` and `shared/theme.css`; `site.js` was untouched,
+  so R11's 28 citations still resolve.
+- checks: checks.sh ok after rebase · manual: re-counted the figures R7 asserts
+- push: this commit
+- note: theme.css went 18 → 15 hex literals in that publish, so R7's count was
+  wrong within minutes of being written. Corrected, and R7 now says outright
+  that these counts drift and are not checked. Prose numbers rot exactly like
+  line numbers do — check-citations only covers `shared/site.js:NNN`.

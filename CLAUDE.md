@@ -17,17 +17,19 @@ bash docs/checks.sh           # static invariant checks; no output = all clear
 
 `file://` mostly works, but **Export** and the asset-inlining fetches require http. There is no build or test framework — verify behaviour by loading the page and exercising the editor.
 
-`docs/checks.sh` is the only automated check in the repo. It is plain grep over the HTML and `site.js`, it exits non-zero on failure, and it catches the two mistakes that are otherwise invisible until a user clicks the wrong thing (see R2/R3 below). Run it after touching handler names, page markup, or the shared script.
+`docs/checks.sh` is the only automated check in the repo. It exits non-zero on failure and runs four checks — R2, R3, R11 and R12 — each one a mistake that is otherwise invisible until a user clicks the wrong thing or the site goes blank. Run it after touching handler names, page markup, the shared script, or any line number quoted in this file.
+
+Three of the four are plain grep and awk. The fourth compiles `site.js` with whichever JS engine is installed (`node --check`, else `gjs`); with neither it prints `SKIPPED` rather than passing quietly on a check that never ran.
 
 ## Working agreement
 
-Ten rules and four loops. Two living files carry the state between sessions:
+Twelve rules and four loops. Two living files carry the state between sessions:
 `docs/worklog.md` (append-only record of what happened) and `docs/backlog.md`
 (ranked optimization ideas, never acted on unprompted).
 
 ### Rules
 
-R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` enforces R2 and R3; the rest are on you. Every rule below is a real failure mode in this repo, not general advice.
+R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` enforces R2, R3, R11 and R12; the rest are on you. Every rule below is a real failure mode in this repo, not general advice.
 
 - **R1 — Don't hand-edit page *content*.** The HTML files are machine-written; the next browser publish overwrites the whole file from that browser's DOM + `localStorage`, discarding hand edits it doesn't know about. Structural markup, CSS and JS changes are safe (the browser reloads them); prose and images go through the editor. If a task needs a content change, say so and stop.
 - **R2 — Every `on*=` handler name must resolve to a declaration in `site.js`.** Handlers are wired by string, in the five HTML files *and* inside `site.js` template literals. Nothing else in the repo can catch a rename that misses one — no import fails, no lint fires; the button simply does nothing when clicked.
@@ -35,10 +37,12 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 - **R4 — New editor UI joins the scrub list** in `buildPublishHTML()` (shared/site.js:1677), or it is serialized into every future publish. The stray `#ep-section-list` / `#ep-presets` markup in `projects/block-city.html` is what that looks like when it's missed.
 - **R5 — Editor-chrome changes land in all five HTML files** (`#edit-panel`, `#fmt-bar`, `#dev-editor`, `#de-toast`). Afterwards the four project pages must still be byte-identical to each other (`diff` them); only `index.html`'s `#edit-panel` legitimately differs — it has the extra "+ Add" tab.
 - **R6 — No new silent catches.** `catch (e) {}` is why `localStorage` quota failures are indistinguishable from successful saves (shared/site.js:780, 1103, 1123, 1154, 1248). Every new catch reaches the user via `dlToast()` or `alert()`, or at minimum `console.warn`.
-- **R7 — No hex literals in new CSS.** Use the variables `computeVars()` writes. 86 literals already survive in `portfolio.css` (against 620 `var()` uses), plus 18 in `shared/theme.css` — they are exactly the parts that ignore presets and don't invert in dark mode. Don't add another.
-- **R8 — Never force-push, `reset --hard`, or rebase `main`.** `origin/main` holds content the browser published from someone's `localStorage`; nothing local can reconstruct it. `--force-with-lease` is no safer here — L2 always fetches first, and after a fetch it will happily overwrite a browser commit.
+- **R7 — No hex literals in new CSS.** Use the variables `computeVars()` writes. 86 literals already survive in `portfolio.css` (against 620 `var()` uses), plus 15 in `shared/theme.css` — they are exactly the parts that ignore presets and don't invert in dark mode. Don't add another. These counts drift when the editor republishes the theme; `checks.sh` does not check them.
+- **R8 — Never force-push, `reset --hard`, or rebase `main`.** `origin/main` holds content the browser published from someone's `localStorage`; nothing local can reconstruct it. `--force-with-lease` is no safer here — L2 always fetches first, and after a fetch it will happily overwrite a browser commit. Blanket restores belong in the same family: `git checkout -- .` and `git restore .` take uncommitted work with them and there is no reflog for it — name the files you actually want reverted.
 - **R9 — Nothing secret in `docs/`.** No tokens, no absolute local paths, no personal data. Those files are committed to a public repo and served by GitHub Pages.
 - **R10 — Backlog items are inert.** Never act on anything in `docs/backlog.md` unless the user names it. Noticing something is a reason to file it, not to fix it.
+- **R11 — Every `shared/site.js:NNN` cited in this file must still name what it points at.** The browser rewrites `site.js` on every publish, so a citation rots the moment anything above it grows — one batch of commits on 2026-08-07 invalidated 18 of 19 at once, silently. `checks.sh` re-resolves all 28 against the file. Cite a symbol in backticks on the same line as its number, or the check has nothing to match. `docs/backlog.md` is exempt: it pins its numbers to a stated commit.
+- **R12 — `site.js` must parse.** One flat script, no module graph, no bundler — a stray brace blanks all five pages and no other check here would notice. `checks.sh` compiles it without executing it, so browser globals don't matter.
 
 ### Loops
 

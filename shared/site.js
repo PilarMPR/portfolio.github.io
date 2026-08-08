@@ -20,6 +20,34 @@ const projectHref = id => PAGE.base + 'projects/' + id + '.html';
 /* A stored image may be a legacy data: URL or an assets/ path. */
 const storedSrc = v => !v ? '' : (v.startsWith('data:') ? v : (MEDIA_CACHE[v] || asset(v)));
 
+/* ─── DIAGNOSTICS ──────────────────────────
+   This file is one flat script wired to the markup by name, so nothing
+   reports a throw: a bad handler leaves the button doing nothing, and a
+   failed save looks exactly like a successful one. Both are logged here.
+
+   Visitors get silence on purpose — they can't act on it, and the toast
+   host only exists while editing. dlToast is hoisted, so calling it from
+   here is fine even though it is declared much further down. */
+function reportError(what, err) {
+  console.error('[portfolio] ' + what + ':', err);
+  if (document.body && document.body.classList.contains('editing')) {
+    dlToast('⚠ ' + what);
+  }
+}
+
+/* Every localStorage write goes through this. The quota is small, images
+   are not, and each of these call sites used to swallow the failure. */
+function safeSet(key, value) {
+  try { localStorage.setItem(key, value); return true; }
+  catch (e) {
+    reportError('Could not save — browser storage is full. Publish to free space.', e);
+    return false;
+  }
+}
+
+window.addEventListener('error', e => reportError('Script error', e.error || e.message));
+window.addEventListener('unhandledrejection', e => reportError('Unhandled promise rejection', e.reason));
+
 /* ─── LAYOUT METRICS ───────────────────────
    Single source of truth is --nav-h in portfolio.css, so the header
    height and every scroll offset that depends on it can't drift apart. */
@@ -40,19 +68,19 @@ function lockScroll()   { if (++scrollLocks === 1) document.body.style.overflow 
 function unlockScroll() { if (scrollLocks > 0 && --scrollLocks === 0) document.body.style.overflow = ''; }
 
 /* ─── CURSOR ─────────────────────────────
-   Pointer-driven, so it's skipped entirely on touch — otherwise a 60fps
-   rAF loop runs forever on a phone animating an element nobody sees. */
+   Pointer-driven, so it's skipped entirely on touch — otherwise the move
+   handler runs forever on a phone positioning an element nobody sees.
+   The crosshair is written straight from the event rather than eased
+   toward it: the old `cx += (mx-cx)*.17` inside a rAF loop left it a
+   handful of frames behind the hand moving it, and since it stands in
+   for the system cursor (body { cursor:none }) any gap at all reads as
+   the whole page lagging. Matching the pointer exactly is the feature —
+   there is nothing to tune here. */
 const cur = document.getElementById('cursor');
 if (cur && MQ_FINE.matches) {
-  let mx=0,my=0,cx=0,cy=0;
-  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
   document.addEventListener('mouseleave', () => cur.classList.add('hidden'));
   document.addEventListener('mouseenter', () => cur.classList.remove('hidden'));
-  (function tick(){
-    cx += (mx-cx)*.17; cy += (my-cy)*.17;
-    cur.style.left = cx+'px'; cur.style.top = cy+'px';
-    requestAnimationFrame(tick);
-  })();
   document.querySelectorAll('a,button,.project,.ch,.skill,.sh-nav-btn,.db-btn').forEach(el => {
     el.addEventListener('mouseenter', () => cur.classList.add('big'));
     el.addEventListener('mouseleave', () => cur.classList.remove('big'));
@@ -777,7 +805,7 @@ function saveCaseStudy(id) {
   if (aside && aside.dataset.touched) data.__widgets__ = cleanAsideHTML(aside);
 
   data.__savedAt__ = Date.now();        // so a later publish can outrank it
-  try { localStorage.setItem('pmpr_cs_fields_' + id, JSON.stringify(data)); } catch (e) {}
+  safeSet('pmpr_cs_fields_' + id, JSON.stringify(data));
 }
 
 /* A field's value without any edit-mode controls that sit inside it —
@@ -844,10 +872,10 @@ function migrateCaseSnapshot(id) {
   const oldLoose = pick(old).filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget'));
   oldLoose.forEach((el, i) => { data[`page/${i}`] = el.innerHTML; });
 
-  try {
-    localStorage.setItem('pmpr_cs_fields_' + id, JSON.stringify(data));
+  // Drop the superseded blob only if the new one actually stored.
+  if (safeSet('pmpr_cs_fields_' + id, JSON.stringify(data))) {
     localStorage.removeItem('pmpr_cs_content_' + id);
-  } catch (e) {}
+  }
   return data;
 }
 
@@ -1100,7 +1128,7 @@ async function handleCsImg(input, key) {
     }
     if (fimg) fimg.src = src;
   }
-  try { localStorage.setItem('pmpr_cs_' + key, path); } catch (e) {}
+  safeSet('pmpr_cs_' + key, path);
   saveCaseStudy(PAGE.id);
 }
 
@@ -1120,7 +1148,7 @@ async function handleImgUpload(input, zoneId) {
     const ph = document.getElementById('photo-ph');
     if (ph) ph.style.display = 'none';
   }
-  try { localStorage.setItem('pmpr_img_' + zoneId, path); } catch (e) {}
+  safeSet('pmpr_img_' + zoneId, path);
   autoSave();
 }
 
@@ -1151,7 +1179,7 @@ function autoSave() {
   const customCards = [...document.querySelectorAll('.project[data-custom-card]')];
   data['__custom_cards__'] = customCards.map(c => ({ id: c.dataset.customCard, html: c.outerHTML }));
   data['__savedAt__'] = Date.now();     // so a later publish can outrank it
-  try { localStorage.setItem('pmpr_portfolio_v2', JSON.stringify(data)); } catch (e) {}
+  safeSet('pmpr_portfolio_v2', JSON.stringify(data));
   dlSave();
 }
 
@@ -1174,10 +1202,9 @@ function draftIsStale(data) {
 
 /* Park it under its own key so nothing is lost, and say so. */
 function parkStaleDraft(key, data) {
-  try {
-    localStorage.setItem(key + '__stale', JSON.stringify(data));
-    localStorage.removeItem(key);
-  } catch (e) {}
+  // Never remove the live copy unless the parked copy is safely written — on
+  // a full quota this used to delete the only copy of the draft that existed.
+  if (safeSet(key + '__stale', JSON.stringify(data))) localStorage.removeItem(key);
   showDraftNotice(key);
 }
 
@@ -1201,10 +1228,9 @@ function showDraftNotice(key) {
         // and the button does nothing forever.
         const data = JSON.parse(d);
         data.__savedAt__ = Date.now();
-        localStorage.setItem(key, JSON.stringify(data));
-        localStorage.removeItem(key + '__stale');
+        if (safeSet(key, JSON.stringify(data))) localStorage.removeItem(key + '__stale');
       }
-    } catch (e) {}
+    } catch (e) { reportError('Could not restore the parked draft', e); }
     location.reload();
   };
 }
@@ -1245,7 +1271,7 @@ function loadSaved() {
         if (k && data[k] === undefined && data['field_' + i] !== undefined) data[k] = data['field_' + i];
       });
       data.__keyed__ = 1;
-      try { localStorage.setItem('pmpr_portfolio_v2', JSON.stringify(data)); } catch (e) {}
+      safeSet('pmpr_portfolio_v2', JSON.stringify(data));
     }
 
     // The education list is restored whole — its entries are added and
@@ -1586,7 +1612,7 @@ function themeCSS(t){
          `   these win — keep it. */\n:root {\n${lines.join('\n')}\n}\n`;
 }
 
-function saveTheme(){ try { localStorage.setItem('pmpr_theme', JSON.stringify(currentTheme)); } catch(e){} }
+function saveTheme(){ safeSet('pmpr_theme', JSON.stringify(currentTheme)); }
 function loadTheme(){
   try { const raw = localStorage.getItem('pmpr_theme'); if (raw){ currentTheme = Object.assign({}, THEME_DEFAULT, JSON.parse(raw)); applyTheme(currentTheme); } } catch(e){}
 }
@@ -1660,7 +1686,7 @@ function ghToken(force) {
       '  • Permissions → Contents → Read and write\n\n' +
       'Stored only in this browser. Never added to your site.'
     );
-    if (t) { t = t.trim(); localStorage.setItem('pmpr_gh_token', t); }
+    if (t) { t = t.trim(); safeSet('pmpr_gh_token', t); }
   }
   return t && t.trim();
 }
@@ -1828,6 +1854,20 @@ async function ghPublish(token, onStep) {
   const msg = uploaded.length
     ? `Update portfolio content + ${uploaded.length} media file${uploaded.length > 1 ? 's' : ''} via in-page editor`
     : 'Update portfolio content via in-page editor';
+  // The ref was read before the uploads, which take as long as the files are
+  // big. If another tab, device or a git push moved the branch since then, this
+  // commit's parent is stale: the PATCH below is not a fast-forward and GitHub
+  // rejects it with a bare "422", which says nothing about what happened or
+  // whether anything was lost. Check first and say it in words.
+  step('⏳ Checking for other changes…');
+  const nowRef = await j(await fetch(`${api}/repos/${owner}/${repo}/git/ref/heads/${branch}`, { headers: H }));
+  if (nowRef.object.sha !== headSha) {
+    throw new Error(
+      'The site changed on GitHub while this was publishing — probably another ' +
+      'tab, another device, or a push.\n\nNothing was overwritten and your edits ' +
+      'are still saved in this browser. Reload the page and publish again.');
+  }
+
   const nc = await j(await fetch(`${api}/repos/${owner}/${repo}/git/commits`, { method: 'POST', headers: H,
     body: JSON.stringify({ message: msg, tree: newTree.sha, parents: [headSha] }) }));
   await j(await fetch(`${api}/repos/${owner}/${repo}/git/refs/heads/${branch}`, { method: 'PATCH', headers: H,
@@ -1933,8 +1973,7 @@ function dlToast(msg) {
 
 /* ── Persistence ───────────────────────── */
 function dlSave() {
-  try { localStorage.setItem(DL_KEY, JSON.stringify(DEVLOG)); }
-  catch (e) { dlToast('⚠ Browser storage full — publish to free space'); }
+  safeSet(DL_KEY, JSON.stringify(DEVLOG));
 }
 
 function dlLoad() {

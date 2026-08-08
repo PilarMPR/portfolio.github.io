@@ -108,5 +108,7 @@ count_says "$hexp" "$hexp literals already survive in \`portfolio.css\`" "portfo
 count_says "$vars" "against $vars \`var()\` uses"                        "portfolio.css var() uses"
 count_says "$hext" "plus $hext in \`shared/theme.css\`"                  "theme.css hex literals"
 count_says "$ncit" "re-resolves all $ncit against the file"              "site.js citations in CLAUDE.md"
+nsil=$(grep -cE 'catch *\([a-z]*\) *\{ *\}' shared/site.js)
+count_says "$nsil" "$nsil silent catches remain elsewhere in the file"   "silent catches in site.js"
 
 exit $fail

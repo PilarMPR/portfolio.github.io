@@ -291,3 +291,61 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   and a fake local path to worklog.md — both still caught (2 matches); scanning
   the script's own diff now returns 0
 - push: this commit
+
+### 2026-08-08 · OK · Cursor tracks the pointer 1:1
+- what: the pen crosshair eased toward the mouse (`cx += (mx-cx)*.17` in a
+  permanent rAF loop, the CURSOR block in `shared/site.js`) — a ~17%/frame
+  follow that never quite arrives, so it visibly trailed the hand. Now written
+  straight from the `mousemove` event; the rAF loop and the mx/my/cx/cy state
+  are gone.
+- checks: checks.sh ok · smoke.sh ok 5 pages — both run against this change
+  alone, in a scratchpad copy, because a parallel session's uncommitted work
+  landed in the shared tree mid-task (see ERR below) · manual: not exercised in
+  a real browser — smoke.sh loads the page but never moves a pointer, so the
+  1:1 tracking itself is unverified here
+- push: this commit
+- note: kept the block at exactly 21 lines so none of R11's 28 citations
+  shifted. Removing the loop also drops a forever-running rAF on every desktop
+  page — the `.big` hover transition is CSS and is unaffected.
+
+### 2026-08-08 · ERR · checks.sh red in the shared tree — 26 citations off by 28
+- what: `check-citations` failed on 26 of R11's 28 numbers immediately after the
+  cursor change passed clean. Not the cursor edit: a parallel session (four are
+  live in this clone) added a ~28-line DIAGNOSTICS block near the top of
+  `shared/site.js` — `reportError()`, `safeSet()`, and window `error` /
+  `unhandledrejection` listeners, plus the R6 rewrite of the five silent
+  `localStorage` catches. Every citation below it shifted by exactly 28.
+- checks: checks.sh FAIL in the working tree · checks.sh ok + smoke.sh ok 5
+  pages on a scratchpad copy holding only the cursor change
+- push: not pushed
+- note: left open on purpose. The CLAUDE.md numbers belong to the change that
+  moved them (L1 step 4), and renumbering them from here would fold someone
+  else's in-flight work into this commit. The cursor block was sized to keep the
+  file's line count unchanged precisely so it would not do this.
+
+### 2026-08-08 · OK · OPT-01, OPT-02, OPT-03 — errors surface, saves report, publish checks
+- what: three named backlog items (R10 — named by the user, so acted on).
+  **OPT-01**: nothing in 3000 lines reported a throw — no `console.*`, no
+  `window.onerror`. Added a DIAGNOSTICS block: `reportError()` (site.js:31)
+  logs always and toasts only while `body.editing`, since a visitor can do
+  nothing with the message; window `error` and `unhandledrejection` listeners
+  route into it.
+  **OPT-02**: `safeSet()` (site.js:40) replaces every raw `localStorage.setItem`
+  — 11 call sites, silent catches 20 → 11. Two of them were worse than silent:
+  `parkStaleDraft()` and the draft-restore path both `removeItem`'d the original
+  *after* a `setItem` that could throw, so a full quota deleted the only copy.
+  Both now remove only once `safeSet` returns true.
+  **OPT-03**: `ghPublish()` read the head sha before uploading media and never
+  re-read it, so a second tab or a push made the PATCH a non-fast-forward and
+  GitHub answered with a bare "422". It now re-reads the ref immediately before
+  the commit and aborts with a sentence saying nothing was overwritten.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: **not exercised through
+  the editor UI** — smoke.sh loads every page but clicks nothing, so the toast
+  path, a real quota failure and a real concurrent publish are all unverified.
+  The publish abort in particular has never run against GitHub.
+- push: this commit
+- note: check-citations earned itself here — the DIAGNOSTICS block shifted every
+  line below it and the check failed on 26 of 29 citations, which is exactly the
+  drift OPT-12 was filed for. All renumbered. R6 rewritten (its cited lines were
+  the silent catches this removed) and its silent-catch count is now recomputed
+  by check-counts, so it cannot rot quietly either.

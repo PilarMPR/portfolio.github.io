@@ -364,3 +364,23 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   the commit message describes only half of what it contains. The real lesson
   is upstream of git — `git commit -a` in a clone with four live sessions
   commits whatever anyone else is holding. Filing it rather than fixing it (R10).
+
+### 2026-08-09 · SESSION · Verified the self-edit / publish path still works end to end
+- what: no code change — a question ("is the site still editable and auto
+  publishable across devices?") answered from the code rather than the docs.
+  Confirmed: the Alt + three-clicks logo gesture still opens the editor
+  (site.js:213); `autoSave()` (site.js:1169) fires on every edit but writes
+  only to this browser's `localStorage` + IndexedDB; `saveAndPublish()`
+  (site.js:1880) is the sole path off-device and is a manual button — no timer,
+  no publish-on-save, no background sync anywhere in the file. Corrected the
+  "auto publishable" framing on that basis: saving is automatic, publishing is
+  not, and only publishing is what another device ever sees.
+- checks: checks.sh ok · smoke.sh ok 5 pages · live site HTTP 200,
+  last-modified 2026-08-08 12:33 UTC (matches the last browser publish)
+- push: e975c98 was still unpushed at session start; this commit sits on top
+- note: two caveats worth remembering because both look like success. A browser
+  with no stored `pmpr_gh_token` reports `✓ Saved locally` and publishes
+  nothing — correct, but indistinguishable from a publish if you aren't
+  reading the button. And OPT-03's new pre-commit ref re-check (site.js:1862)
+  means a publish can now legitimately refuse; it still has never run against
+  a real concurrent publish, so that abort path remains untested in anger.

@@ -349,3 +349,18 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   drift OPT-12 was filed for. All renumbered. R6 rewritten (its cited lines were
   the silent catches this removed) and its silent-catch count is now recomputed
   by check-counts, so it cannot rot quietly either.
+
+### 2026-08-08 · FIX · The parallel session renumbered the citations — and took the cursor commit with it
+- what: the open ERR above resolved itself. That session committed as `e8d47d4`
+  with the whole working tree staged, so its DIAGNOSTICS/R6 work, the cursor
+  change and both of my worklog entries went up as one commit — the citations
+  it shifted were renumbered inside the same commit that shifted them, which is
+  what L1 step 4 asks for, just not by the session that noticed.
+- checks: checks.sh ok · smoke.sh ok 5 pages, both against `af14973`
+- push: nothing of mine left to commit — the cursor change is already on main
+  inside `e8d47d4`; this entry is the only thing in this commit
+- note: second time this has happened in this clone (see 2026-08-07 ERR). Same
+  resolution as then: keep the commit, don't rewrite main (R8), and accept that
+  the commit message describes only half of what it contains. The real lesson
+  is upstream of git — `git commit -a` in a clone with four live sessions
+  commits whatever anyone else is holding. Filing it rather than fixing it (R10).

@@ -407,3 +407,97 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   *did* surface is OPT-17: the toggle's label survives the scrub even though
   its checkbox does not, which is how `block-city.html` came to ship
   `🔒 Private` as static markup.
+
+### 2026-08-09 · OK · The editor is built on demand, not shipped in the HTML
+- what: user asked to make the site's editability less obvious. Nothing was
+  visible on the rendered page already — the panel is `translateX(-100%)`, the
+  editor and bar are `display:none` — so the whole tell was view-source, where
+  44–51% of every page was editor markup. Moved all four blocks (`#edit-panel`,
+  `#fmt-bar`, `#dev-editor`, `#de-toast`) into three template functions in
+  `site.js` and a builder, `edChrome()`, called from `toggleEdit()`. Pages went
+  index 706→371, hot-potato 345→185, block-city 334→160. Two load-time captures
+  had to become lazy (`fmtBar` → `fmtBarEl()`, `epGrip` → looked up in
+  `edWireSheet()`); `buildPublishHTML()` now removes the four subtrees by id,
+  which replaced most of the scrub list rather than adding to it.
+- checks: checks.sh ok · smoke.sh ok 5 pages, extended with `chromeServed` /
+  `chromeBuilt` so it now asserts no page ships the chrome *and* that
+  `edChrome()` builds it exactly once, twice in a row · new scratchpad probe
+  drove the real gesture (12/12 on both roles: plain click inert, one alt-click
+  inert, three enters, tabs populate, fmt bar shows/hides, exit and re-entry
+  clean, no duplicate panel) · privacy probe re-run 18/18, now including "no
+  editor chrome in the published HTML"
+- push: not pushed — asked first
+- note: R3 lost two sentinels, R4 and R5 were rewritten around a built rather
+  than authored editor, and checks.sh gained `check-no-chrome`, which fails if
+  a page carries the markup again — a stale page published by an old browser
+  is now a check failure rather than an invisible divergence. OPT-07, OPT-10
+  and OPT-17 all closed as side effects. **OPT-15 is untouched**: the gesture
+  is still spelled out in a comment at site.js:205 and `site.js` is served to
+  everyone, so this hides the editor, it does not gate it. The token still does
+  that. Not done: no real browser was driven by hand — WebKitGTK is the engine
+  in every check above, and nothing tested a phone-width bottom sheet.
+
+### 2026-08-09 · ERR · My own citation renumbering corrupted citations that were correct
+- what: the chrome templates shifted every line below them and checks.sh failed
+  26 of 33 citations (R11 doing its job). I wrote a resolver that paired each
+  citation with symbols in line order and fell back to "first line containing
+  the string" — it moved `safeSet` to :1048 and `reportError` to :10, both of
+  which had been right, and pointed `buildPublishHTML` at :443. Wrong in a way
+  checks.sh could not see, because a citation only has to mention *some*
+  backticked symbol from its line.
+- checks: checks.sh FAIL, differently and more quietly than before the fix
+- FIX: reverted `CLAUDE.md` by name (`git checkout HEAD -- CLAUDE.md`, R8 —
+  named file, not a blanket restore), re-applied the prose by hand, and rewrote
+  the resolver to pair each citation with the backticked symbol *immediately
+  preceding it* and to resolve only against a real declaration, reporting
+  anything it could not resolve instead of guessing. Three lines cite a second
+  symbol after the number (`dlPublicData`, `DL_SCHEMA`, `dlLegacyRedirect`) and
+  were done by hand both times. checks.sh green.
+- note: the lesson is about the check, not the script — R11 is satisfied by any
+  symbol on the line, so it catches drift but not mis-pairing. A resolver that
+  guesses is worse than one that reports, because its output looks verified.
+
+### 2026-08-09 · FIX · Visitors lost the "link copied" toast
+- what: caught reading the diff, not by any check. `#de-toast` was static markup
+  on every page, so `dlToast()` could assume it existed; after the move it is
+  editor chrome and `dlToast()`'s `if (!t) return` made it a silent no-op. But
+  `dlCopyLink()` is wired to a `.dl-share` button in the *public* dev-entry
+  view — a visitor pressing Copy link would have got no confirmation at all.
+- checks: 6/6 in a scratchpad probe — nothing served, built on first call,
+  carries the message, actually shown, reused rather than duplicated on a
+  second call, still stripped from a publish
+- note: `dlToast()` now creates the node when it's missing. It stays in
+  `EP_CHROME_IDS` so a publish still removes it. This is the one place where
+  "editor chrome" and "visitor UI" overlapped, and the static markup had been
+  hiding that.
+
+### 2026-08-09 · OK · The editor opens only where a GitHub token is stored
+- what: user asked whether editing could be gated to them alone. Answered the
+  honest version first — publishing already is, unbypassably, because GitHub
+  checks the token server-side; the *UI* cannot be, because `site.js` runs on
+  the visitor's machine — then built the gate they picked. `toggleEdit()` now
+  refuses to open unless `edUnlocked()` (site.js:236) finds a token, so the
+  gesture is a silent no-op on any other browser. Shift on the closing click
+  routes to `edUnlock()` (site.js:263) instead, which prompts for a token and
+  checks it against `GET /repos/{owner}/{repo}` — including `permissions.push`
+  — before storing it. Leaving edit mode is deliberately *not* gated, or a
+  token cleared mid-session would strand the panel open with no way to close.
+- checks: checks.sh ok · smoke.sh ok 5 pages, extended with `gateHolds` — it
+  clears the token itself rather than assuming an empty profile, then asserts
+  `toggleEdit()` refuses · gesture probe 14/14 on both roles, now opening with
+  "no token → gesture does nothing, no chrome even built" before proving the
+  unlocked path still works · privacy 18/18 and the toast probe 6/6, both
+  unaffected (they call `edChrome()` directly, not through the gate)
+- push: not pushed — asked first
+- note: the gate checks *presence*, not validity — validation happens at unlock
+  and at publish. Revalidating on every entry would mean a network round trip
+  per gesture and would break editing offline, and it would buy nothing: the
+  key name and the gesture are both readable in the served script, so anyone
+  who can fake one can fake the other. That is the honest ceiling of a
+  client-side gate and CLAUDE.md now says so in the opening section, next to
+  the claim it qualifies. OPT-15 closed by a different route than it proposed
+  — a token in `localStorage` is the "value that isn't in the bundle" it asked
+  for, without a passphrase hash sitting in a public repo waiting to be
+  brute-forced. Not done: no hand-driven real browser, nothing exercised on a
+  phone, and `edTokenValid()` has never run against a live GitHub response —
+  the probes never reach the network.

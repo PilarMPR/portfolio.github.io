@@ -15,7 +15,10 @@ const { Gtk, WebKit2, GLib } = imports.gi;
 const [BASE, PAGES_CSV, FNS_CSV] = ARGV;
 const PAGES = PAGES_CSV.split(',').filter(s => s.length);
 const FNS = JSON.stringify(FNS_CSV.split(',').filter(s => s.length));
-const SENTINELS = '["cursor","nav","nav-logo","fmt-bar","lightbox","de-toast"]';
+const SENTINELS = '["cursor","nav","nav-logo","lightbox"]';
+// Built by edChrome() on first entry to edit mode, absent until then. A page
+// that ships them is stale; a page that can't build them has a broken editor.
+const CHROME = '["edit-panel","fmt-bar","dev-editor","de-toast"]';
 
 Gtk.init(null);
 
@@ -34,6 +37,27 @@ const PROBE = `JSON.stringify({
   errs: window.__errs || [],
   missingEls: ${SENTINELS}.filter(function (id) { return !document.getElementById(id); }),
   missingFns: ${FNS}.filter(function (n) { return typeof window[n] !== "function"; }),
+  // No editor markup may be served. Then build it, twice, and check it
+  // arrives exactly once — edChrome() is the only thing standing between
+  // "hidden editor" and "no editor at all".
+  chromeServed: ${CHROME}.filter(function (id) { return !!document.getElementById(id); }),
+  // The gate: with no stored token the gesture's target must refuse to open.
+  // Cleared explicitly rather than assumed, so a token left behind by another
+  // run in the same WebKit profile can't turn this green by accident.
+  gateHolds: (function () {
+    try {
+      localStorage.removeItem("pmpr_gh_token");
+      toggleEdit();
+    } catch (e) { return "threw: " + e.message; }
+    return document.body.classList.contains("editing")
+      ? "editor opened with no token" : "ok";
+  })(),
+  chromeBuilt: (function () {
+    try { edChrome(); edChrome(); } catch (e) { return "threw: " + e.message; }
+    var dupes = ${CHROME}.filter(function (id) {
+      return document.querySelectorAll("#" + id).length !== 1; });
+    return dupes.length ? "not exactly one: " + dupes.join(", ") : "ok";
+  })(),
   themed: !!getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),
   // The landing page is <section>s, case studies are .sh-sec — count both, and
   // require rendered text too, so a page that keeps its shell but loses its
@@ -67,6 +91,9 @@ function report(page, raw) {
   r.errs.forEach(e => bad.push(`threw: ${e}`));
   if (r.missingEls.length) bad.push(`missing elements: ${r.missingEls.join(', ')}`);
   if (r.missingFns.length) bad.push(`handlers not defined at runtime: ${r.missingFns.join(', ')}`);
+  if (r.chromeServed.length) bad.push(`editor chrome served as markup: ${r.chromeServed.join(', ')}`);
+  if (r.gateHolds !== 'ok') bad.push(`the editor gate did not hold — ${r.gateHolds}`);
+  if (r.chromeBuilt !== 'ok') bad.push(`edChrome() did not build the editor — ${r.chromeBuilt}`);
   if (!r.role) bad.push('window.PAGE never set — site.js did not reach the page contract');
   if (!r.themed) bad.push('--bg unset — applyTheme() did not run');
   if (!r.blocks) bad.push('no <section>/.sh-sec rendered — page structure is gone');

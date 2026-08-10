@@ -66,7 +66,7 @@ Evidence: 86 in `shared/portfolio.css` (against 620 `var()` uses) and 18 in
 don't invert in dark mode (R7). Fix incrementally, one section per session, each
 verified against every preset in both light and dark.
 
-### OPT-07 · Editor chrome duplicated across five files · impact med · effort high · open
+### OPT-07 · Editor chrome duplicated across five files · impact med · effort high · done
 Evidence: the `#edit-panel`…`#de-toast` block is byte-identical in
 `hot-potato.html`, `healthy-jeart.html` and `create-your-own-monster.html`
 (0 diff lines); `block-city.html` differs by 75 lines, all of it baked runtime
@@ -74,6 +74,14 @@ state rather than authored markup (see OPT-10). Fix: inject the chrome from
 `site.js` at load. Catch: `buildPublishHTML()` serializes the live DOM, so
 injected chrome bakes straight back into the published file unless the scrub
 list removes it first (R4). Do not start this without a plan.
+**Done 2026-08-09**, as part of hiding the editor from view-source rather than
+as a cleanup in its own right. The chrome is built by `edChrome()` from three
+template functions and removed from the clone by id on every publish — so the
+catch above is answered by deleting the subtree, not by scrubbing it. The
+drift the item predicted had already happened and was worse than recorded:
+`index.html` was missing `#ep-grip` entirely, so its panel could not be
+collapsed on a phone. One template fixed that by construction. `checks.sh`
+grew `check-no-chrome` to stop it coming back.
 
 ### OPT-08 · Storage failures never reach the user · impact med · effort low · open
 Evidence: the publish path both `alert()`s and drives the button label; the
@@ -86,12 +94,16 @@ overwritten on the very next line; `#cs-edit-notice` is removed twice inside
 `buildPublishHTML()` (:1667 and :1743). Harmless at runtime, but both make the
 scrub list harder to read correctly — which is R4's entire problem.
 
-### OPT-10 · Baked editor artifacts in `projects/block-city.html` · impact low · effort low · open
+### OPT-10 · Baked editor artifacts in `projects/block-city.html` · impact low · effort low · done
 Evidence: `#ep-section-list`, `#ep-presets`, `#ep-colors`, `#ep-fonts`,
 `class="ep-tab active"` and `disabled=""` are serialized runtime state, not
 authored markup, and they generate diff churn nobody wrote — 75 lines of it.
 Fix: extend the scrub list (R4); the next publish from that page then cleans
 the file itself. **Never hand-edit the file** (R1).
+**Done 2026-08-09** by OPT-07 removing the markup from all five files, which
+took the baked artifacts with it. Nothing was hand-edited: the blocks were cut
+whole by id after checking each was div-balanced, and no line of page content
+was touched (the HTML diff is pure deletion).
 
 ### OPT-11 · Five stale `origin/claude/*` branches · impact low · effort low · open
 Evidence: `entry-writing-edit-mode-lo5i0u`, `game-dev-portfolio-container-ng1hf4`,
@@ -116,7 +128,7 @@ first scroll event re-computes it. Fix: one line in the scrub list next to the
 `#cursor` reset at :1745. Catch: only `solid` — `#nav` has no other classes
 today, so don't blanket-clear `className`.
 
-### OPT-15 · The editor gesture is readable in the served JS · impact low · effort high · open
+### OPT-15 · The editor gesture is readable in the served JS · impact low · effort high · done
 Evidence: `shared/site.js` is served to every visitor, so the Alt+3-click
 gesture in its EDIT MODE section is discoverable by anyone who opens it. The
 docs deliberately omit it (README, CLAUDE.md, SPEC.md all point at the code
@@ -125,6 +137,18 @@ means the gesture checks a value that isn't in the bundle (a hash compared
 against a typed passphrase). Catch: probably not worth it. Publishing already
 requires the GitHub token in `localStorage`, so the realistic worst case from a
 found gesture is a visitor editing their own local copy of the page.
+**Done 2026-08-09**, by the route this item didn't consider. Not a passphrase
+hash — that would have put the secret in the public bundle and invited an
+offline attack. The gesture now checks `edUnlocked()`, i.e. whether a GitHub
+token is in this browser's `localStorage`: a value that is genuinely not in
+the bundle, that only the author has, and that needs no second secret to
+remember. Shift on the closing click runs `edUnlock()`, which validates a
+pasted token against the GitHub API (including `permissions.push`) before
+storing it, so a new device is one paste and a typo fails at the door rather
+than after an entry is written. The item's own verdict — "probably not worth
+it" — still stands on its merits; it was done because the user asked, and the
+honest ceiling is unchanged: the check runs in the visitor's browser and can
+be patched out. Publishing remains the only real gate.
 
 ### OPT-12 · Doc line numbers rot on every publish · impact med · effort med · done
 Evidence: 17 upstream commits on 2026-08-07 grew `site.js` 2465 → 3056 lines and
@@ -156,7 +180,7 @@ every live card image. A safe version has to fetch all five published pages and
 union their `assets/` references with `dlMediaRefs()` first, which also means
 deciding what happens when that fetch fails (answer: publish nothing).
 
-### OPT-17 · The private toggle's *label* is never scrubbed before publish · impact med · effort low · open
+### OPT-17 · The private toggle's *label* is never scrubbed before publish · impact med · effort low · done
 Evidence (`shared/site.js` at `5fcb736`, 3136 lines): `buildPublishHTML()` clears
 the checkbox — `clone.querySelector('#de-private')?.removeAttribute('checked')`
 (site.js:1735) — but nothing resets `#de-private-lbl`, which `deSetPrivateLabel()`
@@ -175,3 +199,7 @@ hand-edit the files** (R1). Related: OPT-10 (same file, same root cause,
 different elements) and OPT-07 (why the chrome is duplicated at all).
 Not a content leak — verified separately that no private title, summary, body,
 id or media reaches the published HTML or an export.
+**Done 2026-08-09**, one day after filing, and not by adding the label to the
+scrub list: OPT-07 deleted the whole subtree the label lives in, so the toggle
+is rebuilt from the template every time and cannot carry a stale state
+forward. The published pages no longer contain `#de-private-lbl` at all.

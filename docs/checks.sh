@@ -18,9 +18,20 @@ done < <(grep -ohE '\bon[a-z]+="[^"]*"' index.html projects/*.html shared/site.j
 
 # check-sentinels (R3) — every page keeps the elements site.js grabs at load
 # with no null check. Removing one throws and kills the whole script.
+# #fmt-bar and #de-toast used to be on this list; they are built by edChrome()
+# now and are absent from an unedited page, so requiring them would be wrong.
 for f in index.html projects/*.html; do
-  for id in cursor nav nav-logo fmt-bar lightbox de-toast; do
+  for id in cursor nav nav-logo lightbox; do
     grep -q "id=\"$id\"" "$f" || { echo "MISSING #$id in $f"; fail=1; }
+  done
+done
+
+# check-no-chrome (R5) — the editor is built from one template in site.js, so
+# no page may carry it as markup. A page that does was published by a browser
+# running the old script, and its copy will drift from the template silently.
+for f in index.html projects/*.html; do
+  for id in edit-panel fmt-bar dev-editor de-toast; do
+    grep -q "id=\"$id\"" "$f" && { echo "EDITOR CHROME #$id baked into $f"; fail=1; }
   done
 done
 

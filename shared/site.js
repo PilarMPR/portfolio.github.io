@@ -211,14 +211,69 @@ const SECTIONS = [
 const navLogo = document.getElementById('nav-logo');
 
 navLogo.addEventListener('click', e => {
-  // Plain click navigates; ctrl/cmd/shift still open the link in a new tab.
-  if (!e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  // Plain click navigates; ctrl/cmd still open the link in a new tab.
+  if (!e.altKey || e.metaKey || e.ctrlKey) return;
   e.preventDefault();
   logoClicks++;
   clearTimeout(logoTimer);
-  if (logoClicks >= 3) { logoClicks = 0; toggleEdit(); return; }
+  // Holding shift on the closing click asks for the token instead of opening
+  // — the only way in on a browser that has never published from here.
+  if (logoClicks >= 3) { logoClicks = 0; e.shiftKey ? edUnlock() : toggleEdit(); return; }
   logoTimer = setTimeout(() => { logoClicks = 0; }, 700);
 });
+
+/* ─── THE GATE ─────────────────────────────
+   The editor opens only where a GitHub token is already stored, which in
+   practice means the author's own browsers. Everywhere else the gesture is
+   a dead no-op that says nothing about why.
+
+   Be clear about what this is: `site.js` is served to every visitor, so a
+   determined reader can patch this check out in devtools and open the panel.
+   What they still cannot do is publish — that is checked by GitHub against
+   the token, server-side, and no amount of client-side patching forges it.
+   So this gates discovery, not access; the token gates access, and always
+   did. Do not let a future change treat edUnlocked() as a security boundary. */
+function edUnlocked() {
+  try { return !!(localStorage.getItem('pmpr_gh_token') || '').trim(); }
+  catch (e) { console.warn('Token store unreadable; editor stays closed.', e); return false; }
+}
+
+/* Verify a token can actually write here before accepting it. Wrong or
+   expired tokens used to be discovered only by a failed publish, after an
+   entry had been written. */
+async function edTokenValid(token) {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}`, {
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return { ok: false, why: r.status === 401 ? 'GitHub rejected that token.'
+                                    : r.status === 404 ? 'That token cannot see this repository.'
+                                    : 'GitHub answered ' + r.status + '.' };
+    const j = await r.json();
+    return j?.permissions?.push ? { ok: true }
+         : { ok: false, why: 'That token can read the repository but not write to it.\nIt needs Contents → Read and write.' };
+  } catch (e) {
+    return { ok: false, why: 'Could not reach GitHub to check the token: ' + e.message };
+  }
+}
+
+/* Reached only by the shift variant of the gesture, so anyone seeing this
+   prompt already knows the way in — telling them why a token failed leaks
+   nothing further, and not telling them makes a typo indistinguishable
+   from a mis-clicked gesture. */
+async function edUnlock() {
+  const t = (prompt(
+    'Paste your GitHub token to unlock editing on this browser.\n\n' +
+    'Fine-grained token, github.com/settings/personal-access-tokens:\n' +
+    '  • Repository access → only ' + GH.owner + '/' + GH.repo + '\n' +
+    '  • Permissions → Contents → Read and write\n\n' +
+    'Stored only in this browser. Never added to your site.'
+  ) || '').trim();
+  if (!t) return;
+  const v = await edTokenValid(t);
+  if (!v.ok) { alert('Not unlocked.\n\n' + v.why); return; }
+  if (!safeSet('pmpr_gh_token', t)) return;   // safeSet reports its own failure
+  toggleEdit();
+}
 
 /* The "Open ✏" links hand off to a project page with ?edit=1. That param on
    its own is a plaintext way in for anyone who ever sees the URL, so it only
@@ -237,26 +292,230 @@ function edHandoffTake() {
   } catch (e) { console.warn('Editor handoff could not be read; staying closed.', e); return false; }
 }
 
+/* ─── EDITOR CHROME ────────────────────────
+   The panel, the formatting bar, the dev-entry editor and the toast are
+   built here on first use rather than shipped in the five HTML files.
+   Three reasons, in order of how much they matter:
+
+   1. A published page carries no editor markup at all, so view-source
+      shows a portfolio rather than a CMS. It was 44–51% of every file.
+   2. One template instead of five copies — the chrome cannot drift
+      between pages any more, which is what R5 was written to catch by
+      hand. index.html had already lost its #ep-grip that way.
+   3. Nothing editor-shaped is in the DOM at publish time, so there is
+      no runtime state left to scrub (R4) and none to bake by mistake.
+
+   The cost: #fmt-bar and #de-toast are no longer load-time sentinels, so
+   anything reaching for them must tolerate their absence — see fmtBarEl()
+   and dlToast(). edChrome() is idempotent, because a page published
+   before this change still has the old markup in it. */
+const EP_CHROME_IDS = ['edit-panel', 'fmt-bar', 'dev-editor', 'de-toast'];
+
+function epPanelHTML() {
+  return `<div id="edit-panel">
+  <button class="ep-grip" id="ep-grip" type="button" aria-label="Collapse editor panel" aria-expanded="true"></button>
+  <div class="ep-head">
+    <span class="ep-head-title">Edit mode</span>
+    <button class="ep-exit" onclick="toggleEdit()">✕ Exit</button>
+  </div>
+
+  <div class="ep-tabs">
+    <button class="ep-tab active" onclick="switchTab('sections',this)">Sections</button>
+    <button class="ep-tab" onclick="switchTab('add',this)">+ Add</button>
+    <button class="ep-tab" onclick="switchTab('devlog',this)">Dev Log</button>
+    <button class="ep-tab" onclick="switchTab('design',this)">Design</button>
+  </div>
+
+  <div class="ep-body">
+    <!-- SECTIONS TAB -->
+    <div class="ep-tab-pane active" id="tab-sections">
+      <div id="ep-section-list"></div>
+      <div id="ep-fields-area" style="margin-top:.5rem;border-top:1px solid var(--faint);padding-top:.5rem;display:none">
+        <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.5rem .85rem .35rem">Editable fields</div>
+        <div id="ep-field-list" class="ep-fields"></div>
+      </div>
+    </div>
+
+    <!-- ADD TAB -->
+    <div class="ep-tab-pane" id="tab-add">
+      <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.75rem .25rem .4rem">Work / Projects</div>
+      <button class="ep-add-btn" onclick="insertProjectCard()">
+        <span class="ep-add-btn-icon">🎮</span>
+        <span class="ep-add-btn-label">New project card</span>
+      </button>${IS_PROJECT ? '' : `
+      <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
+      <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">About</div>
+      <button class="ep-add-btn" onclick="eduAdd()">
+        <span class="ep-add-btn-icon">🎓</span>
+        <span class="ep-add-btn-label">Education entry</span>
+      </button>`}
+      <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
+      <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">Content blocks</div>
+      <button class="ep-add-btn" onclick="insertTextBlock()">
+        <span class="ep-add-btn-icon">📝</span>
+        <span class="ep-add-btn-label">Text section</span>
+      </button>
+      <button class="ep-add-btn" onclick="insertImageBlock()">
+        <span class="ep-add-btn-icon">📷</span>
+        <span class="ep-add-btn-label">Image block</span>
+      </button>
+      <button class="ep-add-btn" onclick="insertDividerBlock()">
+        <span class="ep-add-btn-icon">—</span>
+        <span class="ep-add-btn-label">Divider</span>
+      </button>
+    </div>
+
+    <!-- DEV LOG TAB -->
+    <div class="ep-tab-pane" id="tab-devlog">
+      <div class="ep-dsn-label">Project</div>
+      <select class="ep-select" id="dl-proj-select" onchange="renderDlEntryList()"></select>
+      <div class="ep-note" id="dl-tab-note"></div>
+
+      <div class="ep-dsn-label" style="margin-top:.9rem">Dev entries</div>
+      <div id="dl-entry-list"></div>
+
+      <button class="ep-add-btn" onclick="dlAddEntry()">
+        <span class="ep-add-btn-icon">✚</span>
+        <span class="ep-add-btn-label">New dev entry</span>
+      </button>
+
+      <div class="dl-pending" id="dl-pending"></div>
+
+      <div style="border-top:1px solid var(--faint);margin:.8rem 0 .5rem"></div>
+      <div style="font-family:var(--fm);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 .25rem .45rem;line-height:1.7">
+        Private entries stay in this browser only — back them up.
+      </div>
+      <button class="ep-add-btn" onclick="dlExportPrivate()">
+        <span class="ep-add-btn-icon">⤓</span>
+        <span class="ep-add-btn-label">Export private entries</span>
+      </button>
+      <label class="ep-add-btn" style="cursor:pointer">
+        <span class="ep-add-btn-icon">⤒</span>
+        <span class="ep-add-btn-label">Restore from backup</span>
+        <input type="file" accept="application/json,.json" style="display:none" onchange="dlImportPrivate(this)"/>
+      </label>
+    </div>
+
+    <!-- DESIGN TAB -->
+    <div class="ep-tab-pane" id="tab-design">
+      <div class="ep-dsn-label">Theme presets</div>
+      <div id="ep-presets" class="ep-presets"></div>
+      <div class="ep-dsn-label">Colors — click a swatch</div>
+      <div id="ep-colors"></div>
+      <div class="ep-dsn-label">Fonts</div>
+      <div id="ep-fonts"></div>
+      <button class="ep-add-btn" style="justify-content:center;margin-top:.7rem" onclick="resetTheme()">
+        <span class="ep-add-btn-label">↺ Reset to default</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="ep-foot">
+    <button class="ep-foot-btn ep-foot-save" onclick="saveAndPublish()">💾 Save &amp; publish</button>
+    <button class="ep-foot-btn ep-foot-export" onclick="exportHTML()">📥 Export HTML file</button>
+  </div>
+</div>`;
+}
+
+function epFmtBarHTML() {
+  return `<div id="fmt-bar">
+  <button class="fmt-btn" onclick="fmt('bold')"      title="Bold"><b>B</b></button>
+  <button class="fmt-btn" onclick="fmt('italic')"    title="Italic"><i>I</i></button>
+  <button class="fmt-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+  <div class="fmt-sep"></div>
+  <button class="fmt-btn" onclick="fmt('removeFormat')" title="Clear formatting">✕</button>
+</div>`;
+}
+
+function epDevEditorHTML() {
+  return `<div id="dev-editor">
+  <div class="de-bar">
+    <span class="de-bar-t">Dev entry</span>
+    <span class="de-bar-t" id="de-bar-proj" style="color:var(--muted)"></span>
+    <span class="de-bar-sp"></span>
+    <label class="de-toggle" title="Private entries are never published to the live site">
+      <input type="checkbox" id="de-private" onchange="deSetPrivate(this.checked)">
+      <span id="de-private-lbl">Public</span>
+    </label>
+    <button class="de-btn danger" onclick="deDeleteEntry()">🗑 Delete</button>
+    <button class="de-btn primary" onclick="deClose()">✓ Done</button>
+  </div>
+
+  <div class="de-body">
+    <div class="de-inner">
+
+      <!-- ── Header: the three things the log list and the link need.
+           Everything else about the entry is a block. ── -->
+      <div class="de-sec">
+        <div class="de-sec-lbl">Header</div>
+
+        <div class="de-field">
+          <label class="de-lbl" for="de-title">Title</label>
+          <input class="de-in" id="de-title" oninput="deField('title',this.value)">
+          <div class="de-hint">Shown at the top of the entry, and it becomes the link: <code id="de-slug-preview" style="font-family:var(--fm);font-size:.72rem;color:var(--accent)"></code></div>
+        </div>
+
+        <div class="de-field">
+          <label class="de-lbl" for="de-summary">One-line summary <span class="de-opt">optional</span></label>
+          <input class="de-in" id="de-summary" oninput="deField('summary',this.value)">
+          <div class="de-hint">Shown under the title in the entry list. Leave it empty and no summary appears.</div>
+        </div>
+
+        <div class="de-field">
+          <label class="de-lbl" for="de-tools">Tools &amp; tech <span class="de-opt">optional</span></label>
+          <input class="de-in mono" id="de-tools" oninput="deField('tools',this.value)">
+          <div class="de-hint">Comma separated, listed at the foot of the entry.</div>
+        </div>
+      </div>
+
+      <!-- ── The entry itself — blocks, in whatever order you want ── -->
+      <div class="de-sec">
+        <div class="de-sec-lbl">The entry</div>
+        <div id="de-blocks"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="de-toast" id="de-toast"></div>`;
+}
+
+/* Build the chrome once, on the first thing that needs it. Returns early
+   on an already-built page *and* on a page published before the chrome
+   moved into script, so neither ends up with two panels. */
+let edChromeBuilt = false;
+function edChrome() {
+  if (edChromeBuilt) return;
+  edChromeBuilt = true;
+  if (document.getElementById('edit-panel')) { edWireSheet(); return; }
+  const holder = document.createElement('div');
+  holder.innerHTML = epPanelHTML() + epFmtBarHTML() + epDevEditorHTML();
+  while (holder.firstChild) document.body.appendChild(holder.firstChild);
+  edWireSheet();
+}
+
 /* ─── EDITOR SHEET (small screens) ─────────
    Below the stack breakpoint #edit-panel is docked to the bottom edge and
    can collapse to a peek, so the page underneath stays visible while you
    edit it. Above that breakpoint it's the usual side drawer and none of
    this applies. */
-const epGrip = document.getElementById('ep-grip');
-
 function setEditorSheet(expanded) {
   document.body.classList.toggle('panel-peek', !expanded);
-  if (epGrip) {
-    epGrip.setAttribute('aria-expanded', String(expanded));
-    epGrip.setAttribute('aria-label', expanded ? 'Collapse editor panel' : 'Expand editor panel');
+  const grip = document.getElementById('ep-grip');
+  if (grip) {
+    grip.setAttribute('aria-expanded', String(expanded));
+    grip.setAttribute('aria-label', expanded ? 'Collapse editor panel' : 'Expand editor panel');
   }
 }
 function toggleEditorSheet() {
   setEditorSheet(document.body.classList.contains('panel-peek'));
 }
 
-if (epGrip) {
-  epGrip.addEventListener('click', toggleEditorSheet);
+/* Wired from edChrome(), because the grip does not exist before it. */
+function edWireSheet() {
+  const grip = document.getElementById('ep-grip');
+  if (!grip) return;
+  grip.addEventListener('click', toggleEditorSheet);
   // Tapping the header expands too — the grip alone is a small target and
   // the header is the obvious thing to reach for.
   document.querySelector('#edit-panel .ep-head')?.addEventListener('click', e => {
@@ -270,6 +529,12 @@ if (epGrip) {
 function toggleEdit() {
   // Exported copies ship without the editor panel — don't half-open it.
   if (document.documentElement.dataset.readonly) return;
+  // Entering is gated; leaving never is, or a token cleared mid-session
+  // would strand the editor open with no way to shut it.
+  if (!editing && !edUnlocked()) return;
+  // Nothing below this line can assume the panel exists until this runs:
+  // published pages carry no editor markup, it is built on first entry.
+  edChrome();
   editing = !editing;
   document.body.classList.toggle('editing', editing);
   // On a phone the panel is a bottom sheet. Open it collapsed so the first
@@ -886,21 +1151,27 @@ function deleteAddedBlock(id, e) {
 }
 
 /* ─── FORMATTING TOOLBAR ───────────────── */
-const fmtBar = document.getElementById('fmt-bar');
+/* Looked up on each use, not captured at load: the bar is built by
+   edChrome() and simply does not exist on a page nobody has edited.
+   Both callers below run only while editing, but hideFmtBar() is also
+   reached from toggleEdit()'s exit path, so the null guard is real. */
+function fmtBarEl() { return document.getElementById('fmt-bar'); }
 
 function fmt(cmd) { document.execCommand(cmd, false, null); }
 
 function showFmtBar(x, y) {
+  const bar = fmtBarEl();
+  if (!bar) return;
   /* On a phone the bar is docked to the bottom edge by CSS — free
      positioning there would push it off-screen at narrow widths. */
   if (!MQ_PHONE.matches) {
-    const w = fmtBar.offsetWidth || 200;
-    fmtBar.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + 'px';
-    fmtBar.style.top  = Math.max(8, y - 48) + 'px';
+    const w = bar.offsetWidth || 200;
+    bar.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + 'px';
+    bar.style.top  = Math.max(8, y - 48) + 'px';
   }
-  fmtBar.classList.add('show');
+  bar.classList.add('show');
 }
-function hideFmtBar() { fmtBar.classList.remove('show'); }
+function hideFmtBar() { fmtBarEl()?.classList.remove('show'); }
 
 document.addEventListener('mouseup', e => {
   if (!editing) return;
@@ -1704,6 +1975,13 @@ function buildPublishHTML(opts) {
   const { devlogData, forExport } = opts || {};
   const clone = document.documentElement.cloneNode(true);
 
+  // The editor is built by edChrome() on demand and never authored into a
+  // page, so it comes straight back out — which is also why none of its
+  // runtime state needs scrubbing any more. Removing the nodes is what
+  // keeps a published page free of editor markup; the old approach of
+  // wiping their innerHTML left the shells, the drift and the giveaway.
+  EP_CHROME_IDS.forEach(id => clone.querySelector('#' + id)?.remove());
+
   // The dev log is rendered from data on load — baking it in would give
   // the next visit two copies.
   clone.querySelectorAll('#dl-wrap').forEach(n => n.remove());
@@ -1724,22 +2002,12 @@ function buildPublishHTML(opts) {
   const dlSlot = clone.querySelector('#devlog-data');
   if (dlSlot) dlSlot.textContent = JSON.stringify(devlogData || dlPageData());
 
-  // Neutralize transient edit/UI state (edits themselves stay in the DOM)
-  clone.querySelector('#dev-editor')?.classList.remove('open');
-  clone.querySelector('.de-toast')?.classList.remove('show');
-  clone.querySelectorAll('#dev-editor input,#dev-editor textarea').forEach(el => { el.removeAttribute('value'); el.textContent = ''; });
-  // Wipe every trace of the editor's own state — the entry list in the side
-  // panel renders private titles, and this clone becomes the live page.
-  clone.querySelectorAll('#dev-editor .de-rich,#de-blocks,#dl-entry-list,#dl-proj-select,#dl-pending,#de-bar-proj,#de-slug-preview')
-       .forEach(el => { el.innerHTML = ''; });
-  clone.querySelector('#de-private')?.removeAttribute('checked');
+  // Neutralize transient edit/UI state (edits themselves stay in the DOM).
+  // The editor's own state used to be wiped field by field here — the whole
+  // subtree is gone above, so what is left is page state only.
   clone.querySelector('body')?.classList.remove('editing');
-  // Page content ships read-only — edit mode turns it back on. The editor's
-  // own writing surfaces are NOT page content: baking contenteditable="false"
-  // onto them leaves the published copy unable to write a dev entry, because
-  // nothing ever switches those back on.
+  // Page content ships read-only — edit mode turns it back on.
   clone.querySelectorAll('[contenteditable]').forEach(el => {
-    if (el.closest('#dev-editor,#edit-panel')) return;
     el.setAttribute('contenteditable', 'false');
     // enableCaseEditing() paints dashed outlines and a text cursor onto
     // every editable region. Those are author-only affordances; published
@@ -1771,11 +2039,6 @@ function buildPublishHTML(opts) {
     });
   }
   clone.querySelector('#lightbox')?.classList.remove('open');
-  const fb = clone.querySelector('#fmt-bar');
-  if (fb) { fb.classList.remove('show'); fb.removeAttribute('style'); }
-  const toast = clone.querySelector('.de-toast'); if (toast) toast.textContent = '';
-  const saveBtn = clone.querySelector('.ep-foot-save');   // caught mid-publish otherwise
-  if (saveBtn) saveBtn.textContent = '💾 Save & publish';
   // Transient UI state that would otherwise ship to the live site: an open
   // mobile menu, or an editor sheet left collapsed.
   clone.querySelector('#mobile-menu')?.classList.remove('open');
@@ -1787,16 +2050,13 @@ function buildPublishHTML(opts) {
   clone.querySelectorAll('.ep-focused-section').forEach(el => el.classList.remove('ep-focused-section'));
   const cur = clone.querySelector('#cursor'); if (cur) { cur.className = ''; cur.removeAttribute('style'); }
 
-  /* Export mode: strip the authoring UI for a read-only copy.
-     Careful — the script captures #cursor, #nav, #fmt-bar and #lightbox
-     at load with no null check, so removing any of them throws and kills
-     the rest of the script. Those stay (inert); #fmt-bar and the toast
-     are hidden anyway, and the toast is what tells a visitor "link
-     copied". Only the panels come out. */
+  /* Export mode: strip the authoring UI for a read-only copy. The chrome
+     itself is already gone — every publish drops it now — so what is left
+     here is the affordances that live inside page content. Careful still:
+     the script captures #cursor, #nav and #lightbox at load with no null
+     check, so removing any of those throws and kills the rest of it. */
   if (forExport) {
     clone.dataset.readonly = '1';
-    clone.querySelector('#edit-panel')?.remove();
-    clone.querySelector('#dev-editor')?.remove();
     clone.querySelectorAll('.img-upload-btn,.cs-img-btn').forEach(el => el.remove());
     clone.querySelectorAll('[data-img-zone]').forEach(el => el.removeAttribute('data-img-zone'));
     clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
@@ -1963,8 +2223,19 @@ function dlRetitle(proj, entry, title) {
 }
 
 function dlToast(msg) {
-  const t = document.getElementById('de-toast');
-  if (!t) return;
+  /* Made on demand rather than returning early when it's missing. The toast
+     is not editor-only: "🔗 Link copied" answers a visitor pressing Copy
+     link on a dev entry, and that button is public. Before the chrome moved
+     into script #de-toast was static markup on every page, so a plain
+     `if (!t) return` here would have swallowed that confirmation silently.
+     It's still in EP_CHROME_IDS, so a publish never bakes it. */
+  let t = document.getElementById('de-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.className = 'de-toast';
+    t.id = 'de-toast';
+    document.body.appendChild(t);
+  }
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(dlToast._t);

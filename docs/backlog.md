@@ -155,3 +155,23 @@ from `DEVLOG` — so deleting "anything not in `dlMediaRefs()`" would destroy
 every live card image. A safe version has to fetch all five published pages and
 union their `assets/` references with `dlMediaRefs()` first, which also means
 deciding what happens when that fetch fails (answer: publish nothing).
+
+### OPT-17 · The private toggle's *label* is never scrubbed before publish · impact med · effort low · open
+Evidence (`shared/site.js` at `5fcb736`, 3136 lines): `buildPublishHTML()` clears
+the checkbox — `clone.querySelector('#de-private')?.removeAttribute('checked')`
+(site.js:1735) — but nothing resets `#de-private-lbl`, which `deSetPrivateLabel()`
+(site.js:2726) writes text *and* an inline colour into. `projects/block-city.html`
+was published while a private entry was selected and now ships
+`<span id="de-private-lbl" style="color: rgb(138, 109, 31);">🔒 Private</span>`;
+the other three pages say `Public`. Two consequences, and only the second matters:
+the file drifts from its three siblings (R5), and on that page the toggle reads
+"🔒 Private" next to an unchecked box until an entry is loaded and
+`deLoadEntry()` (site.js:2675) corrects it — a control that misreports the one
+state the author is relying on. Also baked: `class=""` on `#dev-editor` in
+`block-city` and `healthy-jeart`, left by `classList.remove('open')`. Fix: reset
+the label's text and `style.color` in the scrub list, and drop `class` when it
+empties; the next publish from each page then cleans its own file. **Never
+hand-edit the files** (R1). Related: OPT-10 (same file, same root cause,
+different elements) and OPT-07 (why the chrome is duplicated at all).
+Not a content leak — verified separately that no private title, summary, body,
+id or media reaches the published HTML or an export.

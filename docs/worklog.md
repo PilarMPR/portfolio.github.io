@@ -384,3 +384,26 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   reading the button. And OPT-03's new pre-commit ref re-check (site.js:1862)
   means a publish can now legitimately refuse; it still has never run against
   a real concurrent publish, so that abort path remains untested in anger.
+
+### 2026-08-09 · OK · Proved the private/public toggle keeps work off the live site
+- what: no code change — a verification the user asked for. Read the chain
+  (`deSetPrivate` site.js:2718 → `dlPublicData` site.js:3071 → `buildPublishHTML`
+  site.js:1723, plus `dlPrivateOnlyMedia` site.js:2228 → `dlPendingMedia`
+  site.js:2160) and then exercised it in WebKitGTK rather than trusting the
+  read: seeded one public + one private entry into a real project page,
+  rendered the private one into the log list, the panel list *and* `#entry-view`
+  so the publish clone was taken from the worst-case DOM, and called the actual
+  `buildPublishHTML()` / `buildExportHTML()` / `dlPendingMedia()`.
+- checks: 15/15 in the probe — private title, summary, body, id and media path
+  all absent from the published HTML; baked `#devlog-data` held only the public
+  entry; private-only media absent from the publish queue; export clean. Two
+  positive controls (public entry present, `#devlog-data` found) so "absent" is
+  not vacuous · checks.sh ok · smoke.sh ok 5 pages earlier this session
+- push: not pushed yet — this entry plus OPT-17
+- note: the probe is a scratchpad one-off, not committed; it manipulates
+  `DEVLOG` in a throwaway WebKit context and never calls `ghPublish`. Worth
+  folding into `smoke.sh` if privacy ever needs a standing check — filed
+  nothing for that, since smoke.sh deliberately clicks nothing. What the probe
+  *did* surface is OPT-17: the toggle's label survives the scrub even though
+  its checkbox does not, which is how `block-city.html` came to ship
+  `🔒 Private` as static markup.

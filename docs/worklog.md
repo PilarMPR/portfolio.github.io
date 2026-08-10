@@ -501,3 +501,52 @@ Kinds: `OK` (worked) · `ERR` (broke) · `FIX` (resolved an ERR) · `SESSION` (c
   brute-forced. Not done: no hand-driven real browser, nothing exercised on a
   phone, and `edTokenValid()` has never run against a live GitHub response —
   the probes never reach the network.
+
+### 2026-08-09 · SESSION · Editor hidden, gated, and proved — four backlog items closed
+Ran as one continuous session across five asks: is the site still editable, is
+private really private, make editability less obvious, gate it to me, how do I
+open it.
+
+**Successes (5).**
+1. *Verified the edit/publish path* rather than trusting the docs — and corrected
+   the premise in the question: saving is automatic and local, publishing is a
+   manual button, and only publishing crosses devices.
+2. *Proved the private/public filter* with a WebKitGTK probe seeded with one
+   public and one private entry, rendered into the log, the panel list and
+   `#entry-view` so the clone came from the worst-case DOM. 18/18, including
+   two positive controls so "absent" was not vacuous, and including the case
+   that had never been checked: media only a private entry references is kept
+   out of the commit.
+3. *Removed the editor from every served page.* Chrome moved into three template
+   functions plus `edChrome()`; publishes drop it by id. index 706→371,
+   hot-potato 345→184, block-city 334→160. The HTML diff was pure deletion — no
+   page content touched (R1).
+4. *Gated the editor on a stored GitHub token.* Silent no-op elsewhere;
+   Shift-variant unlocks a new device after validating the token against the
+   API, including `permissions.push`, which nothing previously checked.
+5. *Closed OPT-07, OPT-10, OPT-15 and OPT-17*, three of them as side effects
+   rather than as work aimed at them.
+
+**Errors (2), both mine, both caught before they shipped.**
+1. `ERR`/`FIX` above: my first citation-renumbering script mis-paired symbols and
+   corrupted citations that were already correct — `safeSet` and `reportError`
+   among them. checks.sh could not see it, because R11 accepts *any* backticked
+   symbol on the line. Reverted `CLAUDE.md` by name (R8-safe), rewrote the
+   resolver to pair each citation with the symbol immediately preceding it and
+   to report rather than guess. Now a repeatable script, run four times since.
+2. `FIX` above: moving `#de-toast` into editor chrome silently broke the "link
+   copied" toast for *visitors*, because `dlCopyLink()` is on a public button.
+   Caught by reading the diff, not by any check — no check covers it even now.
+
+**Open / pick up next.**
+- OPT-18 filed and untouched: there is no way to open the editor on a phone,
+  and the panel has a bottom-sheet layout built for one. Read its Catch before
+  starting — the safe version depends on the gate that now exists.
+- `edTokenValid()` has never run against a live GitHub response; the probes
+  never reach the network. First real exercise is the first new device.
+- Nothing has been driven in a hand-operated browser this whole session.
+  WebKitGTK is the engine behind every green result above.
+- The three probes (`priv`, `gesture`, `toast`) live in a scratchpad and are
+  **not committed**. Anything worth keeping has to be folded into `smoke.sh`
+  deliberately; right now a future session inherits the assertions that were
+  moved there and none of the ones that weren't.

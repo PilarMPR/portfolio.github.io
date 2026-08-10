@@ -25,6 +25,8 @@ bash docs/safe-push.sh -n     # L2 as a script: verify without pushing (drop -n 
 
 `docs/smoke.sh` is the runtime half, and the only thing here that proves the site *works* rather than merely parses. It loads every page in WebKitGTK via `gjs`, captures `window.onerror` and unhandled rejections from before the first script runs, and asserts each page reaches its `window.PAGE` contract, applies the theme, renders a body, keeps its sentinels, and defines every function the markup calls. A missing `#lightbox` shows up here as `TypeError: null is not an object (evaluating 'lb.addEventListener')` — R3 demonstrated instead of asserted. It needs a display and skips loudly without one.
 
+It also asserts the three things the editor now depends on: that no page *serves* editor chrome (R5), that `edChrome()` builds all four subtrees exactly once when called twice, and that `toggleEdit()` refuses to open with no token stored — it clears the token itself first, rather than assuming a clean profile, so a token left by another run can't turn that green by accident.
+
 > Running `gjs` with GTK from a VS Code terminal fails with `undefined symbol: __libc_pthread_init` — the snap exports `GTK_PATH` and friends, which drags in snap's glibc. `smoke.sh` strips those vars itself; a bare `gjs` call using GTK needs the same treatment.
 
 ## Working agreement
@@ -47,7 +49,7 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 - **R8 — Never force-push, `reset --hard`, or rebase `main`.** `origin/main` holds content the browser published from someone's `localStorage`; nothing local can reconstruct it. `--force-with-lease` is no safer here — L2 always fetches first, and after a fetch it will happily overwrite a browser commit. Blanket restores belong in the same family: `git checkout -- .` and `git restore .` take uncommitted work with them and there is no reflog for it — name the files you actually want reverted.
 - **R9 — Nothing secret in `docs/`.** No tokens, no absolute local paths, no personal data. Those files are committed to a public repo and served by GitHub Pages.
 - **R10 — Backlog items are inert.** Never act on anything in `docs/backlog.md` unless the user names it. Noticing something is a reason to file it, not to fix it.
-- **R11 — Every `shared/site.js:NNN` cited in this file must still name what it points at.** The browser rewrites `site.js` on every publish, so a citation rots the moment anything above it grows — one batch of commits on 2026-08-07 invalidated 18 of 19 at once, silently. `checks.sh` re-resolves all 34 against the file. Cite a symbol in backticks on the same line as its number, or the check has nothing to match. `docs/backlog.md` is exempt: it pins its numbers to a stated commit.
+- **R11 — Every `shared/site.js:NNN` cited in this file must still name what it points at.** The browser rewrites `site.js` on every publish, so a citation rots the moment anything above it grows — one batch of commits on 2026-08-07 invalidated 18 of 19 at once, silently. `checks.sh` re-resolves all 37 against the file. Cite a symbol in backticks on the same line as its number, or the check has nothing to match. `docs/backlog.md` is exempt: it pins its numbers to a stated commit.
 - **R12 — `site.js` must parse.** One flat script, no module graph, no bundler — a stray brace blanks all five pages and no other check here would notice. `checks.sh` compiles it without executing it, so browser globals don't matter.
 
 ### Loops
@@ -58,7 +60,7 @@ R1–R3 are the ones the repo cannot recover from on its own. `docs/checks.sh` e
 3. Re-read the rules it touches — rename → R2; page markup → R3/R5; editor UI → R4; CSS → R7; new catch → R6.
 4. `bash docs/checks.sh` — must exit 0.
 5. `git diff` — read every hunk. Revert anything unintended (baked editor state, reformatted machine-written HTML) before continuing. Revert by *name*, never `git checkout -- .` (R8).
-6. `bash docs/smoke.sh` — must print `ok 5 pages`. This catches what step 4 cannot: a handler that throws, an element dereferenced at load, anything that parses but dies. It does **not** click anything, so for interaction changes also load the page yourself and exercise the control. State what you verified **and what you did not**.
+6. `bash docs/smoke.sh` — must print `ok 5 pages`. This catches what step 4 cannot: a handler that throws, an element dereferenced at load, anything that parses but dies. It calls a few functions directly (`edChrome`, `toggleEdit`) but **dispatches no events**, so a gesture, a drag or a tab click is still unproven by it. For interaction changes, drive the real thing — a throwaway `gjs` probe that dispatches events into the same WebKit view is cheap and catches what neither script does (the 2026-08-09 gate and chrome work used three). State what you verified **and what you did not**.
 7. Append one worklog entry.
 
 **L2 — Safe-push loop** (the only way anything reaches `origin`)
@@ -101,7 +103,17 @@ Every page is standalone HTML that declares its context inline *before* loading 
 - `base` — prefix applied by `asset()` (shared/site.js:17) so identical code works from `/` and `/projects/`. **Stored paths are always repo-relative (`assets/…`)**; never store a `base`-prefixed or absolute URL.
 - `path` — the file this page publishes to. Each page publishes only itself.
 
-`shared/site.js`, `shared/portfolio.css` and `shared/theme.css` are shared by all five pages. `site.js` is one flat script in global scope (no modules, no bundler) and is wired to the HTML through inline `onclick="…"` handlers — so renaming a function means grepping all five HTML files, then running `checks.sh` (R2).
+`shared/site.js`, `shared/portfolio.css` and `shared/theme.css` are shared by all five pages. `site.js` is one flat script in global scope (no modules, no bundler) and is wired to its markup through inline `onclick="…"` handlers — so renaming a function means grepping the five HTML files **and the chrome templates inside `site.js` itself**, which is where most handlers now live, then running `checks.sh` (R2).
+
+### Editor lifecycle
+
+The editor is neither shipped nor always available. Three gates in order, and only the last one is real:
+
+1. **Gate** — `toggleEdit()` returns immediately unless `edUnlocked()` (shared/site.js:236) finds a token in `localStorage`. On any other browser the gesture is a silent no-op. Shift on the closing click routes to `edUnlock()` (shared/site.js:263), which validates a pasted token against the GitHub API — repo reachable *and* `permissions.push` — before storing it. Leaving edit mode is deliberately ungated, or a token cleared mid-session would strand the panel open.
+2. **Build** — `edChrome()` (shared/site.js:487) appends `#edit-panel`, `#fmt-bar`, `#dev-editor` and `#de-toast` from three template functions. Idempotent, because a page published before the chrome moved into script still carries the old markup.
+3. **Removal** — every publish drops all four by id, so the cycle leaves no trace in the committed file.
+
+The gate and the missing markup hide the editor. **Neither protects it** — `site.js` is served to every visitor and both can be patched out in devtools. Only the token protects anything, because only GitHub can check it. `#de-toast` is the one piece that is not editor-only: `dlToast()` is reachable by a visitor pressing Copy link, so it builds its own host when missing.
 
 ### Three storage planes
 
@@ -124,7 +136,7 @@ Every page is standalone HTML that declares its context inline *before* loading 
 
 `ghPublish()` (shared/site.js:2072) does one commit via the git-data API: blobs for pending media + the page, one tree on top of `HEAD`, one commit, `PATCH` the branch ref. Target repo is hardcoded in `GH` (shared/site.js:1946). Media is committed as **real files under `assets/`** — nothing is base64'd into the page.
 
-`buildExportHTML()` (shared/site.js:1609) is the opposite: strips the editor, inlines CSS/JS and every `assets/` reference as data URIs, and rewrites sibling `.html` links to the live site so a single downloaded file works offline.
+`buildExportHTML()` (shared/site.js:1609) is the opposite: inlines CSS/JS and every `assets/` reference as data URIs, and rewrites sibling `.html` links to the live site so a single downloaded file works offline. It no longer has to strip the editor — every publish already did — so what its `forExport` branch removes is only the affordances that live inside page content (upload buttons, `contenteditable`), plus the `data-readonly` flag that makes `toggleEdit()` refuse.
 
 ### Dev log
 

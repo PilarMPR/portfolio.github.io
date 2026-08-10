@@ -203,3 +203,28 @@ id or media reaches the published HTML or an export.
 scrub list: OPT-07 deleted the whole subtree the label lives in, so the toggle
 is rebuilt from the template every time and cannot carry a stale state
 forward. The published pages no longer contain `#de-private-lbl` at all.
+
+### OPT-18 · The editor cannot be opened on a phone at all · impact med · effort med · open
+Evidence (`shared/site.js` at `3776482`, 3407 lines): the only entry point to
+`toggleEdit()` is the click handler on `#nav-logo` (site.js:221), which requires
+`e.altKey`. There is no `touchstart`/`pointerdown` path anywhere in the file —
+the only touch listeners are the lightbox's swipe (site.js:1769). A phone has
+no Alt key, so on a phone there is no way in. The `?edit=1` handoff is not a
+second door: it demands this same tab already be in edit mode. This predates the
+chrome refactor — it arrived with `9676035`, which put the editor behind the
+modifier — but it is sharper now, because the panel carries a whole bottom-sheet
+layout for small screens (`#ep-grip`, `body.panel-peek`, `MQ_STACK` at
+site.js:59) that the device it was designed for cannot reach. The 2026-08-09
+refactor even restored `#ep-grip` to `index.html`, which had silently lost it.
+Fix: a touch gesture that opens the same gate — three taps on the logo inside
+the 700 ms window, but only when `MQ_STACK.matches` and only when a token is
+already stored, so it is inert for every visitor. Catch: this is exactly the
+discoverability the Alt requirement was added to remove, and three fast taps on
+a link is something a real visitor can do by accident. Gating it behind
+`edUnlocked()` is what makes it safe — a visitor without a token can tap the
+logo all day and nothing happens — so this must not be built before that gate
+is trusted. iOS also fires a context menu on long-press of an `<a>`, so a
+long-press variant needs `preventDefault` on `contextmenu` and will fight the
+browser; taps are the safer shape. Unlocking a *new* phone still needs the
+Shift path or a typed token, which no touch gesture solves — worth deciding
+whether that matters before starting.

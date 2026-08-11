@@ -570,3 +570,34 @@ open it.
   hands, not this session's. Also worth stating outright somewhere permanent:
   two of the four dev logs are empty, which is the largest content gap on the
   site and the one the block editor was built for.
+
+### 2026-08-10 · OK · README and SPEC brought back in step with the code
+- what: both were documenting a site that no longer exists. `README.md` — the
+  **Layout tab it described was removed entirely** (the panel has four tabs:
+  Sections, + Add, Dev Log, Design; + Add was undocumented); every Design-tab
+  fact was wrong (five invented preset names against the six in `PRESETS`, four
+  colour rows against six, Clash Display and Fontshare, neither of which the
+  code loads); the editable-field list claimed Twitter and skills and a
+  pastable CV URL, none of which are editor fields; project cards were said to
+  reorder, and there is no such control; page sizes were 28 KB / ~20 KB against
+  20 KB / 9–12 KB. Added the token gate, the built-not-shipped chrome, the
+  publish-is-a-DOM-snapshot consequence, the three `docs/` scripts, and the
+  OPT-18 phone gap. `SPEC.md` rewritten from "single HTML file … Ready to
+  build" into a spec of what shipped, keeping its brief-style tables.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: every claim re-read
+  against `epPanelHTML()`, `PRESETS`, `COLOR_ROWS`, `DISPLAY_FONTS`,
+  `DE_BLOCKS` and the `data-ed` attributes actually present in `index.html`,
+  rather than against the old prose
+- push: this commit
+- note: two corrections to my own first draft, both caught by grepping the
+  files I had just written for the gesture. I had spelled out the unlock
+  variant's modifier and the phone gap's cause — the same detail CLAUDE.md,
+  README and SPEC all deliberately withhold. Reworded both to point at the
+  code. Worth flagging and *not* fixing here: OPT-18 in `docs/backlog.md`
+  spells the gesture out completely (`e.altKey`, "a phone has no Alt key") and
+  `docs/` is served publicly, so the convention is already broken one file
+  over. Left alone rather than quietly rewritten — it is the user's call
+  whether the convention or the backlog entry gives way. Deleted one tip that
+  told the reader to hand-edit `index.html` to change the contact status line:
+  it is an editable field, and following that tip would have violated R1 and
+  been overwritten by the next publish.

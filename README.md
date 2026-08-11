@@ -5,23 +5,25 @@ A static, browser-editable portfolio site for a game designer. No build step, no
 ## Files
 
 ```
-index.html                  landing page — hero, work grid, about, contact  (28 KB)
+index.html                  landing page — hero, work grid, about, contact  (20 KB)
 projects/
-  hot-potato.html           one page per project: case study + its dev log  (~20 KB each)
+  hot-potato.html           one page per project: case study + its dev log  (9–12 KB each)
   block-city.html
   healthy-jeart.html
   create-your-own-monster.html
 shared/
   portfolio.css             every page's styling
+  theme.css                 the colours — machine-written by Save & publish
   site.js                   every page's behaviour, incl. the editor
 assets/
   <project>/…               images and clips, as real files
   site/                     profile photo, CV pdf
+docs/                       checks, smoke test, push script, work log, backlog
 .nojekyll                   serve the files as-is
-SPEC.md · README.md
+SPEC.md · README.md · CLAUDE.md
 ```
 
-Nothing is base64'd into the markup, so the landing page is 28 KB and a visitor only downloads the images for the project they actually open.
+Nothing is base64'd into the markup, so the landing page is 20 KB and a visitor only downloads the images for the project they actually open. The editor isn't in the markup either — it's built by the script when you open it — which is the other half of why the pages are that small.
 
 ## Quick start
 
@@ -32,23 +34,50 @@ Nothing is base64'd into the markup, so the landing page is 28 KB and a visitor 
 
 Each page publishes itself: edit the landing page and you commit `index.html`; edit Hot Potato and you commit `projects/hot-potato.html`. Nothing else is touched.
 
+### Unlocking a browser
+
+The gesture does nothing until a GitHub token is stored in that browser — so on a visitor's machine, or a fresh profile of your own, it's a silent no-op. A variant of the same gesture prompts for the token instead, checks it against the GitHub API, and stores it only if it can actually write here. Like the gesture, the variant is in the code rather than written down here.
+
+Use a fine-grained token from `github.com/settings/personal-access-tokens`, scoped to **this repository only**, with **Contents → Read and write**. It's kept in `localStorage` on that machine and is never written into the site.
+
+Be clear about what the gate is and isn't. `shared/site.js` is served to every visitor, so a determined reader can patch the check out in devtools and open the panel over their own copy of the page. What they can't do is **publish** — GitHub verifies the token server-side, and nothing in the browser can forge that. The gesture and the gate hide the editor; the token is what protects it.
+
 ## Editor tabs
 
+Four of them: **Sections**, **+ Add**, **Dev Log**, **Design**. Save & publish and Export sit at the foot of the panel, under all four.
+
 ### Sections
-On the landing page: hero, work, about and contact, each expanding to its editable fields. On a project page: a table of contents for the case study — click any text on the page to edit it directly.
 
-### Profile fields
-- Name, job title, tagline (hero section)
-- Profile photo
-- Bio, quote, education, skills
-- Contact: email, LinkedIn, Twitter/X, CV link
+On the **landing page**, the four fixed sections — Hero, Work, About, Contact — each expand to the editable fields inside them. Work expands to the four projects instead, with **Open ✏** beside each, which takes you to that project's page already in edit mode.
 
-### Projects
-Each project has:
-- **Card fields:** name, category, excerpt, hero image
-- **Case-study fields:** role, team, duration, platform, overview, challenges & solutions, results, tools, gallery images
+On a **project page** the panel is a table of contents: click a case-study section to jump to it, or just click any text on the page and type. The sidebar widgets get their own group below it (see [The sidebar](#the-sidebar)), and a link back to the landing page sits at the bottom.
 
-Reorder with the up/down buttons. Up to as many projects as you want, though the SPEC targets 4.
+What you can edit is whatever the markup marks as editable, which on the landing page is:
+
+| Section | Fields |
+|---|---|
+| Hero | Job title + location, name, tagline |
+| Work | The section subtitle; each card's image via its upload button |
+| About | The bio paragraphs, the pull quote, and every education entry (name + detail) |
+| Contact | Heading, email, LinkedIn, Discord, the status line, the footer note |
+
+Two things on the landing page are **not** editor fields: the skills chips in the About box and the CV link in the header — both are authored in `index.html`. The four project cards are authored too, so their text isn't editable in place and there's no reorder control for them; open a card's case study to edit its content. Cards you add yourself with **+ Add** *are* fully editable, because they're generated with the fields already on them.
+
+The profile photo and the card images are replaced by hovering the image and using its upload button rather than through a field.
+
+### + Add
+
+Drops new content into the page you're on:
+
+| | Adds |
+|---|---|
+| 🎮 New project card | A fifth (sixth, seventh…) card in the work grid, with editable number, tags, role, name and excerpt |
+| 🎓 Education entry | One more row in the About timeline — landing page only |
+| 📝 Text section | A heading + paragraph block |
+| 📷 Image block | An image with a caption |
+| — Divider | A rule between blocks |
+
+Added blocks appear in the Sections tab with a 🗑 to remove them. Education rows carry their own ↑ ↓ 🗑 controls in the page.
 
 ### Dev Log
 
@@ -103,14 +132,13 @@ Every upload — dev-entry media, project card art, gallery images, your profile
 GitHub Pages takes about a minute to deploy, so freshly published images fall back to your local copy in the meantime instead of showing as broken.
 
 ### Design
-- **Theme presets:** one click to apply Soft Latte (default cozy light), Warm Cabin, Forest Dusk, Ghibli Pastel, or Original Dark.
-- **Custom colors:** picker + hex input for background, surface, accent, and text. Text color drives all the secondary opacity tones automatically.
-- **Font:** dropdown of curated display fonts (Unbounded, Space Grotesk, Syne, Clash Display, etc.) loaded on demand from Google Fonts and Fontshare.
 
-### Layout
-- Hero style (modern / classic / minimal), content position, background glow on/off
-- Project grid columns, image position (top / left / right / gallery), aspect ratio, blur
-- About-section photo position
+- **Theme presets** — one click each: **Notebook** (the default: warm paper, dark ink, red pen), **Blueprint**, **Midnight** (the dark one), **Rosé**, **Forest**, **Mono**.
+- **Colors** — click a swatch to change it. Six, named for what they do rather than where they sit: Paper, Ink / text, Accent (pen), Blue ink, Highlighter, Approved. Everything else is derived — shades, borders, drop shadows, every translucent tone — so changing the accent changes all of it, and picking a dark paper flips the whole site to dark mode by itself.
+- **Fonts** — a display face and a body face, loaded from Google Fonts only when you pick them. Display: Bricolage Grotesque, Space Grotesk, Syne, Unbounded, Archivo Black, Fraunces. Body: Space Grotesk, Inter, DM Sans, Work Sans.
+- **↺ Reset to default** puts the Notebook preset back.
+
+The theme is site-wide, not per-page: publishing any page writes `shared/theme.css`, and every page loads it. See [Tech](#tech) for why it works that way.
 
 ## Case study pages
 
@@ -175,16 +203,19 @@ Both exclude private entries. Export gives you a single self-contained page — 
 
 - Images are committed as real files, so page weight stays low — but the repo still grows. Resize screenshots before uploading; keep clips to a few seconds.
 - **Don't publish animated GIFs.** A GIF is stuck with 256 dithered colours and no interframe compression — the one on Healthy Jeart was 1.5 MB for 1.4 seconds. Save animations as **animated WebP** instead: it's still an `<img>`, so the gallery and lightbox handle it with no special casing, and it came out 68% smaller *and* cleaner (no dither noise in flat areas). Any modern browser plays it.
-- The CV link is just a URL — host the PDF anywhere (Drive, Dropbox, your repo) and paste the public link.
+- The CV is a real file in the repo (`assets/site/pilar-mpr-cv.pdf`), linked from the header, the mobile menu and the About section. Replacing it means committing a new PDF at that path; pointing at a hosted copy instead means editing the three `href`s in the markup.
 - The tagline, bio, and case-study text fields all preserve line breaks.
-- Status dot in the contact section is hard-coded as "Available for projects" — edit `index.html` directly to change the wording.
+- The status line beside the green dot in Contact **is** an editable field — click it in edit mode. It's meant to say something like "Available for projects".
+- **Don't hand-edit page text in the `.html` files.** Publishing rewrites the whole page from what's in the browser, so a hand edit is silently overwritten the next time you publish from a browser that never saw it. Structure, CSS and JS are safe to edit by hand — the browser reloads those. Prose and images go through the editor.
 
 ## Tech
 
-- Plain HTML / CSS / vanilla JS, no build step, no dependencies
+- Plain HTML / CSS / vanilla JS, no build step, no dependencies, no package manager
 - One stylesheet and one script shared by every page, so they're cached across navigation
 - Each page declares its own `window.PAGE` context (role, path, base) — that's how the same script drives the landing page and the project pages
 - Works fully offline once the fonts are cached
+- **The editor isn't in the HTML.** The panel, the formatting bar, the dev-entry form and the toast are built from templates in `site.js` the first time you open edit mode, and every publish removes them again by id. So a published page contains no editor markup at all — view-source shows a portfolio, not a CMS — and there's no leftover editor state that could be baked into a page by accident. A page that *does* contain `#edit-panel` was published by a browser running an old copy of the script, and republishing from it will clean it up.
+- **Publishing is a DOM snapshot.** `Save & publish` clones the live page and serializes it, so anything the script rendered at runtime ends up in the committed file. That's the reason for the rule about not hand-editing page text, and the reason the mobile menu is static markup rather than injected by script.
 - Theme system uses CSS variables. The theme is **one file — `shared/theme.css`** — loaded by every page after `portfolio.css`, and written by **Save & publish** from whatever the Design tab is set to. Publishing any page therefore recolours the whole site.
 
   It used to be baked into each page's `<html style>` instead, which meant a theme change only reached the page you published from. Doing that twice left the site with three different accents at once — near-black on the landing page, navy on Block City, the original red everywhere else. If you add anything themed, put it in `theme.css`, not on a page.
@@ -225,6 +256,11 @@ of the left edge, and collapses to a peek so you can see the page you're
 editing. Tap the handle or the "Edit mode" header to expand it; picking a
 section or field collapses it again so you land on what you selected.
 
+> **Known gap:** that bottom sheet can't currently be reached on the device it
+> was built for. The only way into edit mode is the logo gesture, and the
+> gesture can't be performed on a touchscreen — so editing is desktop-only for
+> now. Tracked as OPT-18 in `docs/backlog.md`.
+
 ### Editing on more than one machine
 
 Edits live in **this browser** until you hit **Save & publish** — that part is by design. What wasn't by design: a browser holding an older draft used to replay it over whatever had been published since, so work published from your laptop looked like it never arrived on your desktop.
@@ -232,3 +268,21 @@ Edits live in **this browser** until you hit **Save & publish** — that part is
 Publishing now stamps the page with the time. If a browser's draft is older than the page it just loaded, the draft is set aside instead of applied, and a bar tells you so with **Use my edits** to put it back — nothing is thrown away. A draft newer than the published page still wins, silently, which is the normal state while you're working.
 
 The same stamp cache-busts `shared/site.js` and the stylesheets. Before that, a tab could sit on a months-old `site.js` and publish with its old behaviour — which is how a theme change got reverted by an ordinary content publish.
+
+### Checks
+
+There's no build and no test framework, but there are three shell scripts in `docs/`. None of them installs anything.
+
+```bash
+bash docs/checks.sh      # static checks — no output means all clear
+bash docs/smoke.sh       # loads all five pages in a real engine; "ok 5 pages" = clear
+bash docs/safe-push.sh   # verify, then push (-n to verify only)
+```
+
+`checks.sh` catches the mistakes this codebase can't catch any other way: an `onclick` naming a function that no longer exists (nothing imports anything, so the button just silently does nothing), a page missing one of the elements the script grabs at load without a null check, a page that still ships editor markup, and a syntax error in `site.js` — which, being one flat script, would blank all five pages at once.
+
+`smoke.sh` is the half that proves the site *runs*. It loads every page in WebKitGTK, catching anything thrown from before the first script executes, and checks each page reaches its `window.PAGE` contract, applies the theme, renders, and defines every handler its markup names.
+
+`safe-push.sh` refuses to push on a dirty tree, when the browser has published since you last fetched, when either script above fails, or when a token or a local path appears in the outgoing diff. It won't resolve a conflict for you — when a page conflicts, the published content is somebody's real work and which side wins isn't a script's call.
+
+For the conventions behind all of this — what's safe to hand-edit, why nothing force-pushes, how the work log and backlog are kept — see `CLAUDE.md`.

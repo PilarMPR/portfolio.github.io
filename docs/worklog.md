@@ -639,3 +639,96 @@ any check, and reworded to point at the code.
 - **Nothing checks the prose.** `check-counts` guards five figures in CLAUDE.md
   and nothing else; every claim in README, SPEC and the two summaries is
   hand-verified and rots on the next editor change.
+
+---
+
+## 2026-08-11 · SESSION · Independent AI projects: the category, not its contents
+
+**Task.** Find every repo built with Claude Code and add them to the portfolio
+under a new "Independent AI projects" category.
+
+**The scan.** All 50 repos under `PilarMPR` plus the local clones, on three
+signals: commits authored or co-authored by Claude, a `CLAUDE.md`, a `.claude/`
+directory. Sixteen hit. Ten are substantial (config *and* authored commits);
+six carry one or two Claude commits in an otherwise hand-built repo. Note
+`AdhdBulletJournal` — four Claude commits exist **locally only**, never pushed,
+so a GitHub-only scan reports it clean and is wrong.
+
+**Where this split in two.** The cards are page content, so R1 forbids writing
+them from here — the next browser publish rebuilds `index.html` from its own
+DOM and would drop them. The *category* is structural and did not exist at all:
+`index.html` had one flat `.projects` grid and `insertProjectCard()` appended to
+`document.querySelector('.projects')` unconditionally, so the editor had no way
+to express "this card belongs elsewhere". Built the structure, left the content
+to the user. Scope confirmed with them first: public + substantial (5 repos).
+
+**Shipped.**
+- `#ai-work` / `#ai-projects` in `index.html` — a second `.projects` grid, empty
+  by design, with an editable subtitle.
+- CSS hides `#ai-work` until it holds a `.project` and always shows it under
+  `body.editing`. An empty category must not publish as a heading over nothing,
+  and there must still be somewhere to put the first card. Uses `:has()`, which
+  fails *closed* (section hidden) on an engine without it — the safe direction.
+- `insertProjectCard(gridId)` now takes a target grid and numbers per grid, so
+  both categories start at 01.
+- `__custom_cards__` records each card's grid, read off the DOM at save time
+  rather than stamped on the card, so a card moved between grids saves where it
+  actually is. Restore routes on it; a record with no `grid` predates the
+  section and falls back to Work.
+- Panel button 🤖 **New AI project card**, inside `epPanelHTML()` so R4 removes
+  it from every publish for free. Landing page only.
+
+**Errors (1).** `checks.sh` failed on R11 — the four insertions shifted 28
+`site.js` citations in CLAUDE.md at once, exactly the silent rot R11 exists to
+catch. Re-resolved them from the diff hunk offsets rather than by eye, then the
+R7 `var()` count (620 → 623) and R11's own citation count (37 → 40). All three
+were the check doing its job; none were noticed without it.
+
+**Verified.** `checks.sh` exits 0; `smoke.sh` prints `ok 5 pages`. Neither
+proves any of the above, because smoke.sh dispatches no events — so a throwaway
+`gjs` probe drove the real cycle in the same WebKit view: insert into each grid,
+per-grid numbering (AI 01, Work 05), `autoSave()` → reload → `loadSaved()`
+round-trip, a planted legacy record with no `grid` key landing back in Work, no
+duplicate cards, the section hidden empty and visible with a card, the panel
+button present with its handler resolving, and `buildPublishHTML()` keeping the
+section and all three cards while dropping the chrome. All green.
+
+**Not verified.** Nothing was published — `ghPublish()` was never called, so the
+GitHub write path is untouched and unproven by this session. The section has
+never been seen on a real phone, only in a 1280×900 offscreen view. No
+screenshot: the category renders empty by design until the user adds a card.
+
+**The cards, second pass.** The user then named a different four — this repo,
+`HotPotato-TagOut`, `fitsanitario` and `wildalchemists/FossilsKanban` — and asked
+for them filled in. Two notes worth keeping: `FossilsKanban` sits under the
+studio org so it never appeared in the scan of the user's own account, and it
+carries **no Claude Code markers at all** (4 commits by "PDEV", no `CLAUDE.md`,
+no `.claude/`, no trailers) — flagged to them rather than quietly filed under an
+AI category. `HotPotato-TagOut` is private, so its card cannot link anywhere.
+
+Rather than hand over text to retype, wrote a console snippet that drives the
+site's own `insertProjectCard('ai-projects')` and fills each card's fields, then
+`autoSave()`. That is the editor's code path, not a hand edit, so R1 holds — the
+browser is still the author and the publish still comes from its DOM. It also
+sidesteps the href/CTA gap for these four, because both live in the card's
+`outerHTML`, which is what gets saved and published. Idempotent: re-running skips
+cards whose name is already in the grid. Kept out of the repo — it is a one-time
+tool, not site code.
+
+**Verified (second pass).** A second `gjs` probe ran the snippet twice in a real
+engine: 4 cards added then 0 added / 4 skipped on the re-run, numbered 01–04, the
+private card carrying no `href` at all, external cards `target=_blank rel=noopener`,
+the Work grid still holding exactly its four authored cards, and after a full
+reload every name, CTA label, link and excerpt restored from storage and present
+in `buildPublishHTML()` with the chrome dropped. All green. One failure on the
+first run was **the probe's own bug** — it wrapped the snippet's IIFE in another
+function and swallowed the return value — not the snippet's; fixed and re-run.
+
+**Open / pick up next.**
+- **Publishing.** Everything above is local. The user still has to run the
+  snippet in their own browser and press Save & publish; `ghPublish()` remains
+  unexercised by this session.
+- **OPT-20** — nav and mobile-menu entries for the new section, deliberately not
+  added while the section can still be hidden.
+- Older: OPT-19 placeholder bio copy, two empty dev logs, unchecked prose in
+  README/SPEC/summaries.

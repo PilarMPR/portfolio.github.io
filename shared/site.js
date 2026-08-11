@@ -343,6 +343,10 @@ function epPanelHTML() {
         <span class="ep-add-btn-icon">🎮</span>
         <span class="ep-add-btn-label">New project card</span>
       </button>${IS_PROJECT ? '' : `
+      <button class="ep-add-btn" onclick="insertProjectCard('ai-projects')">
+        <span class="ep-add-btn-icon">🤖</span>
+        <span class="ep-add-btn-label">New AI project card</span>
+      </button>
       <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
       <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">About</div>
       <button class="ep-add-btn" onclick="eduAdd()">
@@ -1239,8 +1243,13 @@ function insertDividerBlock() {
   buildSectionList();
 }
 
-function insertProjectCard() {
-  const n = document.querySelectorAll('.project').length + 1;
+/* gridId picks which grid the card lands in — 'ai-projects' for the
+   Independent AI section, omitted for the main Work grid. Each grid
+   numbers its own cards, so both categories start at 01. */
+function insertProjectCard(gridId) {
+  const grid = (gridId && document.getElementById(gridId)) || document.querySelector('.projects');
+  if (!grid) return;
+  const n = grid.querySelectorAll('.project').length + 1;
   const id = 'proj-new-' + Date.now();
   const imgId = 'img-' + id;
 
@@ -1275,7 +1284,7 @@ function insertProjectCard() {
     </div>
     <button class="card-del-btn" onclick="deleteProjectCard('${id}',event)" title="Delete card">🗑</button>`;
 
-  document.querySelector('.projects').appendChild(card);
+  grid.appendChild(card);
 
   // Register in PROJECTS so it shows in the panel
   PROJECTS.push({ id, icon:'🎮', name:'New Project' });
@@ -1448,7 +1457,9 @@ function autoSave() {
   data['__added__'] = document.getElementById('added-blocks')?.innerHTML || '';
   data['__edu__'] = eduList()?.innerHTML || '';
   const customCards = [...document.querySelectorAll('.project[data-custom-card]')];
-  data['__custom_cards__'] = customCards.map(c => ({ id: c.dataset.customCard, html: c.outerHTML }));
+  // Which grid a card sits in is read back off the DOM rather than stored on
+  // the card, so a card dragged between categories saves where it actually is.
+  data['__custom_cards__'] = customCards.map(c => ({ id: c.dataset.customCard, grid: c.closest('.projects')?.id || '', html: c.outerHTML }));
   data['__savedAt__'] = Date.now();     // so a later publish can outrank it
   safeSet('pmpr_portfolio_v2', JSON.stringify(data));
   dlSave();
@@ -1560,9 +1571,13 @@ function loadSaved() {
     const added = document.getElementById('added-blocks');
     if (added && data['__added__']) added.innerHTML = data['__added__'];
     if (data['__custom_cards__'] && data['__custom_cards__'].length) {
-      const grid = document.querySelector('.projects');
+      const mainGrid = document.querySelector('.projects');
       data['__custom_cards__'].forEach(c => {
         if (document.querySelector(`.project[data-custom-card="${c.id}"]`)) return;
+        // Cards saved before the AI section existed carry no grid, and a named
+        // grid can go missing if a page drops the section — both fall back to
+        // the main Work grid rather than stranding the card off-page.
+        const grid = (c.grid && document.getElementById(c.grid)) || mainGrid;
         const tmp = document.createElement('div');
         tmp.innerHTML = c.html;
         const card = tmp.firstElementChild;

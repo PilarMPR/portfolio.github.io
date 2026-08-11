@@ -26,6 +26,7 @@ of its own so it has its own title, description, URL and link preview.
 |---|---|
 | **Hero** | Name, job title + location, tagline, two CTAs |
 | **Work** | Four project cards → each links to its own case-study page |
+| **Independent AI** | Second card grid, filled entirely from the editor. Hidden while empty |
 | **About** | Bio, pull quote, photo, education timeline, skills |
 | **Contact** | Email, LinkedIn, Discord, CV download, status line |
 

@@ -72,6 +72,7 @@ Drops new content into the page you're on:
 | | Adds |
 |---|---|
 | 🎮 New project card | A fifth (sixth, seventh…) card in the work grid, with editable number, tags, role, name and excerpt |
+| 🤖 New AI project card | The same card, in the **Independent AI** grid instead — landing page only. That section stays hidden on the live site until it holds at least one card, so it never publishes as an empty heading |
 | 🎓 Education entry | One more row in the About timeline — landing page only |
 | 📝 Text section | A heading + paragraph block |
 | 📷 Image block | An image with a caption |

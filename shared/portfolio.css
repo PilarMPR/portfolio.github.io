@@ -317,7 +317,24 @@ h1.hero-name {
 @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
 /* ── WORK — SPEC CARDS ────────────────── */
-#work { padding:clamp(5rem,10vw,8rem) clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,5vw,6rem); position:relative; z-index:2; }
+#work, #ai-work { padding:clamp(5rem,10vw,8rem) clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,5vw,6rem); position:relative; z-index:2; }
+
+/* ── INDEPENDENT AI PROJECTS ──────────────
+   Same card grid as Work, in its own section with its own FIG numbering.
+   #ai-projects ships empty — its cards are added through the editor, not
+   by hand — so the section stays hidden until it holds at least one, or a
+   published page would show a heading standing over nothing. Edit mode
+   always shows it, otherwise there is no way to add the first card.     */
+#ai-work { display:none; }
+#ai-work:has(.project) { display:block; }
+body.editing #ai-work { display:block; }
+body.editing #ai-work:not(:has(.project)) #ai-projects::after {
+  content:'No cards yet — add them from the panel: Add ▸ New AI project card.';
+  grid-column:1 / -1;
+  font-family:var(--fm); font-size:.72rem; line-height:1.7; color:var(--muted);
+  border:1px dashed var(--faint); border-radius:4px;
+  padding:clamp(2rem,5vw,3.5rem); text-align:center;
+}
 .work-head {
   padding:0 0 clamp(2.5rem,5vw,4rem);
   display:flex; align-items:flex-end; justify-content:space-between;

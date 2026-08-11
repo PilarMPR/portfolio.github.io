@@ -243,3 +243,30 @@ defect, and nothing should try — "is this paragraph the one you meant" is not
 checkable. Recorded so it is not re-discovered on every read. Related: the two
 empty dev logs and the stale README/SPEC preset names, both in
 `docs/summary-content.md` §8.
+
+### OPT-20 · Independent AI section has no nav entry · impact low · effort low · open
+Evidence (`index.html`): the nav (`.nav-links`) and `#mobile-menu` both list
+Work / About / Contact and were left untouched when `#ai-work` was added, so the
+new category is reachable only by scrolling. Fix: one `<li>` and one `<a>`, both
+calling `scrollToSection('ai-work')`. Catch: the section is `display:none` until
+it holds a card, so a nav link added now points at nothing and would need the
+same `:has()` gate — hence it was left out rather than shipped broken. Do this
+once the first card is published, not before. Related: OPT-19, also blocked on
+the user adding content through the editor.
+
+### OPT-21 · Added project cards can't link anywhere · impact med · effort med · open
+Evidence (`shared/site.js`, `insertProjectCard()`): every generated card is built
+with `href = '#'` and a hardcoded `<span class="proj-cta">View case study</span>`,
+and neither is a `data-ed` field — so a card added from the panel cannot be
+pointed at a repo, a live demo or anything else from inside the editor, and
+always claims to lead to a case study. Harmless while added cards were rare;
+load-bearing for the Independent AI category, where every card wants an outbound
+link. Fix: an editable CTA label is a plain `data-ed` field, but the href is not
+— `data-ed` round-trips `innerHTML`, not attributes, so a URL needs its own
+input in the panel plus a line in `autoSave`/`loadSaved`, or a convention like
+reading the href out of the CTA field. Catch: `buildExportHTML()` rewrites
+sibling `.html` links to the live site and must leave absolute external URLs
+alone; check that before shipping. Worked around for the four cards filled on
+2026-08-11 by setting both from script, which persists because they ride along
+in the card's `outerHTML` — that covers those cards only, not the next one added
+from the panel.

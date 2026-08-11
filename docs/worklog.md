@@ -601,3 +601,41 @@ open it.
   told the reader to hand-edit `index.html` to change the contact status line:
   it is an editable field, and following that tip would have violated R1 and
   been overwritten by the next publish.
+
+### 2026-08-10 · SESSION · Documentation session — four docs, no code
+Asked for a summary of the portfolio to date, content-wise and programming-wise,
+then for README and SPEC to be brought in line.
+
+**Shipped.** `docs/summary-content.md` and `docs/summary-engineering.md`
+(`12294a3`); `README.md` and `SPEC.md` rewritten against the code (`ab39611`);
+OPT-19 filed; this section of CLAUDE.md corrected. Pushed — `origin/main` went
+`a27c29c` → `ab39611`, taking the previous session's unpushed `8d14e63` with it.
+No site code, CSS or page content touched: the whole diff is `.md`.
+
+**What the read turned up.** The docs had drifted further than the CLAUDE.md
+Gotcha admitted. README documented a **Layout tab that does not exist** (the
+panel has four: Sections, + Add, Dev Log, Design) and omitted + Add entirely;
+its Design section was wrong in every particular — five invented preset names,
+four colour rows against six, two fonts the code never loads. It also told the
+reader to hand-edit `index.html` for a field that is editable in the editor,
+i.e. documented an R1 violation as a tip.
+
+**Errors (1), caught before the commit.** I spelled out part of the editor
+gesture in two places in my own new prose — the one thing every doc here
+deliberately withholds. Found by grepping the files I had just written, not by
+any check, and reworded to point at the code.
+
+**Open / pick up next.**
+- **OPT-19** — three of the four About paragraphs are placeholder duplicates and
+  the contact status line holds the author's name. Page content, so only the
+  in-page editor can fix it (R1). Nothing here can.
+- **Two of four dev logs are empty** (Hot Potato, Create Your Own Monster). The
+  block editor's whole point, unused on the lead project.
+- **The gesture convention contradicts itself.** OPT-18 in this repo's public
+  `docs/` spells the gesture out completely, while CLAUDE.md, README and SPEC
+  all withhold it. Flagged to the user, deliberately not resolved — which side
+  gives way is their call, and rewriting a backlog entry to match a convention
+  is not something to do quietly.
+- **Nothing checks the prose.** `check-counts` guards five figures in CLAUDE.md
+  and nothing else; every claim in README, SPEC and the two summaries is
+  hand-verified and rots on the next editor change.

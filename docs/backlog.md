@@ -228,3 +228,18 @@ long-press variant needs `preventDefault` on `contextmenu` and will fight the
 browser; taps are the safer shape. Unlocking a *new* phone still needs the
 Shift path or a typed token, which no touch gesture solves — worth deciding
 whether that matters before starting.
+
+### OPT-19 · Placeholder copy still live on the landing page · impact med · effort low · open
+Evidence (`index.html` at `8d14e63`): `about-p1` and `about-p2` are byte-identical
+paragraphs, and `about-p3` repeats the `about-quote` pull quote sitting directly
+above it — three of the four bio paragraphs are placeholder duplicates, and only
+`about-p4` is unique. Separately, `contact-availability` holds
+"Pilar Martín-Peña Rojo" where the green status dot beside it is designed for an
+availability message, and the hero tagline reads "inmerses" for "immerses". Fix:
+**the user, through the in-page editor** — every one of these is page content, so
+R1 forbids touching them from here; a hand edit would be overwritten by the next
+publish anyway. Catch: nothing in `checks.sh` or `smoke.sh` can see this class of
+defect, and nothing should try — "is this paragraph the one you meant" is not
+checkable. Recorded so it is not re-discovered on every read. Related: the two
+empty dev logs and the stale README/SPEC preset names, both in
+`docs/summary-content.md` §8.

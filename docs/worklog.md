@@ -550,3 +550,23 @@ open it.
   **not committed**. Anything worth keeping has to be folded into `smoke.sh`
   deliberately; right now a future session inherits the assertions that were
   moved there and none of the ones that weren't.
+
+### 2026-08-10 · OK · Two summary docs — what the site says, and how it is built
+- what: `docs/summary-content.md` (the portfolio as content: framing, the four
+  case studies, the dev log, visual identity, media, and §8 "gaps in the
+  content") and `docs/summary-engineering.md` (stack figures, the five-phase
+  history from the April single file to the gated editor, architecture, the
+  editor lifecycle, the three verification scripts, the working agreement, the
+  backlog's state, and §8 "what is not proven"). No code touched — both are new
+  files under `docs/`, read out of the repo rather than out of README/SPEC,
+  which lag it.
+- checks: checks.sh ok · smoke.sh ok 5 pages · manual: every figure quoted was
+  re-derived from the tree at this commit rather than copied from CLAUDE.md —
+  which caught one, the silent-catch count (11, not the 10 a looser grep gave)
+- push: this commit
+- note: raised OPT-19. Three of the four About paragraphs are placeholder
+  duplicates and the contact status line holds the author's name instead of an
+  availability message — all page content, so R1 puts the fix in the editor's
+  hands, not this session's. Also worth stating outright somewhere permanent:
+  two of the four dev logs are empty, which is the largest content gap on the
+  site and the one the block editor was built for.

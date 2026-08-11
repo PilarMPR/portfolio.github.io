@@ -795,3 +795,58 @@ none of this has been seen on a phone.
 - **FossilsKanban has no Claude Code markers** — flagged twice, still in the set
   at the user's choice.
 - **OPT-20** — nav entries, still waiting on the section being non-empty.
+
+---
+
+## 2026-08-11 · SESSION · Independent AI cards, written by hand at the user's direction
+
+**Task.** Fill the `#ai-projects` grid with the four AI projects, styled like
+the four authored game cards.
+
+**R1 exception, on the record.** Cards are page content, so R1 says they go
+through the editor, not into `index.html` from here. A console snippet driving
+`insertProjectCard('ai-projects')` was built and verified first (15 checks in
+Chromium: idempotent re-run, per-grid numbering, the private repo carrying no
+href, full reload round-trip, `buildPublishHTML()` keeping all four). The
+concern and the overwrite risk were put to the user, who asked twice for it
+pushed to `main` instead. Their call, taken deliberately.
+
+**Why authored markup rather than editor-generated.** Written in the shape of
+the Work cards — plain anchors, no `data-custom-card`, no `data-ed`. That form
+has no field keys to collide with `pmpr_portfolio_v2` and no `__custom_cards__`
+record to be restored over, so a browser with its own landing-page draft leaves
+them alone. Verified: with an unrelated draft in `localStorage`, all four still
+render after a reload.
+
+**Content came from the repos, not from guesswork.** Cloned `fitsanitario`,
+`FossilsKanban` and `HotPotato-TagOut` and wrote each excerpt from its own
+README. Two findings worth keeping:
+- `HotPotato-TagOut` is a React/TypeScript, Firebase-backed command centre —
+  145 files, four-layer architecture, i18n, Zod, Vitest, CI. Its README states
+  it absorbed the Fossils Kanban as a first-class production section.
+- `FossilsKanban` therefore is **superseded by another card in the same set**,
+  and still carries no Claude Code markers (no `CLAUDE.md`, no `.claude/`, zero
+  Claude commits). Third time flagged; kept at the user's choice.
+
+**Card art.** Three of the four render locally, so they were screenshotted and
+converted to WebP at 900×720 — 60 KB for all three. `HotPotato-TagOut` needs
+`npm install`, a Vite build and Firebase credentials, so its card ships with
+the empty figure frame.
+
+**Verified.** `checks.sh` exits 0. Nine assertions in Chromium as a visitor with
+empty storage: four cards, numbered 01–04, section visible, the private card a
+`<div>` with no href, the three public ones `target=_blank rel=noopener`, art
+decoded at 900px on three, Work grid still exactly four, no failed requests, no
+JS errors, and survival of a reload alongside an unrelated local draft.
+
+**Not verified.** `smoke.sh` could not run — no `gjs` in this container, so the
+WebKit runtime half is unproven; Chromium via Playwright stood in. Nothing was
+published through `ghPublish()`; this went to `main` as a normal commit.
+
+**Open / pick up next.**
+- **OPT-20** now unblocks — the section has content, so nav and mobile-menu
+  entries can finally point at something real.
+- The `--accent` in `shared/theme.css` is `#24211b`, identical to `--text`, so
+  every accent-derived tint reads as ink. A publish from the Design tab fixes
+  it site-wide.
+- OPT-16 stands: nothing garbage-collects published assets.

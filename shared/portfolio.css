@@ -451,6 +451,19 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   color:var(--accent); border-bottom:1.5px solid rgba(var(--accent-rgb),.4);
   padding-bottom:.2rem; opacity:1; transform:none;
 }
+/* The destination of a generated card, held as text because an editable field
+   round-trips innerHTML and cannot reach the anchor's href. Authors see it and
+   edit it; visitors never do — syncCardLinks() has already put it on the href. */
+.proj-link { display:none; }
+body.editing .proj-link {
+  display:block; margin-top:.5rem;
+  font-family:var(--fm); font-size:.62rem; line-height:1.6;
+  color:var(--muted); word-break:break-all;
+  border:1px dashed var(--faint); border-radius:3px; padding:.3rem .45rem;
+}
+body.editing .proj-link:empty::before {
+  content:'https://… (blank = not a link)'; opacity:.55;
+}
 .proj-cta::after { content:'→'; transition:transform .2s; }
 .project:hover .proj-cta::after { transform:translateX(5px); }
 .project:hover .proj-cta { border-bottom-color:var(--accent); }

@@ -1254,7 +1254,8 @@ function insertProjectCard(gridId) {
   const imgId = 'img-' + id;
 
   const card = document.createElement('a');
-  card.href = '#';
+  // No href until the link field has one — syncCardLinks() owns the attribute.
+  // A card used to ship href="#", which scrolled the page to the top on click.
   card.className = 'project';
   card.dataset.customCard = id;
   card.innerHTML = `
@@ -1279,12 +1280,14 @@ function insertProjectCard(gridId) {
         <div class="proj-role"    data-ed="${id}-role"    data-label="Your role"        contenteditable="${editing}" spellcheck="false">Your Role</div>
         <div class="proj-name"    data-ed="${id}-name"    data-label="Project name"     contenteditable="${editing}" spellcheck="false">Project Title</div>
         <p   class="proj-excerpt" data-ed="${id}-excerpt" data-label="Short description" contenteditable="${editing}" spellcheck="false">Short description of this project — appears on hover.</p>
-        <span class="proj-cta">View case study</span>
+        <span class="proj-cta"  data-ed="${id}-cta"  data-label="Link label"       contenteditable="${editing}" spellcheck="false">View case study</span>
+        <span class="proj-link" data-ed="${id}-link" data-label="Link URL — blank for no link" contenteditable="${editing}" spellcheck="false"></span>
       </div>
     </div>
     <button class="card-del-btn" onclick="deleteProjectCard('${id}',event)" title="Delete card">🗑</button>`;
 
   grid.appendChild(card);
+  syncCardLinks();
 
   // Register in PROJECTS so it shows in the panel
   PROJECTS.push({ id, icon:'🎮', name:'New Project' });
@@ -1294,6 +1297,42 @@ function insertProjectCard(gridId) {
   // Scroll to the new card
   card.scrollIntoView({ behavior:'smooth', block:'center' });
 }
+
+/* A generated card carries its destination as an editable field, because
+   `data-ed` round-trips innerHTML and cannot reach an attribute. This copies
+   that field onto the anchor, and is the only thing that writes .project href.
+   Called after every load, every insert and every save — the href has to be
+   current *before* autoSave() serializes outerHTML, or the link never
+   survives a reload. Authored cards are untouched: they have no link field. */
+function syncCardLinks() {
+  document.querySelectorAll('.project[data-custom-card]').forEach(card => {
+    const field = card.querySelector('.proj-link');
+    if (!field) return;                       // pre-OPT-21 card, leave it alone
+    const url = field.textContent.trim();
+    if (!url) {
+      // Not a link at all, rather than a dead one that jumps to the top.
+      card.removeAttribute('href'); card.removeAttribute('target'); card.removeAttribute('rel');
+      return;
+    }
+    card.href = url;
+    if (/^https?:\/\//i.test(url)) { card.target = '_blank'; card.rel = 'noopener'; }
+    else { card.removeAttribute('target'); card.removeAttribute('rel'); }
+  });
+}
+
+/* Cards are anchors, so once they point somewhere real, clicking one to edit
+   its text navigates away mid-edit. Swallow that while editing — the panel's
+   section list is how you open a project anyway. Delegated and in the capture
+   phase so it survives cards being restored from stored HTML, and scoped to
+   the anchor itself: the upload label and the delete button inside a card
+   need their own default behaviour. */
+document.addEventListener('click', e => {
+  if (!document.body.classList.contains('editing')) return;
+  if (!e.target.closest) return;
+  if (!e.target.closest('.project')) return;
+  if (e.target.closest('.img-upload-btn') || e.target.closest('.card-del-btn')) return;
+  e.preventDefault();
+}, true);
 
 /* ─── EDUCATION LIST ───────────────────────
    Add, remove and reorder schools. The list is saved as one blob rather
@@ -1456,6 +1495,9 @@ function autoSave() {
   });
   data['__added__'] = document.getElementById('added-blocks')?.innerHTML || '';
   data['__edu__'] = eduList()?.innerHTML || '';
+  // Before serializing, not after: outerHTML is what gets stored, so the href
+  // has to already match the link field or the link dies on the next reload.
+  syncCardLinks();
   const customCards = [...document.querySelectorAll('.project[data-custom-card]')];
   // Which grid a card sits in is read back off the DOM rather than stored on
   // the card, so a card dragged between categories saves where it actually is.
@@ -1586,6 +1628,7 @@ function loadSaved() {
           PROJECTS.push({ id: c.id, icon:'🎮', name: card.querySelector('.proj-name')?.textContent?.trim() || 'Project' });
         }
       });
+      syncCardLinks();
     }
   } catch (e) {}
 }

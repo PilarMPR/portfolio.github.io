@@ -254,7 +254,7 @@ same `:has()` gate — hence it was left out rather than shipped broken. Do this
 once the first card is published, not before. Related: OPT-19, also blocked on
 the user adding content through the editor.
 
-### OPT-21 · Added project cards can't link anywhere · impact med · effort med · open
+### OPT-21 · Added project cards can't link anywhere · impact med · effort med · done
 Evidence (`shared/site.js`, `insertProjectCard()`): every generated card is built
 with `href = '#'` and a hardcoded `<span class="proj-cta">View case study</span>`,
 and neither is a `data-ed` field — so a card added from the panel cannot be
@@ -270,3 +270,13 @@ alone; check that before shipping. Worked around for the four cards filled on
 2026-08-11 by setting both from script, which persists because they ride along
 in the card's `outerHTML` — that covers those cards only, not the next one added
 from the panel.
+**Done 2026-08-11.** The URL is a `.proj-link` field shown only under
+`body.editing`, and `syncCardLinks()` copies it onto the anchor — called from
+insert, from save (before `outerHTML` is serialized) and after restore. The CTA
+label became a plain `data-ed` field. Blank field means no `href` at all rather
+than a dead `#`, and `https://` links get `target=_blank rel=noopener`. Two
+things the fix turned up that the entry had not predicted: cards are anchors, so
+a real destination made clicking one while editing navigate away — handled by a
+capture-phase guard that spares the upload label and the delete button — and
+`buildExportHTML()` needed no change, since it only rewrites sibling `.html`
+links and leaves absolute URLs alone.

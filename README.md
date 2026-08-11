@@ -61,7 +61,7 @@ What you can edit is whatever the markup marks as editable, which on the landing
 | About | The bio paragraphs, the pull quote, and every education entry (name + detail) |
 | Contact | Heading, email, LinkedIn, Discord, the status line, the footer note |
 
-Two things on the landing page are **not** editor fields: the skills chips in the About box and the CV link in the header — both are authored in `index.html`. The four project cards are authored too, so their text isn't editable in place and there's no reorder control for them; open a card's case study to edit its content. Cards you add yourself with **+ Add** *are* fully editable, because they're generated with the fields already on them.
+Two things on the landing page are **not** editor fields: the skills chips in the About box and the CV link in the header — both are authored in `index.html`. The four project cards are authored too, so their text isn't editable in place and there's no reorder control for them; open a card's case study to edit its content. Cards you add yourself with **+ Add** *are* fully editable, because they're generated with the fields already on them — including where the card points. A generated card carries a **Link URL** field, shown only while you're editing, that becomes the card's destination; leave it blank and the card isn't a link at all. Full `https://` addresses open in a new tab. While edit mode is on, clicking a card does nothing rather than navigating away mid-edit.
 
 The profile photo and the card images are replaced by hovering the image and using its upload button rather than through a field.
 
@@ -71,7 +71,7 @@ Drops new content into the page you're on:
 
 | | Adds |
 |---|---|
-| 🎮 New project card | A fifth (sixth, seventh…) card in the work grid, with editable number, tags, role, name and excerpt |
+| 🎮 New project card | A fifth (sixth, seventh…) card in the work grid, with editable number, tags, role, name, excerpt, link label and link URL |
 | 🤖 New AI project card | The same card, in the **Independent AI** grid instead — landing page only. That section stays hidden on the live site until it holds at least one card, so it never publishes as an empty heading |
 | 🎓 Education entry | One more row in the About timeline — landing page only |
 | 📝 Text section | A heading + paragraph block |

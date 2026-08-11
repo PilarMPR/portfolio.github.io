@@ -732,3 +732,66 @@ function and swallowed the return value — not the snippet's; fixed and re-run.
   added while the section can still be hidden.
 - Older: OPT-19 placeholder bio copy, two empty dev logs, unchecked prose in
   README/SPEC/summaries.
+
+---
+
+## 2026-08-11 · SESSION · Generated cards can point somewhere (OPT-21)
+
+**Task.** The user asked for OPT-21 and said they want the category live on the
+web. The second half is not something this end can do — publishing needs their
+browser and their token — so this session did the code and handed back a shorter
+path, rather than pretending the two were the same job.
+
+**Why it needed doing now.** The four Independent AI cards got their links by
+having them written straight onto the anchor from a console snippet. That works
+only because `autoSave()` stores `outerHTML`; the *next* card added from the
+panel would still say "View case study" and link nowhere.
+
+**Shipped.**
+- `.proj-cta` is now a plain `data-ed` field, and generated cards carry a new
+  `.proj-link` field holding the destination. `data-ed` round-trips `innerHTML`
+  and cannot reach an attribute, which is the whole reason the URL has to live
+  in the DOM as text rather than as an `href`.
+- `syncCardLinks()` (shared/site.js:1307) copies that field onto the anchor and
+  is now **the only writer of a `.project` href**. Called from insert, from
+  `autoSave()` *before* it serializes, and after restore — get that order wrong
+  and the link vanishes on the next reload.
+- A blank field removes `href` outright. Cards used to ship `href="#"`, which
+  silently scrolled the page to the top when clicked.
+- `https://` destinations get `target=_blank rel=noopener`; relative ones don't.
+- CSS shows `.proj-link` only under `body.editing`, with an empty-state hint.
+
+**What the fix turned up that OPT-21 had not predicted.** Cards are anchors, so
+giving them real destinations made *clicking one while editing* navigate away
+mid-edit — a hazard that did not exist while every href was `#`. Handled with a
+document-level capture listener that swallows clicks on `.project` while
+editing, excluding `.img-upload-btn` and `.card-del-btn`, which need their own
+default behaviour or the file dialog never opens. The entry's stated catch —
+that `buildExportHTML()` might mangle absolute URLs — turned out to be a
+non-issue: it only rewrites sibling `.html` links.
+
+**Errors (2).** `checks.sh` failed on R11 again — 24 citations shifted, plus the
+`var()` count and the citation count. Re-resolved from the diff hunk offsets.
+Separately, the first probe run reported the delete button broken; the probe was
+wrong, not the code. `deleteProjectCard()` calls `preventDefault()` itself, so
+asserting `defaultPrevented === false` could never hold, and firing the button
+really did delete a card, which cascaded into six phase-2 failures. Rewritten to
+drive a throwaway fifth card and assert the card is *gone* afterwards.
+
+**Verified.** `checks.sh` 0, `smoke.sh` `ok 5 pages`, and an extended `gjs`
+probe: the link field present and hidden from visitors, editing it moves the
+href, blanking it un-links the card, a card click passes through normally when
+not editing and is swallowed while editing, the upload label and delete button
+keep working, the scratch card cleaned up, and after a full reload all four
+links, labels and excerpts restored and reached `buildPublishHTML()`.
+
+**Not verified.** Still nothing published — `ghPublish()` remains unexercised.
+The link field has never been typed into by a human, only set from script, and
+none of this has been seen on a phone.
+
+**Open / pick up next.**
+- **The cards are still not live.** The user has to run the snippet in their own
+  browser and press Save & publish; that is the only step left.
+- **FossilsKanban has no Claude Code markers** — flagged twice, still in the set
+  at the user's choice.
+- **OPT-20** — nav entries, still waiting on the section being non-empty.

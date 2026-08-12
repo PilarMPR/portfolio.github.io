@@ -850,3 +850,56 @@ published through `ghPublish()`; this went to `main` as a normal commit.
   every accent-derived tint reads as ink. A publish from the Design tab fixes
   it site-wide.
 - OPT-16 stands: nothing garbage-collects published assets.
+
+## 2026-08-12 · SESSION · Nav entries for the AI section (OPT-20)
+
+**Shipped.** The Independent AI category is reachable from the nav now, on all
+five pages. `index.html` gets `scrollToSection('ai-work')` in both the desktop
+list and the mobile menu; the four project pages get `../index.html#ai-work` in
+theirs. Order everywhere: Work / AI / About / Contact / CV.
+
+**Two things that had to change alongside it.**
+
+The visibility gate was inverted. It was `#ai-work { display:none }` plus an
+`#ai-work:has(.project) { display:block }` override — which fails *closed*: an
+engine that doesn't understand `:has()` drops the override and hides a section
+that has content. That was the safe direction while the grid shipped empty and
+nothing linked to it. It is the wrong direction now, so it is written as
+`#ai-work:not(:has(.project)) { display:none }` — same behaviour where `:has()`
+works, section visible where it doesn't, and a nav link that never points at
+something invisible.
+
+`section[id]` gained `scroll-margin-top: calc(var(--nav-h) + 1rem)`. The
+in-page links go through `scrollToSection()`, which offsets by hand; the
+cross-page ones are native anchor jumps that know nothing about the fixed nav,
+so `../index.html#ai-work` was landing with the section's first 56px underneath
+it. This was true of `#work`, `#about` and `#contact` too — the new link only
+made it visible. R7 clean (one `var()`, no literal); the `var()` count in
+CLAUDE.md moves 626 → 627.
+
+**Verified.** `checks.sh` exits 0. Eight assertions in Chromium: nav order
+reads `Work,AI,About,Contact,CV ↓`; the section computes visible before any
+click; the desktop AI link lands the section 62px down against a 56px nav; the
+mobile menu lists AI, closes on the click and lands at 58px; from
+`hot-potato.html` the link reaches `index.html#ai-work` with the section 72px
+down — 0px before the `scroll-margin-top`, i.e. flush under the nav; no JS
+errors on any page. Re-ran `check.js`, `theme.js`, `sidebar.js`, `aiverify.js`
+and `final.js` — all green.
+
+**Two suites needed fixing, neither a regression.** `aiverify.js` asserted the
+published HTML carried four `data-custom-card` attributes; the AI cards are
+authored markup now, not editor-inserted, so they carry none — it counts
+`#ai-projects .project` instead. `final.js` opened the editor with six plain
+logo clicks, which predates both the token gate and the alt-key gesture — it
+plants a token, reloads, and alt-clicks three times. Test-harness rot, no repo
+change either way.
+
+**Not verified.** `smoke.sh` still skips — no `gjs` in this container, so the
+WebKit half is unproven and Chromium stood in again. Nothing went through
+`ghPublish()`.
+
+**Open / pick up next.**
+- `--accent` in `shared/theme.css` is still `#24211b`, identical to `--text`,
+  so every accent-derived tint reads as ink. One publish from the Design tab
+  fixes it site-wide; nothing here can.
+- OPT-16 stands: nothing garbage-collects published assets.

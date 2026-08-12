@@ -40,6 +40,11 @@
 /* ── BASE ─────────────────────────────── */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 html { scroll-behavior:smooth; }
+/* Cross-page hash links (../index.html#ai-work) land through native anchor
+   scrolling, which knows nothing about the fixed nav and buries the top of
+   the section under it. scrollToSection() compensates by hand for in-page
+   clicks; this does the same for the links that never reach it. */
+section[id] { scroll-margin-top: calc(var(--nav-h) + 1rem); }
 body {
   font-family: var(--fb);
   background-color: var(--bg);
@@ -321,12 +326,17 @@ h1.hero-name {
 
 /* ── INDEPENDENT AI PROJECTS ──────────────
    Same card grid as Work, in its own section with its own FIG numbering.
-   #ai-projects ships empty — its cards are added through the editor, not
-   by hand — so the section stays hidden until it holds at least one, or a
-   published page would show a heading standing over nothing. Edit mode
-   always shows it, otherwise there is no way to add the first card.     */
-#ai-work { display:none; }
-#ai-work:has(.project) { display:block; }
+   Hidden while genuinely empty, or a published page would show a heading
+   standing over nothing. Edit mode always shows it, otherwise there is no
+   way to add the first card.
+
+   Written as :not(:has()) rather than a display:none default plus a
+   :has() override, so it fails OPEN: an engine without :has() drops this
+   rule and shows the section. The old form failed closed, which was the
+   safe direction while the grid shipped empty — now that the cards are
+   authored into the page, hiding real content is the worse outcome, and
+   the nav links added for them must not point at something invisible. */
+#ai-work:not(:has(.project)) { display:none; }
 body.editing #ai-work { display:block; }
 body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   content:'No cards yet — add them from the panel: Add ▸ New AI project card.';

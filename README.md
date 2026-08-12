@@ -247,7 +247,7 @@ Two things worth knowing if you change the layout:
   and `navH()` in `site.js` reads it back, so scroll offsets can't drift out
   of step with it. It is deliberately **not** a theme variable — `applyTheme()`
   writes theme vars onto `documentElement.style`, which would override it.
-- The mobile menu's markup is static in all five pages rather than injected
+- The mobile menu's markup is static in all nine pages rather than injected
   by script. `buildPublishHTML()` serializes the live DOM, so anything the
   script adds would be baked into the published page and then added again on
   the next load. Any new UI state class needs clearing there too.
@@ -276,11 +276,11 @@ There's no build and no test framework, but there are three shell scripts in `do
 
 ```bash
 bash docs/checks.sh      # static checks — no output means all clear
-bash docs/smoke.sh       # loads all five pages in a real engine; "ok 5 pages" = clear
+bash docs/smoke.sh       # loads all nine pages in a real engine; "ok 9 pages" = clear
 bash docs/safe-push.sh   # verify, then push (-n to verify only)
 ```
 
-`checks.sh` catches the mistakes this codebase can't catch any other way: an `onclick` naming a function that no longer exists (nothing imports anything, so the button just silently does nothing), a page missing one of the elements the script grabs at load without a null check, a page that still ships editor markup, and a syntax error in `site.js` — which, being one flat script, would blank all five pages at once.
+`checks.sh` catches the mistakes this codebase can't catch any other way: an `onclick` naming a function that no longer exists (nothing imports anything, so the button just silently does nothing), a page missing one of the elements the script grabs at load without a null check, a page that still ships editor markup, and a syntax error in `site.js` — which, being one flat script, would blank all nine pages at once.
 
 `smoke.sh` is the half that proves the site *runs*. It loads every page in WebKitGTK, catching anything thrown from before the first script executes, and checks each page reaches its `window.PAGE` contract, applies the theme, renders, and defines every handler its markup names.
 

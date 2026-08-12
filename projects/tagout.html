@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Hot Potato · TagOut — Pilar Martín-Peña Rojo</title>
+<meta name="description" content="Studio command centrePrivate · Wild Alchemists · 2026 Hot Potato · TagOut StackReact 18 + TypeScript BackendFirebase My roleTooling &amp; architecture"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../shared/portfolio.css"/>
+<link rel="stylesheet" href="../shared/theme.css"/>
+</head>
+<body>
+<div id="cursor"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <a class="nav-logo" id="nav-logo" href="../index.html">Pilar MPR</a>
+  <ul class="nav-links">
+    <li><a href="../index.html#work">Work</a></li>
+    <li><a href="../index.html#ai-work">AI</a></li>
+    <li><a href="../index.html#about">About</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+    <li><a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu. Static markup on purpose: the publish flow serializes the
+     live DOM, so anything injected by script would be baked into the page
+     and then injected a second time on the next load. -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="../index.html#work">Work</a>
+  <a href="../index.html#ai-work">AI</a>
+  <a href="../index.html#about">About</a>
+  <a href="../index.html#contact">Contact</a>
+  <a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
+</div>
+
+<a class="proj-back" href="../index.html#ai-work">← All AI work</a>
+
+<main class="sh-page">
+
+<article id="case-view">
+<div class="sh-hero">
+    <img src="../assets/ai/tagout/hero.webp" alt="Hot Potato · TagOut — the Google sign-in gate" width="1600" height="1029" loading="eager" fetchpriority="high" decoding="async" />
+    <div class="sh-hero-grad"></div>
+    <div class="sh-hero-info">
+      <div class="sh-tags"><span class="tag tag-accent">Studio command centre</span><span class="tag tag-dim">Private · Wild Alchemists · 2026</span></div>
+      <h2>Hot Potato · TagOut</h2>
+    </div>
+  </div>
+  <div class="sh-facts">
+    <div><div class="sh-fact-lbl">Stack</div><div class="sh-fact-val">React 18 + TypeScript</div></div>
+    <div><div class="sh-fact-lbl">Backend</div><div class="sh-fact-val">Firebase — Firestore + Auth</div></div>
+    <div><div class="sh-fact-lbl">My role</div><div class="sh-fact-val">Tooling &amp; architecture</div></div>
+    <div><div class="sh-fact-lbl">Timeline</div><div class="sh-fact-val">2026 → Present</div></div>
+  </div>
+  <div class="sh-content">
+    <div class="sh-body">
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Context</div>
+        <h3>What is TagOut?</h3>
+        <p>The internal command centre for the Hot Potato · TagOut project at Wild Alchemists — the single place where the project's finances, tasks, bugs, calendar, team and production board live.</p>
+        <div class="sh-pull">"It began as one enormous HTML file that did everything. This is the same tool rebuilt properly, so that adding a module is a day's work instead of an archaeology expedition."</div>
+        <p>The previous Command Center was a single-file app that had grown past the point where anyone could safely change it. The rebuild keeps the behaviour and the data shape, and replaces the structure — including the studio's Fossils Kanban, which becomes a first-class production section rather than a separate tool.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">How it works</div>
+        <h3>Four layers, dependencies only point down</h3>
+        <p>The whole point of the layering is a rule you can check: presentation depends on the application layer, which depends on the domain, which depends on infrastructure. Nothing lower reaches up, and <strong style="color:var(--white)">the UI never imports the Firebase SDK</strong>.</p>
+        <div class="sh-loop">
+          <span class="loop-n">Presentation</span><span class="loop-a">→</span>
+          <span class="loop-n">Application</span><span class="loop-a">→</span>
+          <span class="loop-n">Domain</span><span class="loop-a">→</span>
+          <span class="loop-n">Infrastructure</span>
+        </div>
+        <p>Components go through services, services go through one Firebase module, and that module is the only place the SDK is ever constructed. Path aliases mark the boundaries, so a wrong-direction import is visible in the import line itself rather than hidden three files deep.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Key decisions</div>
+        <h3>The schema is the source of truth</h3>
+        <p>Every read from Firestore is parsed through a Zod schema before it reaches anything else, so malformed data fails at the boundary instead of surfacing as a blank panel somewhere deep in a component. The types the app uses are inferred from those schemas — there is no second, hand-written definition to drift out of sync.</p>
+        <p>A project is one Firestore document holding the whole project state. That mirrors the original Command Center exactly, which is what lets the two interoperate while the studio migrates rather than forcing a cut-over.</p>
+        <p>Security is deliberately not in the UI. The in-app allowlist is a nicety; the real boundary is the server-enforced rules file, because that is the only one a user cannot edit. The Firebase web keys are public by design and are not treated as secrets.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Scope</div>
+        <h3>Modules &amp; engineering</h3>
+        <div class="sh-resp">
+          <div>
+            <div class="sh-resp-lbl">Modules</div>
+            <ul>
+              <li>Overview, Kanban, Bugs, Calendar</li>
+              <li>Team, Financials, Budget</li>
+              <li>Bases, Changelog, Auth</li>
+              <li>One folder per module, one pull request each</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sh-resp-lbl">Engineering</div>
+            <ul>
+              <li>Bilingual throughout — Spanish and English via i18next.</li>
+              <li>Vitest and React Testing Library; 21 of the 117 source files are tests.</li>
+              <li>ESLint flat config, Prettier, typecheck and tests all run in GitHub Actions.</li>
+              <li>Firestore and Auth emulators for local development, so nobody develops against live data.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Note</div>
+        <h3>Why there is only one screenshot</h3>
+        <p>The repository is private and the app sits behind a Google sign-in restricted to the studio's accounts, so the only screen that can be shown publicly is the gate itself. Happy to walk through the rest of it in a conversation.</p>
+      </div>
+    </div>
+    <aside class="sh-aside">
+      <div class="sh-widget" data-widget="w0" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Source</div>
+        <div class="sh-repo is-private">
+          <span class="sh-repo-icon">🔒</span>
+          <span class="sh-repo-txt"><span class="sh-repo-lbl">GitHub</span><span class="sh-repo-val">Private repository</span></span>
+        </div>
+      </div>
+      <div class="sh-widget" data-widget="w1" data-kind="chips"><div class="sh-widget-lbl" data-ph="Heading">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool" data-ph="Tool">React 18</span><span class="sh-tool" data-ph="Tool">TypeScript</span><span class="sh-tool" data-ph="Tool">Vite</span><span class="sh-tool" data-ph="Tool">Firebase</span><span class="sh-tool" data-ph="Tool">Zod</span><span class="sh-tool" data-ph="Tool">i18next</span><span class="sh-tool" data-ph="Tool">Vitest</span><span class="sh-tool" data-ph="Tool">GitHub Actions</span></div></div>
+      <div class="sh-widget" data-widget="w2" data-kind="bullets"><div class="sh-widget-lbl" data-ph="Heading">Role breakdown</div><ul class="sh-bullets"><li data-ph="Point">Architecture &amp; layering</li><li data-ph="Point">Domain modelling</li><li data-ph="Point">Module implementation</li><li data-ph="Point">Migration from the single-file tool</li><li data-ph="Point">CI &amp; contribution workflow</li></ul></div>
+      <div class="sh-widget" data-widget="w3" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Studio</div><p data-ph="Write something…">Wild Alchemists — internal tooling for the Hot Potato team. Built solo, paired with Claude Code.</p></div>
+    </aside>
+  </div>
+  <div class="sh-nav">
+    <a class="sh-nav-btn" href="systems-notebook.html">← Systems Notebook</a>
+    <a class="sh-nav-btn primary" href="fitsanitario.html">Next: FitSanitario →</a>
+  </div>
+</article>
+
+<div id="entry-view" hidden></div>
+
+</main>
+
+<!-- ═══ LIGHTBOX ════════════════════════════ -->
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lb-close" onclick="closeLightbox()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1,event)">‹</button>
+  <div id="lb-img-wrap"><img id="lb-img" src="" alt=""/></div>
+  <button id="lb-next" onclick="lbNav(1,event)">›</button>
+  <div id="lb-footer">
+    <span id="lb-counter"></span>
+    <div id="lb-dots"></div>
+    <span id="lb-caption"></span>
+  </div>
+</div>
+
+<!-- ═══ DEVELOPMENT LOG DATA ═══════════════════════════════
+     Public dev entries are baked in here on publish. Private
+     entries never reach this element — they stay in the
+     browser only. Your live copy always wins over this.
+     ═══════════════════════════════════════════════════════ -->
+<script type="application/json" id="devlog-data">{}</script>
+
+<script>window.PAGE = { role:'project', path:'projects/tagout.html', base:'../', id:'tagout', name:"Hot Potato · TagOut" };</script>
+<script src="../shared/site.js"></script>
+</body>
+</html>

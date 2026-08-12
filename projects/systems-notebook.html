@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Systems Notebook — Pilar Martín-Peña Rojo</title>
+<meta name="description" content="Self-publishing siteBuilt solo, with AI · 2026 Systems Notebook StackHTML, CSS, vanilla JS TeamSolo, with Claude Code My roleDesign &amp; build"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../shared/portfolio.css"/>
+<link rel="stylesheet" href="../shared/theme.css"/>
+</head>
+<body>
+<div id="cursor"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <a class="nav-logo" id="nav-logo" href="../index.html">Pilar MPR</a>
+  <ul class="nav-links">
+    <li><a href="../index.html#work">Work</a></li>
+    <li><a href="../index.html#ai-work">AI</a></li>
+    <li><a href="../index.html#about">About</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+    <li><a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu. Static markup on purpose: the publish flow serializes the
+     live DOM, so anything injected by script would be baked into the page
+     and then injected a second time on the next load. -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="../index.html#work">Work</a>
+  <a href="../index.html#ai-work">AI</a>
+  <a href="../index.html#about">About</a>
+  <a href="../index.html#contact">Contact</a>
+  <a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
+</div>
+
+<a class="proj-back" href="../index.html#ai-work">← All AI work</a>
+
+<main class="sh-page">
+
+<article id="case-view">
+<div class="sh-hero">
+    <img src="../assets/ai/systems-notebook/hero.webp" alt="Systems Notebook — the portfolio landing page" width="1600" height="1029" loading="eager" fetchpriority="high" decoding="async" />
+    <div class="sh-hero-grad"></div>
+    <div class="sh-hero-info">
+      <div class="sh-tags"><span class="tag tag-accent">Self-publishing site</span><span class="tag tag-dim">Built solo, with AI · 2026</span></div>
+      <h2>Systems Notebook</h2>
+    </div>
+  </div>
+  <div class="sh-facts">
+    <div><div class="sh-fact-lbl">Stack</div><div class="sh-fact-val">HTML, CSS, vanilla JS</div></div>
+    <div><div class="sh-fact-lbl">Team</div><div class="sh-fact-val">Solo, with Claude Code</div></div>
+    <div><div class="sh-fact-lbl">My role</div><div class="sh-fact-val">Design &amp; build</div></div>
+    <div><div class="sh-fact-lbl">Timeline</div><div class="sh-fact-val">2026 → Present</div></div>
+  </div>
+  <div class="sh-content">
+    <div class="sh-body">
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Context</div>
+        <h3>What is Systems Notebook?</h3>
+        <p>It is the site you are reading. A static portfolio with no build step, no dependencies and no framework — five plain HTML files, one stylesheet and one script, served exactly as they sit in the repository.</p>
+        <div class="sh-pull">"The interesting part isn't that it's static. It's that it edits and publishes itself — the page you are looking at is the thing that writes the next version of itself."</div>
+        <p>A hidden gesture turns the live page into an editor. Text becomes editable in place, images can be swapped, cards and sections can be added — and one button commits the result straight back to GitHub. Most of the commit history was written by the site, not by hand.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">How it works</div>
+        <h3>Publishing is a DOM snapshot</h3>
+        <p>There is no CMS and no server. Publishing clones the live document, strips the editor out of the clone, serializes it, and writes it back as a single commit through the GitHub git-data API — blobs for the page and any pending media, one tree on top of HEAD, one commit, one ref update.</p>
+        <div class="sh-loop">
+          <span class="loop-n">Edit in place</span><span class="loop-a">→</span>
+          <span class="loop-n">Clone the DOM</span><span class="loop-a">→</span>
+          <span class="loop-n">Strip the editor</span><span class="loop-a">→</span>
+          <span class="loop-n">Blobs + tree</span><span class="loop-a">→</span>
+          <span class="loop-n">One commit</span><span class="loop-a">→</span>
+          <span class="loop-n">Pages redeploys</span>
+        </div>
+        <p>Uploaded images are committed as real files under <code>assets/</code> rather than base64'd into the page, so the HTML stays readable and the browser can cache them.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Design decisions</div>
+        <h3>Three constraints that shaped everything</h3>
+        <div class="sh-resp">
+          <div>
+            <div class="sh-resp-lbl">No build step</div>
+            <ul>
+              <li>One flat script in global scope — no modules, no bundler, no package manager.</li>
+              <li>Anything the site needs at runtime it builds at runtime.</li>
+              <li>The whole repo can be opened straight off disk and still work.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sh-resp-lbl">The editor is built, not shipped</div>
+            <ul>
+              <li>No published page contains any editor markup — the panel is constructed on entry and removed from every publish.</li>
+              <li>A served page is about half the size it would otherwise be.</li>
+              <li>New editor UI lives inside that subtree, so it is removed for free.</li>
+            </ul>
+          </div>
+        </div>
+        <p>The third constraint is the one worth being honest about: the entry gesture and the missing markup <em>hide</em> the editor, they do not protect it. The script is served to every visitor, so both can be patched out. What actually protects publishing is the GitHub token, because only GitHub can check it — server-side, where no amount of client-side patching reaches.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Under the hood</div>
+        <h3>Three storage planes</h3>
+        <p>Editable text lives in <code>localStorage</code>, keyed per page and per field. Uploaded images and clips live in IndexedDB until they are published, keyed by the repo-relative path they will eventually occupy. Published dev-log entries are baked into the HTML as JSON, and the loader merges the two — the local copy wins, but anything baked in that the browser has never seen is kept, so a cleared browser never drops live content.</p>
+        <p>The theme works the same way: a handful of seed colours and two font names are expanded into a full set of CSS custom properties — shades, transparent tones, a luminance-derived dark mode — and written to a stylesheet on publish, so every page picks up the same palette instead of each carrying its own copy.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Outcome</div>
+        <h3>What it is good for</h3>
+        <p>Updating a case study takes about a minute and needs nothing installed. There is no CMS to keep patched, no account to renew, and nothing between the writing and the published page except a commit.</p>
+        <p>There is also an export path: one button inlines the stylesheet, the script and every referenced asset as data URIs and rewrites the internal links, producing a single HTML file that works offline — a portfolio that can be emailed as an attachment.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Gallery</div>
+        <div class="sh-gallery">
+        <div class="sh-gal-featured" data-cs-img="sn-0" onclick="openGallery(this)">
+          <img src="../assets/ai/systems-notebook/gallery-1.webp" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+          <div class="sh-gal-hint">🖼 3 images — click to view</div>
+          <label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'sn-0')"/></label>
+        </div>
+        <!-- gallery data -->
+        <div class="sh-gal-item" data-cs-img="sn-0" data-cap="Edit mode — the panel is built on entry and never published" style="display:none"><img src="../assets/ai/systems-notebook/gallery-1.webp" alt="" width="1400" height="900" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'sn-0')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="sn-1" data-cap="A case-study page, rendered from the same shared script" style="display:none"><img src="../assets/ai/systems-notebook/gallery-2.webp" alt="" width="1400" height="900" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'sn-1')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="sn-2" data-cap="The landing page" style="display:none"><img src="../assets/ai/systems-notebook/hero.webp" alt="" width="1600" height="1029" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'sn-2')"/></label></div>
+
+        </div>
+      </div>
+    </div>
+    <aside class="sh-aside">
+      <div class="sh-widget" data-widget="w0" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Source</div>
+        <a class="sh-repo" href="https://github.com/PilarMPR/portfolio.github.io" target="_blank" rel="noopener">
+          <span class="sh-repo-icon">↗</span>
+          <span class="sh-repo-txt"><span class="sh-repo-lbl">GitHub · PilarMPR</span><span class="sh-repo-val">portfolio.github.io</span></span>
+        </a>
+      </div>
+      <div class="sh-widget" data-widget="w1" data-kind="chips"><div class="sh-widget-lbl" data-ph="Heading">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool" data-ph="Tool">Vanilla JS</span><span class="sh-tool" data-ph="Tool">CSS custom properties</span><span class="sh-tool" data-ph="Tool">IndexedDB</span><span class="sh-tool" data-ph="Tool">GitHub API</span><span class="sh-tool" data-ph="Tool">GitHub Pages</span><span class="sh-tool" data-ph="Tool">Claude Code</span></div></div>
+      <div class="sh-widget" data-widget="w2" data-kind="bullets"><div class="sh-widget-lbl" data-ph="Heading">Role breakdown</div><ul class="sh-bullets"><li data-ph="Point">Product design</li><li data-ph="Point">Editor UX</li><li data-ph="Point">Front-end implementation</li><li data-ph="Point">Publish &amp; export pipeline</li><li data-ph="Point">Theme system</li><li data-ph="Point">Documentation</li></ul></div>
+      <div class="sh-widget" data-widget="w3" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Built with</div><p data-ph="Write something…">Designed and built solo, paired with Claude Code. Every commit labelled "Update portfolio content via in-page editor" was written by the site itself.</p></div>
+    </aside>
+  </div>
+  <div class="sh-nav">
+    <a class="sh-nav-btn" href="../index.html#ai-work">← All AI work</a>
+    <a class="sh-nav-btn primary" href="tagout.html">Next: Hot Potato · TagOut →</a>
+  </div>
+</article>
+
+<div id="entry-view" hidden></div>
+
+</main>
+
+<!-- ═══ LIGHTBOX ════════════════════════════ -->
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lb-close" onclick="closeLightbox()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1,event)">‹</button>
+  <div id="lb-img-wrap"><img id="lb-img" src="" alt=""/></div>
+  <button id="lb-next" onclick="lbNav(1,event)">›</button>
+  <div id="lb-footer">
+    <span id="lb-counter"></span>
+    <div id="lb-dots"></div>
+    <span id="lb-caption"></span>
+  </div>
+</div>
+
+<!-- ═══ DEVELOPMENT LOG DATA ═══════════════════════════════
+     Public dev entries are baked in here on publish. Private
+     entries never reach this element — they stay in the
+     browser only. Your live copy always wins over this.
+     ═══════════════════════════════════════════════════════ -->
+<script type="application/json" id="devlog-data">{}</script>
+
+<script>window.PAGE = { role:'project', path:'projects/systems-notebook.html', base:'../', id:'systems-notebook', name:"Systems Notebook" };</script>
+<script src="../shared/site.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runtime smoke test. Loads all five pages in WebKitGTK and fails on anything
+# Runtime smoke test. Loads all nine pages in WebKitGTK and fails on anything
 # that throws. No output but the final "ok" line = all clear.
 #   bash docs/smoke.sh
 #

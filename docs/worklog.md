@@ -903,3 +903,78 @@ WebKit half is unproven and Chromium stood in again. Nothing went through
   so every accent-derived tint reads as ink. One publish from the Design tab
   fixes it site-wide; nothing here can.
 - OPT-16 stands: nothing garbage-collects published assets.
+
+## 2026-08-12 · SESSION · The AI cards open case studies now, not GitHub
+
+**Shipped.** Four new case-study pages under `projects/` — `systems-notebook`,
+`tagout`, `fitsanitario`, `fossils-kanban` — built on the same page contract as
+the game ones: hero, four facts, body sections, sidebar widgets, gallery,
+lightbox, dev-log mount, prev/next. The four AI cards on the landing page now
+link to them instead of opening GitHub in a new tab, and the repository link
+lives in the case study's sidebar as a new `.sh-repo` block. Nine pages now,
+not five; the counts quoted in CLAUDE.md, README.md and `smoke.sh` moved with
+them.
+
+**The content is read from the repositories, not invented.** All three public
+repos were cloned and read (`PilarMPR/fitsanitario`,
+`wildalchemists/FossilsKanban`, and this one); `PilarMPR/HotPotato-TagOut` is
+private but attached to the session, so its README, `docs/ARCHITECTURE.md` and
+source tree are the source for that page — the layering rule, the Zod-at-the-
+boundary decision, the single-document data model, the ten feature modules, and
+the 21-of-117 test-file count are all from the repo, not from memory.
+
+**Screenshots are real, and driven.** FitSanitario was loaded with its own demo
+data and walked through perfil / ejercicio / logros; FossilsKanban had six
+sample cards created through its own add-card modal and was photographed with
+the board, Area Goals and the shortcut sheet; this site was shot in edit mode.
+Eleven WebP files, 424 KB for the whole `assets/ai` folder.
+
+**TagOut has one screenshot and says so.** The repo is private and the app is
+behind a Google sign-in restricted to studio accounts, so only the gate can be
+published. `npm install` and a Vite dev server against the Firebase emulator
+suite got as far as the sign-in card; driving the emulator's popup to reach the
+shell was cut short when the sandbox declined to restart the dev server, and it
+was not worth another route. The page carries a short "why there is only one
+screenshot" section rather than padding the gallery.
+
+**Two supporting changes.** `.sh-repo` is deliberately a `div`/`span` tree: the
+editor's field walk selects `h2,h3,p,li,.sh-pull,.sh-widget-lbl,.sh-tool`, so a
+link written as a `<p>` would become contenteditable and the `href` would be one
+keystroke from broken — verified in the browser that it stays non-editable and
+survives a publish intact. And the four new pages were added to `PROJECTS` in
+`site.js`, so the editor's section list can reach them; that shifted every
+citation below it, so all 41 `shared/site.js:NNN` references in CLAUDE.md were
+re-resolved (R11), and the `var()` count moved 627 → 640 (R7).
+
+**Verified.** `checks.sh` exits 0. 44 assertions across the four new pages in
+Chromium — page contract, four sentinels each (R3), no served editor chrome
+(R5), facts/sections/widget counts, gallery item counts, the repo link, hero
+decode at native width, lightbox counter, no 4xx, no JS errors — plus a
+prev/next walk that visits all four in order and lands back at `#ai-work`. 18
+more for layout at 1440 and 390 (no horizontal overflow on any page) and a full
+editor round trip on `fossils-kanban`: edit mode opens, the repo link does not
+become editable, publish drops the chrome and keeps the link, the heading and
+the gallery, and the edit survives a reload. `aiverify.js`, `navcheck.js`,
+`check.js`, `theme.js`, `sidebar.js` and `final.js` all green.
+
+**Three suites needed repair, none a site regression.** `aiverify.js` still
+expected the cards to be editor-inserted and to point at GitHub. `theme.js`
+asserted `link[href$="theme.css"]`, which misses the `?v=` cache-buster the
+publish flow appends — the same bug class that once would have shipped exports
+with no CSS, here only in the test; `site.js` itself has no `href$=`/`src$=`
+selector left, checked. `sidebar.js` opened the editor with six alt-clicks,
+which toggles it open and then closed, and section 5 clears `localStorage`
+first, which now also clears the token — it plants one and clicks three times.
+
+**Not verified.** `smoke.sh` still skips — no `gjs` in this container, so the
+WebKitGTK half is unproven and Chromium stood in throughout. Nothing was
+published through `ghPublish()`.
+
+**Open / pick up next.**
+- The FossilsKanban card excerpt says "backlog, in-progress and review columns";
+  the board actually has five (Backlog, To Do, In Progress, Review, Done) and
+  the case study says so. Card excerpts are page content (R1) — one edit in the
+  panel fixes it.
+- `--accent` in `shared/theme.css` is still `#24211b`, identical to `--text`.
+  A publish from the Design tab fixes it site-wide; nothing here can.
+- OPT-16 stands: nothing garbage-collects published assets.

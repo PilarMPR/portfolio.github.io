@@ -584,6 +584,12 @@ let PROJECTS = [
   { id:'block-city',   icon:'🏙', name:'Block City' },
   { id:'healthy-jeart',icon:'🤖', name:'Healthy Jeart' },
   { id:'create-your-own-monster', icon:'👾', name:'Create Your Own Monster' },
+  // The Independent AI case studies. Same page contract as the game ones —
+  // they only look different because their cards are in the other grid.
+  { id:'systems-notebook', icon:'📓', name:'Systems Notebook' },
+  { id:'tagout',           icon:'🎛', name:'Hot Potato · TagOut' },
+  { id:'fitsanitario',     icon:'🩺', name:'FitSanitario' },
+  { id:'fossils-kanban',   icon:'🗂', name:'FossilsKanban' },
 ];
 
 function buildSectionList() {

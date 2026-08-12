@@ -685,6 +685,22 @@ a.ch:hover { transform:translate(-1px,-2px); box-shadow:6px 7px 0 rgba(var(--acc
    This was an inline style on one authored paragraph, so text boxes made
    in the editor came out as plain default paragraphs instead. */
 .sh-widget p { font-size:.85rem; color:var(--muted); line-height:1.6; }
+/* Repository link in a case-study sidebar. Deliberately a <div>/<span> tree
+   rather than a <p> or an <li>: CS_EDITABLE in site.js selects those, so a
+   link written that way would become contenteditable and the href would be
+   one stray keystroke from broken. Nothing here matches that selector. */
+.sh-repo { display:flex; align-items:center; gap:.7rem; text-decoration:none; background:var(--bg); border:1.5px solid var(--text); border-radius:3px; padding:.7rem .85rem; box-shadow:2px 2px 0 rgba(var(--text-rgb),.14); transition:transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease); }
+.sh-repo:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(var(--accent-rgb),.2); border-color:var(--accent); }
+.sh-repo-icon { font-size:.95rem; line-height:1; flex-shrink:0; }
+.sh-repo-txt { min-width:0; }
+/* Owner on the label line, repo name on its own — "wildalchemists/FossilsKanban"
+   set as one string is wider than the sidebar and breaks mid-word. */
+.sh-repo-lbl { display:block; font-family:var(--fm); font-size:.53rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.18rem; overflow-wrap:break-word; }
+.sh-repo-val { display:block; font-family:var(--fm); font-size:.72rem; color:var(--text); overflow-wrap:break-word; }
+/* The private-repo variant is not a link and must not pretend to be one. */
+.sh-repo.is-private { border-style:dashed; box-shadow:none; background:none; cursor:default; }
+.sh-repo.is-private .sh-repo-val { color:var(--muted); }
+
 .sh-tools { display:flex; flex-wrap:wrap; gap:.35rem; }
 .sh-tool { font-family:var(--fm); font-size:.57rem; letter-spacing:.04em; padding:.28rem .6rem; background:var(--bg); border:1px solid var(--faint); border-radius:2px; color:var(--muted); }
 .sh-bullets { display:flex; flex-direction:column; gap:.45rem; }

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FitSanitario — Pilar Martín-Peña Rojo</title>
+<meta name="description" content="Health productPrototype &amp; pitch · HealthTribes · 2026 FitSanitario StackVanilla JS, single-file HTML TeamSolo My rolePrototype &amp; pitch"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../shared/portfolio.css"/>
+<link rel="stylesheet" href="../shared/theme.css"/>
+</head>
+<body>
+<div id="cursor"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <a class="nav-logo" id="nav-logo" href="../index.html">Pilar MPR</a>
+  <ul class="nav-links">
+    <li><a href="../index.html#work">Work</a></li>
+    <li><a href="../index.html#ai-work">AI</a></li>
+    <li><a href="../index.html#about">About</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+    <li><a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu. Static markup on purpose: the publish flow serializes the
+     live DOM, so anything injected by script would be baked into the page
+     and then injected a second time on the next load. -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="../index.html#work">Work</a>
+  <a href="../index.html#ai-work">AI</a>
+  <a href="../index.html#about">About</a>
+  <a href="../index.html#contact">Contact</a>
+  <a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
+</div>
+
+<a class="proj-back" href="../index.html#ai-work">← All AI work</a>
+
+<main class="sh-page">
+
+<article id="case-view">
+<div class="sh-hero">
+    <img src="../assets/ai/fitsanitario/hero.webp" alt="FitSanitario — opening slide of the commercial deck" width="1600" height="1029" loading="eager" fetchpriority="high" decoding="async" />
+    <div class="sh-hero-grad"></div>
+    <div class="sh-hero-info">
+      <div class="sh-tags"><span class="tag tag-accent">Health product</span><span class="tag tag-dim">Prototype &amp; pitch · HealthTribes · 2026</span></div>
+      <h2>FitSanitario</h2>
+    </div>
+  </div>
+  <div class="sh-facts">
+    <div><div class="sh-fact-lbl">Stack</div><div class="sh-fact-val">Vanilla JS, single-file HTML</div></div>
+    <div><div class="sh-fact-lbl">Team</div><div class="sh-fact-val">Solo, with Claude Code</div></div>
+    <div><div class="sh-fact-lbl">My role</div><div class="sh-fact-val">Prototype &amp; pitch</div></div>
+    <div><div class="sh-fact-lbl">Language</div><div class="sh-fact-val">Spanish</div></div>
+  </div>
+  <div class="sh-content">
+    <div class="sh-body">
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Context</div>
+        <h3>What is FitSanitario?</h3>
+        <p>A team fitness app for healthcare workers, brand-named HealthTribes. Staff join a tribe, log training at home or at the gym, earn points and unlock achievements — with the competition running between tribes rather than between individuals.</p>
+        <div class="sh-pull">"The brief asked for something a room full of people could be walked through. Not a spec — a thing you can hold and tap."</div>
+        <p>The deliverable was two things at once: a navigable prototype that behaves enough like the product to be believed, and the commercial deck that sells it.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">How it works</div>
+        <h3>One state object, one render</h3>
+        <p>The prototype is a hand-rolled render loop over a single global state object. Every change rewrites the screen from scratch and re-wires its handlers — no diffing, no framework, no virtual DOM. Screens are functions in a map, routing is one string on the state, and the whole thing persists to <code>localStorage</code> so a demo survives a reload.</p>
+        <div class="sh-loop">
+          <span class="loop-n">Perfil</span><span class="loop-a">→</span>
+          <span class="loop-n">Ejercicio</span><span class="loop-a">→</span>
+          <span class="loop-n">Cámara</span><span class="loop-a">→</span>
+          <span class="loop-n">Logros</span><span class="loop-a">→</span>
+          <span class="loop-n">Social</span>
+        </div>
+        <p>It sounds crude and it is exactly right for the job: the whole prototype is one file, it opens by double-clicking, and there is no step between "I changed something" and "you can see it".</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Key decisions</div>
+        <h3>Ideal and MVP, side by side</h3>
+        <p>There are two prototypes, not one. The full-vision build carries all five tabs; the MVP carries three — profile, exercise and camera. They are independent files and share no code, and the landing page presents them next to each other on purpose, so the conversation about scope happens against two things you can actually open rather than against a bullet list.</p>
+        <p>Everything is inlined — fonts, avatars, images, all as data URIs. That is why the deck is around 700 KB for eight slides, and it is a deliberate trade: the files can be emailed, opened from a USB stick, or served from anywhere, with nothing to install and nothing to break.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">The pitch</div>
+        <h3>An eight-slide deck</h3>
+        <p>The commercial presentation is its own single file with its own animation and scroll logic, sharing the branding with the app by convention rather than by code. It runs in a browser, full-screen, driven by the arrow keys or space — no slideware, no export step, no fonts that fail to load on someone else's laptop.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Gallery</div>
+        <div class="sh-gallery">
+        <div class="sh-gal-featured" data-cs-img="fsa-0" onclick="openGallery(this)">
+          <img src="../assets/ai/fitsanitario/gallery-1.webp" alt="" width="900" height="1350" loading="lazy" decoding="async" />
+          <div class="sh-gal-hint">🖼 4 images — click to view</div>
+          <label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fsa-0')"/></label>
+        </div>
+        <!-- gallery data -->
+        <div class="sh-gal-item" data-cs-img="fsa-0" data-cap="Perfil — level, streak, and your tribe against the others" style="display:none"><img src="../assets/ai/fitsanitario/gallery-1.webp" alt="" width="900" height="1350" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fsa-0')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="fsa-1" data-cap="Ejercicio — four-week plan, home or gym, with an express challenge" style="display:none"><img src="../assets/ai/fitsanitario/gallery-2.webp" alt="" width="900" height="1350" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fsa-1')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="fsa-2" data-cap="Logros — individual, team and express achievements" style="display:none"><img src="../assets/ai/fitsanitario/gallery-3.webp" alt="" width="900" height="1350" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fsa-2')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="fsa-3" data-cap="The deck — eight slides, one file, runs in a browser" style="display:none"><img src="../assets/ai/fitsanitario/hero.webp" alt="" width="1600" height="1029" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fsa-3')"/></label></div>
+
+        </div>
+      </div>
+    </div>
+    <aside class="sh-aside">
+      <div class="sh-widget" data-widget="w0" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Source</div>
+        <a class="sh-repo" href="https://github.com/PilarMPR/fitsanitario" target="_blank" rel="noopener">
+          <span class="sh-repo-icon">↗</span>
+          <span class="sh-repo-txt"><span class="sh-repo-lbl">GitHub · PilarMPR</span><span class="sh-repo-val">fitsanitario</span></span>
+        </a>
+      </div>
+      <div class="sh-widget" data-widget="w1" data-kind="chips"><div class="sh-widget-lbl" data-ph="Heading">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool" data-ph="Tool">Vanilla JS</span><span class="sh-tool" data-ph="Tool">HTML &amp; CSS</span><span class="sh-tool" data-ph="Tool">localStorage</span><span class="sh-tool" data-ph="Tool">GitHub Pages</span><span class="sh-tool" data-ph="Tool">Claude Code</span></div></div>
+      <div class="sh-widget" data-widget="w2" data-kind="bullets"><div class="sh-widget-lbl" data-ph="Heading">Role breakdown</div><ul class="sh-bullets"><li data-ph="Point">Product &amp; systems design</li><li data-ph="Point">Gamification model</li><li data-ph="Point">UX and screen flow</li><li data-ph="Point">Prototype implementation</li><li data-ph="Point">Commercial deck</li></ul></div>
+      <div class="sh-widget" data-widget="w3" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Client</div><p data-ph="Write something…">HealthTribes. Three deliverables in one repository: the full prototype, a pared-down MVP, and the deck.</p></div>
+    </aside>
+  </div>
+  <div class="sh-nav">
+    <a class="sh-nav-btn" href="tagout.html">← Hot Potato · TagOut</a>
+    <a class="sh-nav-btn primary" href="fossils-kanban.html">Next: FossilsKanban →</a>
+  </div>
+</article>
+
+<div id="entry-view" hidden></div>
+
+</main>
+
+<!-- ═══ LIGHTBOX ════════════════════════════ -->
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lb-close" onclick="closeLightbox()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1,event)">‹</button>
+  <div id="lb-img-wrap"><img id="lb-img" src="" alt=""/></div>
+  <button id="lb-next" onclick="lbNav(1,event)">›</button>
+  <div id="lb-footer">
+    <span id="lb-counter"></span>
+    <div id="lb-dots"></div>
+    <span id="lb-caption"></span>
+  </div>
+</div>
+
+<!-- ═══ DEVELOPMENT LOG DATA ═══════════════════════════════
+     Public dev entries are baked in here on publish. Private
+     entries never reach this element — they stay in the
+     browser only. Your live copy always wins over this.
+     ═══════════════════════════════════════════════════════ -->
+<script type="application/json" id="devlog-data">{}</script>
+
+<script>window.PAGE = { role:'project', path:'projects/fitsanitario.html', base:'../', id:'fitsanitario', name:"FitSanitario" };</script>
+<script src="../shared/site.js"></script>
+</body>
+</html>

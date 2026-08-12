@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FossilsKanban — Pilar Martín-Peña Rojo</title>
+<meta name="description" content="Kanban boardProduction tooling · Wild Alchemists · 2026 FossilsKanban StackOne HTML file SyncFirebase Firestore, optional My roleProduction tooling"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../shared/portfolio.css"/>
+<link rel="stylesheet" href="../shared/theme.css"/>
+</head>
+<body>
+<div id="cursor"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <a class="nav-logo" id="nav-logo" href="../index.html">Pilar MPR</a>
+  <ul class="nav-links">
+    <li><a href="../index.html#work">Work</a></li>
+    <li><a href="../index.html#ai-work">AI</a></li>
+    <li><a href="../index.html#about">About</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+    <li><a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu. Static markup on purpose: the publish flow serializes the
+     live DOM, so anything injected by script would be baked into the page
+     and then injected a second time on the next load. -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="../index.html#work">Work</a>
+  <a href="../index.html#ai-work">AI</a>
+  <a href="../index.html#about">About</a>
+  <a href="../index.html#contact">Contact</a>
+  <a href="../assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
+</div>
+
+<a class="proj-back" href="../index.html#ai-work">← All AI work</a>
+
+<main class="sh-page">
+
+<article id="case-view">
+<div class="sh-hero">
+    <img src="../assets/ai/fossils-kanban/hero.webp" alt="FossilsKanban — the five-column quest board" width="1600" height="950" loading="eager" fetchpriority="high" decoding="async" />
+    <div class="sh-hero-grad"></div>
+    <div class="sh-hero-info">
+      <div class="sh-tags"><span class="tag tag-accent">Kanban board</span><span class="tag tag-dim">Production tooling · Wild Alchemists · 2026</span></div>
+      <h2>FossilsKanban</h2>
+    </div>
+  </div>
+  <div class="sh-facts">
+    <div><div class="sh-fact-lbl">Stack</div><div class="sh-fact-val">One HTML file</div></div>
+    <div><div class="sh-fact-lbl">Sync</div><div class="sh-fact-val">Firestore, optional</div></div>
+    <div><div class="sh-fact-lbl">My role</div><div class="sh-fact-val">Production tooling</div></div>
+    <div><div class="sh-fact-lbl">Team</div><div class="sh-fact-val">Wild Alchemists</div></div>
+  </div>
+  <div class="sh-content">
+    <div class="sh-body">
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Context</div>
+        <h3>What is FossilsKanban?</h3>
+        <p>A production quest board for the studio: five columns, cards grouped by quest, and per-discipline goal checklists. It is one HTML file of roughly 4,250 lines — no install, no account, no build.</p>
+        <div class="sh-pull">"Every project management tool the team tried died the same way: nobody wanted to open one more browser tab and log in. So the board had to open like a document."</div>
+        <p>The framing is deliberate. Columns are a pipeline, work is grouped into quests, and goals are tracked per discipline — the board speaks the language the team already used rather than making them translate into someone else's vocabulary.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">How it works</div>
+        <h3>The board</h3>
+        <div class="sh-loop">
+          <span class="loop-n">Backlog</span><span class="loop-a">→</span>
+          <span class="loop-n">To Do</span><span class="loop-a">→</span>
+          <span class="loop-n">In Progress</span><span class="loop-a">→</span>
+          <span class="loop-n">Review</span><span class="loop-a">→</span>
+          <span class="loop-n">Done</span>
+        </div>
+        <p>Cards carry a priority, an assignee, discipline areas, a due date, subtasks, blockers and an optional parent, and they can be dragged between columns. Above them sit <strong style="color:var(--white)">Area Goals</strong> — high-level checklists per discipline, kept separate from card subtasks so a project-level objective isn't buried inside one task.</p>
+        <p>A second view keeps the project's links — builds, documents, references — beside the board rather than in a chat history, and finished work goes to an archive instead of being deleted.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Key decisions</div>
+        <h3>Local first, sync optional</h3>
+        <p>The board stores everything in the browser and treats that as the normal case, with an Export JSON as the backup path. Real-time team sync is available through Firestore, but it is opt-in: the file ships with it off, and turning it on is a config block near the top of the script plus about ten minutes in a Firebase console.</p>
+        <p>That ordering matters. A tool that needs a backend before it does anything useful never gets adopted; this one is useful the moment it opens, and the team can decide later whether it is worth wiring up.</p>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Detail</div>
+        <h3>Built for people who live in it</h3>
+        <div class="sh-resp">
+          <div>
+            <div class="sh-resp-lbl">Keyboard</div>
+            <ul>
+              <li><strong style="color:var(--white)">N</strong> — new card</li>
+              <li><strong style="color:var(--white)">Ctrl/⌘+K</strong> or <strong style="color:var(--white)">/</strong> — search</li>
+              <li><strong style="color:var(--white)">G</strong> then <strong style="color:var(--white)">K</strong> / <strong style="color:var(--white)">L</strong> — switch view</li>
+              <li><strong style="color:var(--white)">1–9</strong> — filter to a status</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sh-resp-lbl">Filters &amp; scope</div>
+            <ul>
+              <li>Filter by text, by discipline area, or to just your own cards.</li>
+              <li>Switch between quests without losing the filter.</li>
+              <li>Archive keeps completed work out of the way but recoverable.</li>
+              <li>Shortcuts only fire when no input is focused.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="sh-sec">
+        <div class="sh-sec-lbl">Gallery</div>
+        <div class="sh-gallery">
+        <div class="sh-gal-featured" data-cs-img="fk-0" onclick="openGallery(this)">
+          <img src="../assets/ai/fossils-kanban/hero.webp" alt="" width="1600" height="950" loading="lazy" decoding="async" />
+          <div class="sh-gal-hint">🖼 3 images — click to view</div>
+          <label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fk-0')"/></label>
+        </div>
+        <!-- gallery data -->
+        <div class="sh-gal-item" data-cs-img="fk-0" data-cap="The board, with sample cards across the five columns" style="display:none"><img src="../assets/ai/fossils-kanban/hero.webp" alt="" width="1600" height="950" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fk-0')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="fk-1" data-cap="Area Goals — project-level checklists per discipline" style="display:none"><img src="../assets/ai/fossils-kanban/gallery-1.webp" alt="" width="1400" height="831" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fk-1')"/></label></div>
+        <div class="sh-gal-item" data-cs-img="fk-2" data-cap="Keyboard shortcuts" style="display:none"><img src="../assets/ai/fossils-kanban/gallery-2.webp" alt="" width="1400" height="831" loading="lazy" decoding="async" /><label class="cs-img-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="handleCsImg(this,'fk-2')"/></label></div>
+
+        </div>
+      </div>
+    </div>
+    <aside class="sh-aside">
+      <div class="sh-widget" data-widget="w0" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Source</div>
+        <a class="sh-repo" href="https://github.com/wildalchemists/FossilsKanban" target="_blank" rel="noopener">
+          <span class="sh-repo-icon">↗</span>
+          <span class="sh-repo-txt"><span class="sh-repo-lbl">GitHub · wildalchemists</span><span class="sh-repo-val">FossilsKanban</span></span>
+        </a>
+      </div>
+      <div class="sh-widget" data-widget="w1" data-kind="chips"><div class="sh-widget-lbl" data-ph="Heading">Tools &amp; Tech</div><div class="sh-tools"><span class="sh-tool" data-ph="Tool">Vanilla JS</span><span class="sh-tool" data-ph="Tool">HTML &amp; CSS</span><span class="sh-tool" data-ph="Tool">localStorage</span><span class="sh-tool" data-ph="Tool">Firebase Firestore</span><span class="sh-tool" data-ph="Tool">Claude Code</span></div></div>
+      <div class="sh-widget" data-widget="w2" data-kind="bullets"><div class="sh-widget-lbl" data-ph="Heading">Role breakdown</div><ul class="sh-bullets"><li data-ph="Point">Production workflow design</li><li data-ph="Point">Board &amp; card model</li><li data-ph="Point">Implementation</li><li data-ph="Point">Keyboard &amp; filter UX</li><li data-ph="Point">Sync &amp; backup path</li></ul></div>
+      <div class="sh-widget" data-widget="w3" data-kind="text"><div class="sh-widget-lbl" data-ph="Heading">Studio</div><p data-ph="Write something…">Wild Alchemists. Later absorbed into Hot Potato · TagOut as a first-class production section.</p></div>
+    </aside>
+  </div>
+  <div class="sh-nav">
+    <a class="sh-nav-btn" href="fitsanitario.html">← FitSanitario</a>
+    <a class="sh-nav-btn primary" href="../index.html#ai-work">All AI work →</a>
+  </div>
+</article>
+
+<div id="entry-view" hidden></div>
+
+</main>
+
+<!-- ═══ LIGHTBOX ════════════════════════════ -->
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lb-close" onclick="closeLightbox()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1,event)">‹</button>
+  <div id="lb-img-wrap"><img id="lb-img" src="" alt=""/></div>
+  <button id="lb-next" onclick="lbNav(1,event)">›</button>
+  <div id="lb-footer">
+    <span id="lb-counter"></span>
+    <div id="lb-dots"></div>
+    <span id="lb-caption"></span>
+  </div>
+</div>
+
+<!-- ═══ DEVELOPMENT LOG DATA ═══════════════════════════════
+     Public dev entries are baked in here on publish. Private
+     entries never reach this element — they stay in the
+     browser only. Your live copy always wins over this.
+     ═══════════════════════════════════════════════════════ -->
+<script type="application/json" id="devlog-data">{}</script>
+
+<script>window.PAGE = { role:'project', path:'projects/fossils-kanban.html', base:'../', id:'fossils-kanban', name:"FossilsKanban" };</script>
+<script src="../shared/site.js"></script>
+</body>
+</html>

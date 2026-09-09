@@ -978,3 +978,46 @@ published through `ghPublish()`.
 - `--accent` in `shared/theme.css` is still `#24211b`, identical to `--text`.
   A publish from the Design tab fixes it site-wide; nothing here can.
 - OPT-16 stands: nothing garbage-collects published assets.
+
+---
+
+## 2026-09-09 · SESSION · Remove the Systems Notebook case study
+
+**Shipped.** The Systems Notebook project is gone from the site at the user's
+direction — the whole thing, not just the landing card. Removed: the card in
+`#ai-projects` (the authored one from 2026-08-11, so R1 does not apply — it is
+hand-written markup, not editor content), `projects/systems-notebook.html`,
+`assets/ai/systems-notebook.webp` and the three files under
+`assets/ai/systems-notebook/`, and its entry in `PROJECTS` in `site.js` so the
+editor's section list no longer offers a page that isn't there.
+
+The two things that break when a page leaves the middle of a chain: `tagout.html`
+had a back button pointing at it, now `← All AI work` → `../index.html#ai-work`,
+which is what the removed page itself used, so the AI walk still starts and ends
+on the landing page. And the three remaining cards were renumbered 01–03 with the
+`reveal`/`reveal d1` stagger re-alternated, or the first row would have animated
+in together.
+
+Dropping one line from `PROJECTS` shifted every citation below `site.js:588`, so
+all 41 `shared/site.js:NNN` references in CLAUDE.md were decremented and
+re-resolved (R11). Page count went nine → eight in CLAUDE.md, README.md and
+`smoke.sh`; the two scripts glob `projects/*.html` and needed no change beyond
+their prose.
+
+**Verified.** `checks.sh` exits 0 — handlers, sentinels, no served chrome,
+`site.js` parses, all citations land. Both edited pages re-parse with balanced
+tags and no unclosed elements, `#ai-projects` holds exactly three cards, and
+`grep -r systems-notebook` over HTML/JS/CSS/shell returns nothing.
+
+**Not verified.** `smoke.sh` skips — no `gjs` in this container — so the
+WebKitGTK half is unproven, and there was no browser available to stand in this
+time. Nothing was published through `ghPublish()`. The live site could not be
+fetched either: the egress proxy rejects `pilarmpr.github.io`, so the check was
+made against the repo, which matches the last published commit.
+
+**Open / pick up next.**
+- Browsers that visited the old case study still hold `pmpr_cs_content_systems-notebook`
+  and its `pmpr_cs_*` keys in `localStorage`. They are inert now — nothing reads
+  them — but nothing clears them either.
+- OPT-16 stands, and this session is a case for it: the four deleted assets were
+  removed by hand.

@@ -1854,6 +1854,9 @@ document.addEventListener('keydown', e => {
 
 /* ─── DESIGN / THEME EDITOR ────────────── */
 const PRESETS = {
+  /* The site ships plain: white paper, one ink, no accent colour and the
+     browser's own UI face. SYSTEM_FONT is not a webfont — see fontStack(). */
+  'Plain':     { bg:'#ffffff', text:'#1a1a1a', accent:'#1a1a1a', blue:'#33506b', yellow:'#eceae4', green:'#4a4a46', fd:'System', fb:'System' },
   'Notebook':  { bg:'#f4efe3', text:'#24211b', accent:'#c8402e', blue:'#2f5c8f', yellow:'#f4d24a', green:'#4f7a4a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
   'Blueprint': { bg:'#e4ecf2', text:'#152435', accent:'#1f6feb', blue:'#16405f', yellow:'#f2c14e', green:'#2f8f6a', fd:'Space Grotesk', fb:'Space Grotesk' },
   'Midnight':  { bg:'#1f1b16', text:'#efe6d4', accent:'#e0553f', blue:'#83a8d8', yellow:'#e6c14a', green:'#7bb06a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
@@ -1861,7 +1864,7 @@ const PRESETS = {
   'Forest':    { bg:'#eceee2', text:'#20261d', accent:'#b5622e', blue:'#456a58', yellow:'#dabf47', green:'#3f7a4a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
   'Mono':      { bg:'#eeeae4', text:'#1c1c1c', accent:'#141414', blue:'#3b3b3b', yellow:'#e6e0d0', green:'#4a4a4a', fd:'Archivo Black', fb:'Inter' },
 };
-const THEME_DEFAULT = Object.assign({}, PRESETS['Notebook']);
+const THEME_DEFAULT = Object.assign({}, PRESETS['Plain']);
 const COLOR_ROWS = [
   { key:'bg',     label:'Paper' },
   { key:'text',   label:'Ink / text' },
@@ -1871,17 +1874,22 @@ const COLOR_ROWS = [
   { key:'green',  label:'Approved' },
 ];
 const DISPLAY_FONTS = [
-  { n:'Bricolage Grotesque', w:'400;500;700;800' }, { n:'Space Grotesk', w:'400;500;700' },
+  { n:'System', w:'' }, { n:'Bricolage Grotesque', w:'400;500;700;800' }, { n:'Space Grotesk', w:'400;500;700' },
   { n:'Syne', w:'400;700;800' }, { n:'Unbounded', w:'400;700;900' },
   { n:'Archivo Black', w:'400' }, { n:'Fraunces', w:'400;600;800' },
 ];
 const BODY_FONTS = [
-  { n:'Space Grotesk', w:'400;500;700' }, { n:'Inter', w:'400;500;700' },
+  { n:'System', w:'' }, { n:'Space Grotesk', w:'400;500;700' }, { n:'Inter', w:'400;500;700' },
   { n:'DM Sans', w:'400;500;700' }, { n:'Work Sans', w:'400;500;600' },
 ];
 const _loadedFonts = new Set(['Bricolage Grotesque','Space Grotesk','JetBrains Mono','Caveat']);
+/* "System" is a font name in the picker but not a webfont: it means the
+   browser's own UI face, which is what the plain theme uses. Nothing to
+   fetch, and the stack has to match the :root fallback in portfolio.css. */
+const SYSTEM_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
+function fontStack(name){ return name === 'System' ? SYSTEM_STACK : "'" + name + "', sans-serif"; }
 function ensureFont(name, weights) {
-  if (_loadedFonts.has(name)) return;
+  if (name === 'System' || _loadedFonts.has(name)) return;
   _loadedFonts.add(name);
   const l = document.createElement('link');
   l.rel = 'stylesheet';
@@ -1926,8 +1934,8 @@ function computeVars(t){
 function applyTheme(t){
   const vars = computeVars(t), root = document.documentElement.style;
   for (const k in vars) root.setProperty(k, vars[k]);
-  if (t.fd) { ensureFont(t.fd, (DISPLAY_FONTS.find(f=>f.n===t.fd)||{}).w); root.setProperty('--fd', "'"+t.fd+"', sans-serif"); }
-  if (t.fb) { ensureFont(t.fb, (BODY_FONTS.find(f=>f.n===t.fb)||{}).w); root.setProperty('--fb', "'"+t.fb+"', sans-serif"); }
+  if (t.fd) { ensureFont(t.fd, (DISPLAY_FONTS.find(f=>f.n===t.fd)||{}).w); root.setProperty('--fd', fontStack(t.fd)); }
+  if (t.fb) { ensureFont(t.fb, (BODY_FONTS.find(f=>f.n===t.fb)||{}).w); root.setProperty('--fb', fontStack(t.fb)); }
 }
 let currentTheme = Object.assign({}, THEME_DEFAULT);
 /* The theme as a stylesheet, for shared/theme.css. Built from the same
@@ -1937,8 +1945,8 @@ function themeCSS(t){
   const vars = computeVars(t || currentTheme);
   const lines = Object.keys(vars).map(k => `  ${k}: ${vars[k]};`);
   const th = t || currentTheme;
-  if (th.fd) lines.push(`  --fd: '${th.fd}', sans-serif;`);
-  if (th.fb) lines.push(`  --fb: '${th.fb}', sans-serif;`);
+  if (th.fd) lines.push(`  --fd: ${fontStack(th.fd)};`);
+  if (th.fb) lines.push(`  --fb: ${fontStack(th.fb)};`);
   return `/* SITE THEME — one file, every page.\n` +
          `   Written by "Save & publish"; change it through the editor's\n` +
          `   Design tab rather than by hand. Loaded after portfolio.css,\n` +
@@ -2594,7 +2602,7 @@ function dlRenderList(projId) {
   let html = `
     <div class="dl-head">
       <div>
-        <div class="dl-meta" style="margin-bottom:.4rem">// How it was built</div>
+        <div class="dl-meta" style="margin-bottom:.4rem">How it was built</div>
         <div class="dl-title">Development Log</div>
       </div>
       <div class="dl-meta">${n} ${n === 1 ? 'entry' : 'entries'}</div>

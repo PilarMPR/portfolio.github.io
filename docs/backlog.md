@@ -280,3 +280,29 @@ a real destination made clicking one while editing navigate away — handled by 
 capture-phase guard that spares the upload label and the delete button — and
 `buildExportHTML()` needed no change, since it only rewrites sibling `.html`
 links and leaves absolute URLs alone.
+
+### OPT-22 · Two kicker lines carry a literal "//" in page content · impact low · effort low
+Evidence (`index.html`, `.spec-kicker`): the Work and Independent AI sections are
+introduced by `// FOUR GAMES, TAKEN APART` and `// BUILT SOLO, WITH AI`. The
+slashes are in the text, not in CSS — unlike `.slabel`, which got its `//` from a
+`::before` and lost it with the plain redesign. The plain layout therefore hides
+`.spec-kicker` outright rather than shipping a code comment as a section label.
+Fix: an edit through the panel — retype the two lines without the slashes (or
+leave them blank) and then drop the `display:none` so the label comes back as
+plain grey text. Page content, so R1 puts it on the user, not on a commit.
+
+### OPT-23 · The About bio repeats a paragraph · impact low · effort low
+Evidence (`index.html`, `#about .about-bio`): "I've been fascinated by videogames
+since I was young — from the rooftops of Assassin's Creed Brotherhood to the
+depths of Subnautica…" is published twice, once before the pull quote and once
+after it, and the pull quote's text appears a third time as a plain paragraph
+below itself. Visible on the live page, and the plain layout makes it more
+obvious because there is no longer a coloured post-it separating the two. Page
+content (R1): fix it in the editor, nothing here can.
+
+### OPT-24 · The panel's section list has no entry for Independent AI · impact low · effort low
+Evidence (`shared/site.js`, `buildSectionList()`): on the landing page the
+Sections tab lists Hero, Work, About and Contact. `#ai-work` has been a real
+section since 2026-08-11 and the nav links to it, but the panel cannot scroll to
+it, so the only way to reach its cards while editing is to scroll by hand. Fix:
+one more entry in whatever array that function walks, pointing at `#ai-work`.

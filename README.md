@@ -134,10 +134,10 @@ GitHub Pages takes about a minute to deploy, so freshly published images fall ba
 
 ### Design
 
-- **Theme presets** — one click each: **Notebook** (the default: warm paper, dark ink, red pen), **Blueprint**, **Midnight** (the dark one), **Rosé**, **Forest**, **Mono**.
+- **Theme presets** — one click each: **Plain** (the default: white paper, one ink, no accent colour), **Notebook** (warm paper, red pen), **Blueprint**, **Midnight** (the dark one), **Rosé**, **Forest**, **Mono**.
 - **Colors** — click a swatch to change it. Six, named for what they do rather than where they sit: Paper, Ink / text, Accent (pen), Blue ink, Highlighter, Approved. Everything else is derived — shades, borders, drop shadows, every translucent tone — so changing the accent changes all of it, and picking a dark paper flips the whole site to dark mode by itself.
-- **Fonts** — a display face and a body face, loaded from Google Fonts only when you pick them. Display: Bricolage Grotesque, Space Grotesk, Syne, Unbounded, Archivo Black, Fraunces. Body: Space Grotesk, Inter, DM Sans, Work Sans.
-- **↺ Reset to default** puts the Notebook preset back.
+- **Fonts** — a display face and a body face. **System** is the default and is not a webfont at all: it uses whatever UI face the reader's own device has. The rest load from Google Fonts only when you pick them. Display: System, Bricolage Grotesque, Space Grotesk, Syne, Unbounded, Archivo Black, Fraunces. Body: System, Space Grotesk, Inter, DM Sans, Work Sans.
+- **↺ Reset to default** puts the Plain preset back.
 
 The theme is site-wide, not per-page: publishing any page writes `shared/theme.css`, and every page loads it. See [Tech](#tech) for why it works that way.
 

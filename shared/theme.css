@@ -4,26 +4,26 @@
    and both declare :root, so that link order is what makes
    these win — keep it. */
 :root {
-  --bg: #f4efe3;
-  --bg2: #e8e3d8;
-  --bg3: #dcd7cc;
-  --card-bg: #ede8dc;
-  --card-bg2: #e3ded3;
-  --text: #24211b;
-  --white: #24211b;
-  --muted: #77736b;
-  --faint: #c3bfb6;
-  --accent: #24211b;
-  --accent2: #3a3732;
-  --blue: #2f5c8f;
-  --yellow: #f4d24a;
-  --sticky: #f5d658;
-  --green: #4f7a4a;
-  --grid: rgba(36,33,27,0.05);
-  --grid2: rgba(36,33,27,0.085);
-  --accent-rgb: 36,33,27;
-  --text-rgb: 36,33,27;
-  --yellow-rgb: 244,210,74;
-  --fd: 'Bricolage Grotesque', sans-serif;
-  --fb: 'Space Grotesk', sans-serif;
+  --bg: #ffffff;
+  --bg2: #f2f2f2;
+  --bg3: #e6e6e6;
+  --card-bg: #f7f7f7;
+  --card-bg2: #ededed;
+  --text: #1a1a1a;
+  --white: #1a1a1a;
+  --muted: #767676;
+  --faint: #cccccc;
+  --accent: #1a1a1a;
+  --accent2: #313131;
+  --blue: #33506b;
+  --yellow: #eceae4;
+  --sticky: #eeece6;
+  --green: #4a4a46;
+  --grid: rgba(26,26,26,0.05);
+  --grid2: rgba(26,26,26,0.085);
+  --accent-rgb: 26,26,26;
+  --text-rgb: 26,26,26;
+  --yellow-rgb: 236,234,228;
+  --fd: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --fb: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
 }

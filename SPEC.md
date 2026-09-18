@@ -10,8 +10,9 @@ wins — see `README.md` for how to use it and `CLAUDE.md` for how to change it.
 - **Goal**: Job applications; showing work to studios and clients
 - **Angle**: Not a gallery — a notebook. Each project is taken apart into the
   systems that make it work, and the part the author designed is named.
-- **Style**: Plain and typographic — white paper, one ink, hairline rules,
-  plenty of whitespace. No texture, no decoration, no motion.
+- **Style**: Editorial — warm paper, one ink, one deep accent, a serif for
+  display, hairline rules, plenty of whitespace. No texture, no shadows, no
+  motion.
 
 ## 2. Structure
 
@@ -50,11 +51,13 @@ of its own so it has its own title, description, URL and link preview.
 ## 4. Visual style
 
 - **Theme**: generated from six seed colours and two fonts, not hand-painted.
-  Seven presets ship — Plain (default), Notebook, Blueprint, Midnight, Rosé,
-  Forest, Mono. Shades, translucent tones and dark-mode inversion are all
-  derived, so one colour change carries across the whole site.
-- **Type**: a display face and a body face, both swappable. The default for
-  both is System — the reader's own UI face, no webfont fetched. Monospace is
+  Eight presets ship — Editorial (default), Plain, Notebook, Blueprint,
+  Midnight, Rosé, Forest, Mono. Shades, translucent tones and dark-mode
+  inversion are all derived, so one colour change carries across the whole
+  site.
+- **Type**: a display serif (Newsreader, with real italics for pull quotes
+  and the second line of each heading) and a humanist sans (Source Sans 3),
+  both swappable. Labels are small tracked capitals in the sans. Monospace is
   reserved for code.
 - **Layout**: two-column grids on desktop, single column on mobile.
 - **Responsive**: four breakpoints — 1100 / 900 / 620 / 420px.

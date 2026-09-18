@@ -2,40 +2,41 @@
    PORTFOLIO — plain typographic layout.
    Variable names preserved for editor/JS compat.
 
-   The look is deliberately unstyled: one ink colour, one grey,
-   hairline rules, system type, no texture and no motion. Every
-   decorative device this file used to carry (paper grid, grain,
-   highlighter, tape, dog-ears, offset shadows, rotations, scroll
-   reveals, a custom cursor) was removed on purpose — put none of
-   them back without being asked.
+   The look is editorial: warm paper, near-black ink, one deep
+   accent, a serif for display and a humanist sans for text, and
+   hairline rules doing all the structural work. No texture, no
+   shadows, no rotation, no motion. Every decorative device this
+   file used to carry (paper grid, grain, highlighter, tape,
+   dog-ears, offset shadows, scroll reveals, a custom cursor) was
+   removed on purpose — put none of them back without being asked.
    ───────────────────────────────────────── */
 :root {
-  --bg:      #ffffff;
-  --bg2:     #f7f7f5;
-  --bg3:     #efefec;
-  --card-bg: #ffffff;
-  --card-bg2:#fafafa;
-  --accent:  #1a1a1a;   /* ink — deliberately NOT a colour */
-  --accent2: #3a3a3a;
-  --text:    #1a1a1a;
-  --white:   #1a1a1a;
-  --muted:   #63635e;
-  --faint:   #e2e2de;
-  --blush:   #e2e2de;
-  --sage:    #63635e;
-  --navyL:   #e2e2de;
-  --blue:    #33506b;   /* links only */
-  --yellow:  #eceae4;   /* kept for theme compat; no longer a highlighter */
-  --sticky:  #f2f1ec;
-  --green:   #4a4a46;
+  --bg:      #f7f5f1;   /* warm paper — light, not aged */
+  --bg2:     #efece6;
+  --bg3:     #e6e2da;
+  --card-bg: #f2efea;
+  --card-bg2:#ebe7e0;
+  --accent:  #2f5d50;   /* pine — the one colour on the page */
+  --accent2: #44705f;
+  --text:    #1c1a17;
+  --white:   #1c1a17;
+  --muted:   #6b675f;
+  --faint:   #d3cfc6;
+  --blush:   #d3cfc6;
+  --sage:    #2f5d50;
+  --navyL:   #d3cfc6;
+  --blue:    #2f5d50;
+  --yellow:  #e9e4d9;   /* kept for theme compat; no longer a highlighter */
+  --sticky:  #ede9e0;
+  --green:   #2f5d50;
   --grid:    rgba(0,0,0,0);
   --grid2:   rgba(0,0,0,0);
-  /* One family for everything. No webfont, no display/body pairing —
-     the browser's own UI face is the plainest thing available. */
-  --fd: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --fb: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* Display serif with real italics, humanist sans for text. Both are
+     linked from every page's <head>; the theme can swap them. */
+  --fd: 'Newsreader', Georgia, serif;
+  --fb: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --fm: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --fi: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --fi: 'Newsreader', Georgia, serif;
   --ease: cubic-bezier(.4,0,.2,1);
   --eo:   cubic-bezier(0,0,.2,1);
   /* Layout metrics. Deliberately NOT part of the theme variable set —
@@ -57,8 +58,8 @@ html { scroll-behavior:smooth; }
 section[id] { scroll-margin-top: calc(var(--nav-h) + 1rem); }
 body {
   font-family: var(--fb);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-size: 1.0625rem;
+  line-height: 1.6;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -70,6 +71,12 @@ body {
 img { display:block; max-width:100%; height:auto; }
 a { color:inherit; text-decoration:none; }
 ul { list-style:none; }
+::selection { background:var(--accent); color:var(--bg); }
+/* Small-caps label used for kickers, section labels and field names. */
+.slabel, .hero-kicker, .proj-role, .ch-lbl, .sh-fact-lbl, .sh-sec-lbl, .sh-resp-lbl,
+.sh-widget-lbl, .sh-award-lbl, .sh-repo-lbl, .skills-box-title, .dl-meta, .dl-ba-lbl, .dl-code-lbl, .edu-sub {
+  font-family:var(--fb); font-size:.76rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+}
 
 /* ── CURSOR ───────────────────────────────
    #cursor is a sentinel (R3): site.js grabs it at load with no null check,
@@ -91,7 +98,7 @@ ul { list-style:none; }
 }
 #nav.solid { border-bottom-color:var(--faint); }
 .nav-logo {
-  font-weight:600; font-size:.95rem;
+  font-family:var(--fd); font-weight:500; font-size:1.15rem; letter-spacing:-.01em;
   color:var(--text); user-select:none;
   display:inline-flex; align-items:center;
 }
@@ -104,10 +111,10 @@ a.nav-logo { cursor:pointer; }
 a.nav-logo:hover { text-decoration:underline; }
 .nav-links { display:flex; gap:1.75rem; align-items:center; }
 .nav-links a {
-  font-size:.9rem; color:var(--muted);
+  font-size:.95rem; color:var(--muted);
 }
-.nav-links a:hover { color:var(--text); text-decoration:underline; }
-.nav-cv { color:var(--text); text-decoration:underline; }
+.nav-links a:hover { color:var(--accent); }
+.nav-cv { color:var(--accent); text-decoration:underline; text-underline-offset:.2em; text-decoration-thickness:1px; }
 .nav-cv:hover { color:var(--text); }
 
 /* ── MOBILE NAV ───────────────────────────
@@ -135,11 +142,11 @@ body.menu-open .nav-burger span:nth-child(3) { transform:translateY(-6px) rotate
 }
 .mobile-menu.open { opacity:1; visibility:visible; pointer-events:auto; }
 .mobile-menu a {
-  font-size:1.5rem; font-weight:600; line-height:1.4;
+  font-family:var(--fd); font-size:1.75rem; font-weight:500; line-height:1.4;
   color:var(--text); padding:.55rem 0; display:block;
   border-bottom:1px solid var(--faint);
 }
-.mobile-menu .mm-cv { border-bottom:none; margin-top:.75rem; text-decoration:underline; }
+.mobile-menu .mm-cv { border-bottom:none; margin-top:.75rem; color:var(--accent); }
 /* Above the phone breakpoint the real nav links are visible, so the
    overlay must not be reachable by tab or by a stale .open class. */
 @media(min-width:621px){ .mobile-menu { display:none; } }
@@ -155,14 +162,11 @@ body.menu-open .nav-burger span:nth-child(3) { transform:translateY(-6px) rotate
   border-bottom:1px solid var(--faint);
 }
 .hero-inner { position:relative; max-width:900px; }
-.hero-kicker {
-  display:block;
-  font-size:.95rem; color:var(--muted); margin-bottom:.75rem;
-}
+.hero-kicker { display:block; margin-bottom:1rem; }
 h1.hero-name {
-  font-family:var(--fd); font-weight:700;
-  font-size:clamp(2rem,4.5vw,3.1rem);
-  line-height:1.15; letter-spacing:-.02em;
+  font-family:var(--fd); font-weight:500;
+  font-size:clamp(2.4rem,5.5vw,4rem);
+  line-height:1.04; letter-spacing:-.015em;
   margin-bottom:1.5rem;
 }
 .hero-name .line { display:block; }
@@ -172,8 +176,8 @@ h1.hero-name {
   gap:1.5rem;
 }
 .hero-tagline {
-  max-width:var(--measure); color:var(--muted);
-  font-size:1rem; line-height:1.7;
+  max-width:40ch; color:var(--muted);
+  font-family:var(--fd); font-style:italic; font-size:1.3rem; line-height:1.45;
 }
 .hero-btns { display:flex; gap:1.25rem; flex-wrap:wrap; align-items:center; }
 /* The handwritten margin note and the scroll hint were pure decoration.
@@ -185,17 +189,17 @@ h1.hero-name {
    offset shadows, no uppercase tracking. */
 .btn {
   display:inline-flex; align-items:center; gap:.4rem;
-  font-family:var(--fb); font-size:.95rem; font-weight:500;
-  color:var(--text); border:none; background:none;
-  padding:0 0 .15rem; border-bottom:1px solid var(--text);
+  font-family:var(--fb); font-size:.98rem; font-weight:600;
+  color:var(--accent); border:none; background:none;
+  padding:0 0 .12rem; border-bottom:1.5px solid var(--accent);
 }
-.btn:hover { color:var(--muted); border-bottom-color:var(--muted); }
-.btn-white, .btn-ghost, .btn-accent { background:none; color:var(--text); border-bottom:1px solid var(--text); }
-.btn-ghost { color:var(--muted); border-bottom-color:var(--faint); }
+.btn:hover { color:var(--text); border-bottom-color:var(--text); }
+.btn-white, .btn-ghost, .btn-accent { background:none; color:var(--accent); border-bottom:1.5px solid var(--accent); }
+.btn-ghost { color:var(--muted); border-bottom-color:var(--faint); font-weight:400; }
 .btn-ghost:hover { color:var(--text); border-bottom-color:var(--text); }
 
 .tag {
-  display:inline-flex; align-items:center;
+  display:inline;
   font-size:.82rem; color:var(--muted);
 }
 /* Tags are a comma-separated run of words, not a row of pills. */
@@ -204,10 +208,7 @@ h1.hero-name {
 
 /* Section label. The "// LABEL ——" treatment is gone; it is just a small
    grey line of text above the heading. */
-.slabel {
-  display:block;
-  font-size:.85rem; color:var(--muted); margin-bottom:.6rem;
-}
+.slabel { display:block; margin-bottom:.8rem; }
 /* Authored kickers carry a literal "// …" in their text (page content,
    R1 — not ours to rewrite), so the plain layout leaves them out. */
 .spec-kicker { display:none; }
@@ -250,14 +251,14 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   flex-wrap:wrap; gap:1.5rem;
 }
 .work-head h2 {
-  font-family:var(--fd); font-weight:700;
-  font-size:clamp(1.6rem,3vw,2.2rem); letter-spacing:-.02em; line-height:1.2;
+  font-family:var(--fd); font-weight:500;
+  font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
 }
-/* The second line of each heading is its own span ("Work" / "Log."). It
-   used to be the accent colour; it is the same ink now. */
-.work-head h2 span.log { color:inherit; }
+/* The second line of each heading is its own span ("Work" / "Log."):
+   italic, in the accent — the one flourish the headings get. */
+.work-head h2 span.log { font-style:italic; color:var(--accent); }
 .work-head p {
-  max-width:34ch; color:var(--muted); font-size:.95rem; line-height:1.7;
+  max-width:34ch; color:var(--muted); font-size:1rem; line-height:1.6;
 }
 .projects {
   display:grid; grid-template-columns:1fr 1fr;
@@ -271,7 +272,7 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
 }
 .proj-img {
   position:relative; margin:0 0 1rem;
-  aspect-ratio:4/3; overflow:hidden;
+  aspect-ratio:3/2; overflow:hidden;
   background:var(--bg3); border:1px solid var(--faint);
 }
 .proj-img img { width:100%; height:100%; object-fit:cover; }
@@ -287,24 +288,24 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   display:flex; justify-content:space-between; align-items:baseline; gap:1rem;
   margin-bottom:.4rem;
 }
-.proj-num { font-size:.82rem; color:var(--muted); }
+.proj-num { font-family:var(--fd); font-style:italic; font-size:1rem; color:var(--accent); }
 .proj-tags { text-align:right; }
-.proj-role { font-size:.82rem; color:var(--muted); margin-bottom:.35rem; }
+.proj-role { margin-bottom:.4rem; }
 .proj-name {
-  font-family:var(--fd); font-weight:600;
-  font-size:1.2rem; letter-spacing:-.01em; line-height:1.3;
+  font-family:var(--fd); font-weight:500;
+  font-size:1.5rem; letter-spacing:-.01em; line-height:1.2;
   color:var(--text); margin-bottom:.5rem; max-width:100%;
 }
-.project:hover .proj-name { text-decoration:underline; }
+.project:hover .proj-name { color:var(--accent); }
 .proj-excerpt {
-  font-size:.95rem; color:var(--muted); line-height:1.65;
+  font-size:1rem; color:var(--muted); line-height:1.6;
   max-width:52ch; margin-bottom:.75rem;
 }
 .proj-cta {
-  align-self:flex-start; font-size:.9rem; color:var(--text);
-  border-bottom:1px solid var(--faint); padding-bottom:.1rem;
+  align-self:flex-start; font-size:.95rem; font-weight:600; color:var(--accent);
+  border-bottom:1.5px solid transparent; padding-bottom:.1rem;
 }
-.project:hover .proj-cta { border-bottom-color:var(--text); }
+.project:hover .proj-cta { border-bottom-color:var(--accent); }
 /* The destination of a generated card, held as text because an editable field
    round-trips innerHTML and cannot reach the anchor's href. Authors see it and
    edit it; visitors never do — syncCardLinks() has already put it on the href. */
@@ -329,21 +330,21 @@ body.editing .proj-link:empty::before {
   border-top:1px solid var(--faint);
 }
 .about-left h2 {
-  font-family:var(--fd); font-weight:700;
-  font-size:clamp(1.6rem,3vw,2.2rem); letter-spacing:-.02em; line-height:1.2;
+  font-family:var(--fd); font-weight:500;
+  font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
   margin-bottom:1.5rem;
 }
-.about-left h2 em { font-style:normal; font-family:inherit; color:inherit; font-size:inherit; }
-.about-bio p { color:var(--muted); line-height:1.8; font-size:1rem; margin-bottom:1rem; max-width:var(--measure); }
+.about-left h2 em { font-style:italic; font-family:inherit; color:var(--accent); font-size:inherit; font-weight:inherit; }
+.about-bio p { color:var(--text); line-height:1.7; font-size:1.05rem; margin-bottom:1rem; max-width:var(--measure); }
 .about-bio p strong { color:var(--text); font-weight:600; background:none; }
-.about-bio p a { color:var(--blue); text-decoration:underline; }
+.about-bio p a { color:var(--accent); text-decoration:underline; text-underline-offset:.15em; text-decoration-thickness:1px; }
 .about-bio p em { font-family:inherit; font-style:italic; font-weight:400; color:inherit; font-size:inherit; }
 /* The pull quote was a rotated post-it. It is an indented quotation now. */
 .about-pull {
-  font-family:var(--fb); font-style:normal; font-weight:400;
-  font-size:1.05rem; color:var(--text); line-height:1.7;
-  background:none; border:none; border-left:2px solid var(--faint);
-  padding:.1rem 0 .1rem 1.25rem; margin:1.75rem 0;
+  font-family:var(--fd); font-style:italic; font-weight:400;
+  font-size:1.35rem; color:var(--text); line-height:1.4;
+  background:none; border:none; border-left:2px solid var(--accent);
+  padding:.15rem 0 .15rem 1.25rem; margin:1.75rem 0;
   max-width:var(--measure); transform:none; box-shadow:none;
 }
 .about-ctas { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:2rem; }
@@ -352,8 +353,8 @@ body.editing .proj-link:empty::before {
 .edu-item:last-child { border-bottom:none; }
 .edu-dot { display:none; }
 .edu-body { flex:1; min-width:0; }
-.edu-name { font-size:.98rem; font-weight:600; color:var(--text); margin-bottom:.1rem; }
-.edu-sub { font-size:.85rem; color:var(--muted); }
+.edu-name { font-size:1.02rem; font-weight:600; color:var(--text); margin-bottom:.15rem; }
+.edu-sub { color:var(--muted); }
 /* Reorder / remove controls and the add button — edit mode only, so a
    visitor sees a plain list. */
 .edu-ctrl, .edu-add { display:none; }
@@ -386,13 +387,13 @@ body.editing .edu-add { display:block; }
 .photo-ph-lbl { font-size:.85rem; color:var(--muted); text-align:center; line-height:1.6; }
 /* Skills: a plain list, not a ticked checklist in a framed box. */
 .skills-box { background:none; border:none; border-top:1px solid var(--faint); padding:1.1rem 0 0; box-shadow:none; }
-.skills-box-title { font-size:.85rem; color:var(--muted); margin-bottom:.6rem; }
+.skills-box-title { margin-bottom:.6rem; }
 .skills-pills { display:block; }
 .skill {
-  font-size:.9rem; color:var(--muted); padding:0;
+  font-size:.95rem; color:var(--text); padding:0;
   border:none; background:none; display:inline;
 }
-.skill + .skill::before { content:' · '; color:var(--faint); }
+.skill + .skill::before { content:' · '; color:var(--accent); }
 
 /* ── CONTACT ──────────────────────────── */
 #contact {
@@ -403,16 +404,16 @@ body.editing .edu-add { display:block; }
 }
 .contact-inner { max-width:1100px; position:relative; }
 .contact-h2 {
-  font-family:var(--fd); font-weight:700;
-  font-size:clamp(1.6rem,3vw,2.2rem); letter-spacing:-.02em; line-height:1.2;
+  font-family:var(--fd); font-weight:500;
+  font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
   margin-bottom:clamp(1.75rem,4vw,2.5rem);
 }
-.contact-h2 .dim { display:inline; color:inherit; background:none; padding:0; transform:none; box-shadow:none; }
+.contact-h2 .dim { display:inline; font-style:italic; color:var(--accent); background:none; padding:0; transform:none; box-shadow:none; }
 .channels { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-bottom:2.5rem; }
 .ch { background:none; padding:0; display:block; border:none; box-shadow:none; }
-.ch-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.3rem; }
-.ch-val { font-size:1rem; color:var(--text); margin-bottom:.2rem; }
-a.ch:hover .ch-val { text-decoration:underline; }
+.ch-lbl { margin-bottom:.4rem; }
+.ch-val { font-family:var(--fd); font-size:1.2rem; color:var(--text); margin-bottom:.2rem; overflow-wrap:anywhere; }
+a.ch:hover .ch-val { color:var(--accent); }
 .ch-sub { font-size:.85rem; color:var(--muted); }
 .contact-foot { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding-top:1.5rem; border-top:1px solid var(--faint); }
 .status {
@@ -433,44 +434,44 @@ a.ch:hover .ch-val { text-decoration:underline; }
 .sh-hero-grad { display:none; }
 .sh-hero-info { position:static; padding:1.5rem clamp(1.5rem,4vw,2.5rem) 0; }
 .sh-tags { margin-bottom:.35rem; }
-.sh-hero-info h2 { font-family:var(--fd); font-weight:700; font-size:clamp(1.6rem,3.2vw,2.4rem); letter-spacing:-.02em; line-height:1.2; color:var(--text); }
+.sh-hero-info h2 { font-family:var(--fd); font-weight:500; font-size:clamp(2.2rem,4.2vw,3.2rem); letter-spacing:-.015em; line-height:1.06; color:var(--text); }
 /* auto-fit rather than a fixed 4 columns: the cells hold strings like
    "Lead Designer & Producer", so let them reflow 4 → 3 → 2 → 1 on their
    own instead of stepping through breakpoints. */
 .sh-facts { background:none; border-bottom:1px solid var(--faint); display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); padding:1.25rem clamp(1.5rem,4vw,2.5rem) 1.5rem; gap:1rem 2rem; }
 .sh-facts > div { position:relative; padding-left:0; }
-.sh-fact-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.15rem; }
-.sh-fact-val { font-weight:600; font-size:.95rem; color:var(--text); }
+.sh-fact-lbl { margin-bottom:.25rem; }
+.sh-fact-val { font-family:var(--fd); font-weight:500; font-size:1.1rem; color:var(--text); }
 .sh-content { padding:clamp(2.25rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem); display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:3rem; align-items:start; }
 .sh-aside { position:sticky; top:calc(var(--nav-h) + 1rem); }
 .sh-sec { margin-bottom:2.5rem; }
-.sh-sec-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.4rem; }
-.sh-sec h3 { font-family:var(--fd); font-weight:600; font-size:1.15rem; letter-spacing:-.01em; margin-bottom:.75rem; color:var(--text); }
-.sh-sec p { color:var(--muted); line-height:1.8; font-size:1rem; margin-bottom:.85rem; max-width:var(--measure); }
+.sh-sec-lbl { margin-bottom:.5rem; }
+.sh-sec h3 { font-family:var(--fd); font-weight:500; font-size:1.6rem; letter-spacing:-.01em; line-height:1.15; margin-bottom:.75rem; color:var(--text); }
+.sh-sec p { color:var(--text); line-height:1.7; font-size:1.05rem; margin-bottom:.85rem; max-width:var(--measure); }
 .sh-sec p:last-child { margin-bottom:0; }
 .sh-sec ul { display:flex; flex-direction:column; gap:.5rem; }
-.sh-sec li { color:var(--muted); line-height:1.7; font-size:.97rem; padding-left:1.5rem; position:relative; max-width:var(--measure); }
-.sh-sec li::before { content:'—'; position:absolute; left:0; top:0; color:var(--faint); }
+.sh-sec li { color:var(--text); line-height:1.65; font-size:1.02rem; padding-left:1.5rem; position:relative; max-width:var(--measure); }
+.sh-sec li::before { content:'—'; position:absolute; left:0; top:0; color:var(--accent); }
 .sh-sec em { font-family:inherit; font-style:italic; font-weight:400; color:inherit; font-size:inherit; }
 .sh-sec strong { color:var(--text); }
 .sh-pull {
-  font-family:var(--fb); font-style:normal; font-weight:400;
-  font-size:1.05rem; color:var(--text); line-height:1.7;
-  background:none; border:none; border-left:2px solid var(--faint);
+  font-family:var(--fd); font-style:italic; font-weight:400;
+  font-size:1.35rem; color:var(--text); line-height:1.4;
+  background:none; border:none; border-left:2px solid var(--accent);
   padding:.1rem 0 .1rem 1.25rem; margin:1.5rem 0;
   max-width:var(--measure); transform:none; box-shadow:none;
 }
 /* The core-loop strip: plain words separated by arrows, no chips. */
 .sh-loop { background:none; border:none; border-top:1px solid var(--faint); border-bottom:1px solid var(--faint); padding:.9rem 0; display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1.25rem 0; box-shadow:none; }
-.loop-n { font-size:.9rem; color:var(--text); background:none; border:none; padding:0; }
-.loop-a { color:var(--muted); font-size:.9rem; }
+.loop-n { font-size:.95rem; font-weight:600; color:var(--text); background:none; border:none; padding:0; }
+.loop-a { color:var(--accent); font-size:.9rem; }
 .sh-resp { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:.5rem; }
-.sh-resp-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.5rem; padding-bottom:.4rem; border-bottom:1px solid var(--faint); }
+.sh-resp-lbl { margin-bottom:.6rem; padding-bottom:.45rem; border-bottom:1px solid var(--faint); }
 /* Awards were tinted, framed and shadowed rows with an emoji each. */
 .sh-award { display:flex; align-items:baseline; gap:.75rem; background:none; border:none; border-bottom:1px solid var(--faint); padding:.7rem 0; margin:0; box-shadow:none; }
 .sh-award-icon { display:none; }
-.sh-award-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.1rem; }
-.sh-award-val { font-weight:600; font-size:.95rem; color:var(--text); }
+.sh-award-lbl { margin-bottom:.15rem; }
+.sh-award-val { font-family:var(--fd); font-weight:500; font-size:1.15rem; color:var(--text); }
 .sh-gallery { margin-top:1rem; position:relative; overflow:hidden; border:1px solid var(--faint); }
 .sh-gal-featured { width:100%; aspect-ratio:16/9; position:relative; overflow:hidden; background:var(--bg3); cursor:zoom-in; }
 .sh-gal-featured img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -479,11 +480,11 @@ a.ch:hover .ch-val { text-decoration:underline; }
 .sh-gal-ph span { font-size:.85rem; color:var(--muted); }
 .sh-gal-cap { display:none; }
 .sh-widget { background:none; border:none; border-top:1px solid var(--faint); padding:1rem 0 0; margin-bottom:1.5rem; box-shadow:none; }
-.sh-widget-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.6rem; padding-bottom:0; border-bottom:none; }
+.sh-widget-lbl { margin-bottom:.7rem; padding-bottom:0; border-bottom:none; }
 /* Body copy in a text widget — Studio, and anything added via "Add Text".
    This was an inline style on one authored paragraph, so text boxes made
    in the editor came out as plain default paragraphs instead. */
-.sh-widget p { font-size:.92rem; color:var(--muted); line-height:1.65; }
+.sh-widget p { font-size:.95rem; color:var(--text); line-height:1.6; }
 /* Repository link in a case-study sidebar. Deliberately a <div>/<span> tree
    rather than a <p> or an <li>: CS_EDITABLE in site.js selects those, so a
    link written that way would become contenteditable and the href would be
@@ -494,18 +495,18 @@ a.ch:hover .ch-val { text-decoration:underline; }
 .sh-repo-txt { min-width:0; }
 /* Owner on the label line, repo name on its own — "wildalchemists/FossilsKanban"
    set as one string is wider than the sidebar and breaks mid-word. */
-.sh-repo-lbl { display:block; font-size:.85rem; color:var(--muted); margin-bottom:.1rem; overflow-wrap:break-word; }
-.sh-repo-val { display:block; font-size:.92rem; color:var(--text); overflow-wrap:break-word; }
+.sh-repo-lbl { display:block; margin-bottom:.15rem; overflow-wrap:break-word; }
+.sh-repo-val { display:block; font-size:.95rem; color:var(--text); overflow-wrap:break-word; }
 /* The private-repo variant is not a link and must not pretend to be one. */
 .sh-repo.is-private { cursor:default; }
 .sh-repo.is-private .sh-repo-val { color:var(--muted); text-decoration:none; }
 
 .sh-tools { display:block; }
-.sh-tool { display:inline; font-size:.9rem; padding:0; background:none; border:none; color:var(--muted); }
-.sh-tool + .sh-tool::before { content:' · '; color:var(--faint); }
+.sh-tool { display:inline; font-size:.95rem; padding:0; background:none; border:none; color:var(--text); }
+.sh-tool + .sh-tool::before { content:' · '; color:var(--accent); }
 .sh-bullets { display:flex; flex-direction:column; gap:.4rem; }
-.sh-bullets li { font-size:.92rem; color:var(--muted); padding-left:1.4rem; position:relative; line-height:1.6; }
-.sh-bullets li::before { content:'—'; position:absolute; left:0; color:var(--faint); }
+.sh-bullets li { font-size:.95rem; color:var(--text); padding-left:1.4rem; position:relative; line-height:1.55; }
+.sh-bullets li::before { content:'—'; position:absolute; left:0; color:var(--accent); }
 
 /* ── Sidebar widgets in edit mode ─────────
    Controls are injected by decorateWidgets() only while editing and
@@ -552,9 +553,9 @@ body.editing .sh-widget .is-blank::before {
 }
 body.editing .sh-tool.is-blank, body.editing .sh-bullets li.is-blank { min-width:4rem; }
 .sh-nav { border-top:1px solid var(--faint); padding:1.5rem clamp(1.5rem,4vw,2.5rem); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; background:none; flex-shrink:0; }
-.sh-nav-btn { font-size:.92rem; padding:0 0 .1rem; border:none; border-bottom:1px solid var(--faint); color:var(--text); cursor:pointer; background:none; }
-.sh-nav-btn:hover { border-bottom-color:var(--text); }
-.sh-nav-btn.primary { background:none; color:var(--text); border-bottom-color:var(--text); }
+.sh-nav-btn { font-size:.98rem; padding:0 0 .1rem; border:none; border-bottom:1.5px solid var(--faint); color:var(--text); cursor:pointer; background:none; }
+.sh-nav-btn:hover { color:var(--accent); border-bottom-color:var(--accent); }
+.sh-nav-btn.primary { background:none; color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
 
 /* ── LIGHTBOX ─────────────────────────── */
 #lightbox { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.9); display:none; flex-direction:column; align-items:center; justify-content:center; }
@@ -721,8 +722,8 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 /* ── Log list (inside a case study) ────── */
 .dl-wrap { margin-top:2.5rem; padding-top:2rem; border-top:1px solid var(--faint); }
 .dl-head { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem; }
-.dl-title { font-family:var(--fd); font-weight:600; font-size:1.15rem; letter-spacing:-.01em; color:var(--text); }
-.dl-meta { font-size:.85rem; color:var(--muted); }
+.dl-title { font-family:var(--fd); font-weight:500; font-size:1.6rem; letter-spacing:-.01em; line-height:1.15; color:var(--text); }
+.dl-meta { color:var(--muted); }
 .dl-list { display:flex; flex-direction:column; }
 
 /* An entry is a row in a list, not a card. */
@@ -732,7 +733,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
   padding:.9rem 0; cursor:pointer; text-align:left; width:100%;
   box-shadow:none;
 }
-.dl-entry:hover .dl-entry-name { text-decoration:underline; }
+.dl-entry:hover .dl-entry-name { color:var(--accent); }
 .dl-entry:focus-visible { outline:2px solid var(--text); outline-offset:2px; }
 .dl-thumb { width:88px; height:60px; overflow:hidden; background:var(--bg3); border:1px solid var(--faint); position:relative; flex-shrink:0; }
 .dl-thumb img, .dl-thumb video { width:100%; height:100%; object-fit:cover; display:block; }
@@ -743,7 +744,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-chip { font-size:.82rem; padding:0; border:none; color:var(--muted); background:none; }
 .dl-chip.phase  { color:var(--muted); }
 .dl-chip.locked { color:var(--muted); }
-.dl-entry-name { font-family:var(--fd); font-weight:600; font-size:1rem; color:var(--text); line-height:1.35; margin-bottom:.15rem; }
+.dl-entry-name { font-family:var(--fd); font-weight:500; font-size:1.2rem; color:var(--text); line-height:1.25; margin-bottom:.15rem; }
 .dl-entry-sum { font-size:.92rem; color:var(--muted); line-height:1.6; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 .dl-entry-go { display:none; }
 
@@ -754,12 +755,12 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 /* ── Entry detail view ─────────────────── */
 .dl-detail { padding:clamp(2rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem); max-width:900px; }
 .dl-back {
-  font-size:.92rem; color:var(--text); background:none; border:none; cursor:pointer; padding:0;
+  font-size:.95rem; color:var(--accent); background:none; border:none; cursor:pointer; padding:0;
   display:inline-flex; align-items:center; gap:.4rem; margin-bottom:1.5rem;
   border-bottom:1px solid var(--faint);
 }
 .dl-back:hover { border-bottom-color:var(--text); }
-.dl-d-title { font-family:var(--fd); font-weight:700; font-size:clamp(1.5rem,3vw,2.1rem); letter-spacing:-.02em; line-height:1.2; color:var(--text); margin:.5rem 0 .75rem; }
+.dl-d-title { font-family:var(--fd); font-weight:500; font-size:clamp(2rem,3.8vw,2.8rem); letter-spacing:-.015em; line-height:1.08; color:var(--text); margin:.5rem 0 .75rem; }
 .dl-d-sum { font-size:1.02rem; line-height:1.75; color:var(--muted); max-width:var(--measure); margin-bottom:1.5rem; }
 .dl-d-hero { width:100%; border:1px solid var(--faint); overflow:hidden; margin-bottom:2rem; background:var(--bg3); box-shadow:none; }
 .dl-d-hero img, .dl-d-hero video { width:100%; display:block; }
@@ -779,14 +780,14 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-blk-head { margin:2.25rem 0 .75rem; }
 .dl-blk-sub  { margin:1.75rem 0 .5rem; }
 .dl-blk-head + .dl-blk, .dl-blk-sub + .dl-blk, .dl-blk-head + .dl-rule, .dl-blk-sub + .dl-rule { margin-top:0; }
-.dl-h3 { font-family:var(--fd); font-weight:600; font-size:1.15rem; letter-spacing:-.01em; color:var(--text); line-height:1.3; }
-.dl-h4 { font-family:var(--fd); font-weight:600; font-size:1rem; color:var(--text); line-height:1.4; }
+.dl-h3 { font-family:var(--fd); font-weight:500; font-size:1.5rem; letter-spacing:-.01em; color:var(--text); line-height:1.2; }
+.dl-h4 { font-family:var(--fd); font-weight:500; font-size:1.2rem; color:var(--text); line-height:1.3; }
 .dl-rule { height:0; border-top:1px solid var(--faint); margin:2rem 0; }
 .dl-blk-tags { margin:1.25rem 0; }
 .dl-blk-tags .dl-chips { margin-bottom:0; }
 .dl-blk-fig { border:1px solid var(--faint); overflow:hidden; background:var(--bg3); box-shadow:none; }
 .dl-blk-fig img, .dl-blk-fig video { width:100%; display:block; }
-.dl-cap { font-size:.85rem; color:var(--muted); margin-top:.5rem; line-height:1.6; }
+.dl-cap { font-family:var(--fd); font-style:italic; font-size:.95rem; color:var(--muted); margin-top:.5rem; line-height:1.5; }
 .dl-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 .dl-ba-lbl { font-size:.85rem; color:var(--muted); margin-bottom:.35rem; }
 .dl-gal { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:.7rem; }
@@ -1106,6 +1107,8 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
      replace them, stranding every section but the hero. */
   .nav-links a:not(.nav-cv) { display:none; }
   .nav-burger { display:flex; }
+  .nav-logo { margin-right:auto; }
+  .nav-links { margin-right:.75rem; }
 
   .hero-btns { flex-wrap:wrap; }
 

@@ -4,26 +4,26 @@
    and both declare :root, so that link order is what makes
    these win — keep it. */
 :root {
-  --bg: #ffffff;
-  --bg2: #f2f2f2;
-  --bg3: #e6e6e6;
-  --card-bg: #f7f7f7;
-  --card-bg2: #ededed;
-  --text: #1a1a1a;
-  --white: #1a1a1a;
-  --muted: #767676;
-  --faint: #cccccc;
-  --accent: #1a1a1a;
-  --accent2: #313131;
-  --blue: #33506b;
-  --yellow: #eceae4;
-  --sticky: #eeece6;
-  --green: #4a4a46;
-  --grid: rgba(26,26,26,0.05);
-  --grid2: rgba(26,26,26,0.085);
-  --accent-rgb: 26,26,26;
-  --text-rgb: 26,26,26;
-  --yellow-rgb: 236,234,228;
-  --fd: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --fb: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --bg: #f7f5f1;
+  --bg2: #ebe9e5;
+  --bg3: #deddd9;
+  --card-bg: #f0eeea;
+  --card-bg2: #e6e4e0;
+  --text: #1c1a17;
+  --white: #1c1a17;
+  --muted: #74726e;
+  --faint: #c6c4c1;
+  --accent: #2f5d50;
+  --accent2: #446d62;
+  --blue: #2f5d50;
+  --yellow: #e9e4d9;
+  --sticky: #ebe6dc;
+  --green: #2f5d50;
+  --grid: rgba(28,26,23,0.05);
+  --grid2: rgba(28,26,23,0.085);
+  --accent-rgb: 47,93,80;
+  --text-rgb: 28,26,23;
+  --yellow-rgb: 233,228,217;
+  --fd: 'Newsreader', Georgia, serif;
+  --fb: 'Source Sans 3', sans-serif;
 }

@@ -1099,3 +1099,65 @@ survive the deploy until the Design tab's **↺ Reset to default** is pressed on
 - The Independent AI cards are 4:3 crops of screenshots that were framed for a
   tilted card. They read large and loose in a plain grid; a tighter ratio or
   re-cropped art would help, but that is image content.
+
+---
+
+## 2026-09-18 · SESSION · From plain to editorial: a look with character, no AI tells
+
+**Why.** The plain layout was the right subtraction but too austere to live
+with — "sin perder la info, crea un look que no sea IA estándar pero que sea
+agradable visualmente". So: keep every element and every word, add back
+character through type, one colour and rhythm, and nothing else.
+
+**Shipped.** A new `Editorial` preset is `THEME_DEFAULT` (Plain stays in the
+list): warm paper `#f7f5f1` — light, not the aged cream of Notebook — near-black
+ink, and one pine green `#2f5d50` that is the only colour on the page: links,
+buttons, numerals, list dashes, separators, and the italic second line of every
+section heading (`Work` / *Log.*, `About the` / *Author.*, `Leave a` /
+*message*). Display is **Newsreader** (weight 500, real italics for the tagline,
+pull quotes and captions); text is **Source Sans 3**; labels are small tracked
+capitals in the sans. Neither is on the list of faces a generated portfolio
+reaches for. `shared/theme.css` was regenerated from `computeVars()` again, so it
+is what Save & publish would write.
+
+Two mechanism changes carried it. `fontStack()` now hands serif families a
+`Georgia, serif` fallback via `SERIF_FONTS`, so a slow font load degrades to a
+serif instead of Arial. And the default pair is linked from every page's
+`<head>` rather than injected at runtime, because `ensureFont()` builds a
+`:wght@` URL and cannot ask for the italic axis — `_loadedFonts` is seeded with
+both names so the runtime loader never fetches them twice. Preconnects came
+back with the link. Each page's `<link>` matches its own attribute style
+(`&amp;`/`>` on the hand-written pages, `&`/`/>` on the published ones), which is
+what the publisher would have written.
+
+Also in this commit, the two mobile defects the phone screenshots showed before
+the direction changed: `.tag` is `display:inline` now, because as an inline-flex
+item the `, ` separator wrapped with the tag it belonged to (`Party Brawler` /
+`, Premium · …`); and on the phone nav `.nav-logo { margin-right:auto }` parks
+the CV link beside the burger instead of mid-bar, where `space-between` left it
+once the other links were hidden.
+
+`site.js` grew by nine lines; all 42 citations were re-bound to their real
+declarations from an explicit table this time (R11). R7: 63 → 63 hex literals,
+`var()` 416 → 423. README and SPEC updated for the preset and the faces.
+
+**Verified.** `checks.sh` exits 0. 104 assertions across all eight pages in
+Chromium: page contract, four sentinels, warm paper applied, Newsreader on
+headings and Source Sans 3 on body, `document.fonts.check()` true for both
+(Google Fonts is reachable from this container, so these are real glyphs, not
+fallbacks), body renders, `edChrome()` idempotent, `toggleEdit()` refusing
+without a token, exactly one webfont stylesheet, cursor hidden, no looping
+animation, no JS errors, no 4xx. Mobile at 390 and 320: no horizontal overflow,
+no text under 12px, hamburger opens on a real tap, tags wrap as prose.
+
+**Not verified.** `smoke.sh` still skips (no `gjs`); Safari and Firefox
+untested. Nothing published through `ghPublish()`.
+
+**Same caveat as before.** A browser holding `pmpr_theme` keeps whatever preset
+it last saved until **↺ Reset to default** is pressed in the Design tab.
+
+**Open / pick up next.**
+- OPT-22/23/24 stand. OPT-23 (the repeated bio paragraph) is now the most
+  visible flaw on the landing page.
+- The AI cards' 3:2 crop cuts the TagOut screenshot's caption; re-cropped card
+  art would suit the new grid better. Image content, not ours.

@@ -1856,7 +1856,7 @@ document.addEventListener('keydown', e => {
 const PRESETS = {
   /* The site ships plain: white paper, one ink, no accent colour and the
      browser's own UI face. SYSTEM_FONT is not a webfont — see fontStack(). */
-  'Editorial': { bg:'#f7f5f1', text:'#1c1a17', accent:'#2f5d50', blue:'#2f5d50', yellow:'#e9e4d9', green:'#2f5d50', fd:'Newsreader', fb:'Source Sans 3' },
+  'Editorial': { bg:'#f6f4ef', text:'#17150f', accent:'#2a5346', blue:'#2a5346', yellow:'#e8e3d8', green:'#2a5346', fd:'Newsreader', fb:'Source Sans 3' },
   'Plain':     { bg:'#ffffff', text:'#1a1a1a', accent:'#1a1a1a', blue:'#33506b', yellow:'#eceae4', green:'#4a4a46', fd:'System', fb:'System' },
   'Notebook':  { bg:'#f4efe3', text:'#24211b', accent:'#c8402e', blue:'#2f5c8f', yellow:'#f4d24a', green:'#4f7a4a', fd:'Bricolage Grotesque', fb:'Space Grotesk' },
   'Blueprint': { bg:'#e4ecf2', text:'#152435', accent:'#1f6feb', blue:'#16405f', yellow:'#f2c14e', green:'#2f8f6a', fd:'Space Grotesk', fb:'Space Grotesk' },

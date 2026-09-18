@@ -11,21 +11,21 @@
    removed on purpose — put none of them back without being asked.
    ───────────────────────────────────────── */
 :root {
-  --bg:      #f7f5f1;   /* warm paper — light, not aged */
-  --bg2:     #efece6;
-  --bg3:     #e6e2da;
-  --card-bg: #f2efea;
-  --card-bg2:#ebe7e0;
-  --accent:  #2f5d50;   /* pine — the one colour on the page */
-  --accent2: #44705f;
-  --text:    #1c1a17;
-  --white:   #1c1a17;
-  --muted:   #6b675f;
-  --faint:   #d3cfc6;
-  --blush:   #d3cfc6;
-  --sage:    #2f5d50;
-  --navyL:   #d3cfc6;
-  --blue:    #2f5d50;
+  --bg:      #f6f4ef;   /* warm paper — light, not aged */
+  --bg2:     #eeebe4;
+  --bg3:     #e5e1d8;
+  --card-bg: #f1eee8;
+  --card-bg2:#eae6de;
+  --accent:  #2a5346;   /* deep pine — the one colour on the page */
+  --accent2: #3f6a5b;
+  --text:    #17150f;
+  --white:   #17150f;
+  --muted:   #66625a;
+  --faint:   #d0ccc3;
+  --blush:   #d0ccc3;
+  --sage:    #2a5346;
+  --navyL:   #d0ccc3;
+  --blue:    #2a5346;
   --yellow:  #e9e4d9;   /* kept for theme compat; no longer a highlighter */
   --sticky:  #ede9e0;
   --green:   #2f5d50;
@@ -147,9 +147,9 @@ body.menu-open .nav-burger span:nth-child(3) { transform:translateY(-6px) rotate
   border-bottom:1px solid var(--faint);
 }
 .mobile-menu .mm-cv { border-bottom:none; margin-top:.75rem; color:var(--accent); }
-/* Above the phone breakpoint the real nav links are visible, so the
-   overlay must not be reachable by tab or by a stale .open class. */
-@media(min-width:621px){ .mobile-menu { display:none; } }
+/* The overlay is never shown — the nav links are visible at every width —
+   so it must not be reachable by tab or by a stale .open class. */
+.mobile-menu { display:none; }
 
 /* ── HERO ─────────────────────────────── */
 /* A page header, not a landing screen: no 100dvh, no entrance animation,
@@ -159,7 +159,6 @@ body.menu-open .nav-burger span:nth-child(3) { transform:translateY(-6px) rotate
   padding:calc(var(--nav-h) + clamp(4rem,10vw,7rem))
           clamp(1.5rem,5vw,3.5rem) clamp(3rem,6vw,4.5rem)
           clamp(1.5rem,5vw,6rem);
-  border-bottom:1px solid var(--faint);
 }
 .hero-inner { position:relative; max-width:900px; }
 .hero-kicker { display:block; margin-bottom:1rem; }
@@ -222,6 +221,7 @@ h1.hero-name {
 #work, #ai-work {
   padding:clamp(3.5rem,7vw,5.5rem) clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,5vw,6rem);
   position:relative;
+  border-top:1px solid var(--faint);
 }
 
 /* ── INDEPENDENT AI PROJECTS ──────────────
@@ -273,9 +273,9 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
 .proj-img {
   position:relative; margin:0 0 1rem;
   aspect-ratio:3/2; overflow:hidden;
-  background:var(--bg3); border:1px solid var(--faint);
+  background:var(--card-bg); border:1px solid var(--faint); padding:.45rem;
 }
-.proj-img img { width:100%; height:100%; object-fit:cover; }
+.proj-img img { width:100%; height:100%; object-fit:cover; outline:1px solid var(--faint); }
 .proj-img.ph { display:flex; align-items:center; justify-content:center; }
 .proj-img.ph span {
   font-size:2rem; color:var(--muted); font-weight:600; user-select:none;
@@ -377,11 +377,11 @@ body.editing .edu-add { display:block; }
 /* The photo was taped and tilted inside a polaroid frame. Plain now. */
 .photo-wrap {
   width:100%; aspect-ratio:3/4;
-  background:var(--bg3); border:1px solid var(--faint);
+  background:var(--card-bg); border:1px solid var(--faint);
   overflow:hidden; position:relative;
-  transform:none; box-shadow:none; padding:0;
+  transform:none; box-shadow:none; padding:.45rem;
 }
-.photo-wrap img { width:100%; height:100%; object-fit:cover; }
+.photo-wrap img { width:100%; height:100%; object-fit:cover; outline:1px solid var(--faint); }
 .photo-ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.85rem; }
 .photo-ph-cross { display:none; }
 .photo-ph-lbl { font-size:.85rem; color:var(--muted); text-align:center; line-height:1.6; }
@@ -410,7 +410,7 @@ body.editing .edu-add { display:block; }
 }
 .contact-h2 .dim { display:inline; font-style:italic; color:var(--accent); background:none; padding:0; transform:none; box-shadow:none; }
 .channels { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-bottom:2.5rem; }
-.ch { background:none; padding:0; display:block; border:none; box-shadow:none; }
+.ch { background:none; padding:0 0 0 1.25rem; display:block; border:none; border-left:1px solid var(--faint); box-shadow:none; }
 .ch-lbl { margin-bottom:.4rem; }
 .ch-val { font-family:var(--fd); font-size:1.2rem; color:var(--text); margin-bottom:.2rem; overflow-wrap:anywhere; }
 a.ch:hover .ch-val { color:var(--accent); }
@@ -427,7 +427,7 @@ a.ch:hover .ch-val { color:var(--accent); }
 /* ── CASE STUDY (design-doc page) ───────
    Lived in a modal once; it's real pages now (see .sh-page below). */
 .sh-hero { position:relative; height:auto; background:none; flex-shrink:0; overflow:visible; border-bottom:1px solid var(--faint); padding-bottom:1.5rem; }
-.sh-hero img { width:100%; height:clamp(200px,32vh,380px); object-fit:cover; background:var(--bg3); }
+.sh-hero img { width:100%; height:clamp(200px,32vh,380px); object-fit:cover; background:var(--bg3); border:1px solid var(--faint); }
 .sh-hero-ph { width:100%; height:clamp(200px,32vh,380px); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:2rem; color:var(--muted); background:var(--bg3); }
 /* The scrim existed to float a title over the image. The title sits under
    it now, so there is nothing to scrim. */
@@ -439,7 +439,7 @@ a.ch:hover .ch-val { color:var(--accent); }
    "Lead Designer & Producer", so let them reflow 4 → 3 → 2 → 1 on their
    own instead of stepping through breakpoints. */
 .sh-facts { background:none; border-bottom:1px solid var(--faint); display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); padding:1.25rem clamp(1.5rem,4vw,2.5rem) 1.5rem; gap:1rem 2rem; }
-.sh-facts > div { position:relative; padding-left:0; }
+.sh-facts > div { position:relative; padding-left:1rem; border-left:1px solid var(--faint); }
 .sh-fact-lbl { margin-bottom:.25rem; }
 .sh-fact-val { font-family:var(--fd); font-weight:500; font-size:1.1rem; color:var(--text); }
 .sh-content { padding:clamp(2.25rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem); display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:3rem; align-items:start; }
@@ -472,10 +472,10 @@ a.ch:hover .ch-val { color:var(--accent); }
 .sh-award-icon { display:none; }
 .sh-award-lbl { margin-bottom:.15rem; }
 .sh-award-val { font-family:var(--fd); font-weight:500; font-size:1.15rem; color:var(--text); }
-.sh-gallery { margin-top:1rem; position:relative; overflow:hidden; border:1px solid var(--faint); }
+.sh-gallery { margin-top:1rem; position:relative; overflow:hidden; border:1px solid var(--faint); padding:.45rem; background:var(--card-bg); }
 .sh-gal-featured { width:100%; aspect-ratio:16/9; position:relative; overflow:hidden; background:var(--bg3); cursor:zoom-in; }
-.sh-gal-featured img { width:100%; height:100%; object-fit:cover; display:block; }
-.sh-gal-hint { position:absolute; bottom:.7rem; right:.7rem; background:var(--bg); border:1px solid var(--faint); padding:.25rem .55rem; font-size:.8rem; color:var(--muted); pointer-events:none; display:flex; align-items:center; gap:.35rem; }
+.sh-gal-featured img { width:100%; height:100%; object-fit:cover; display:block; outline:1px solid var(--faint); }
+.sh-gal-hint { position:absolute; bottom:1.1rem; right:1.1rem; background:var(--bg); border:1px solid var(--faint); padding:.25rem .55rem; font-size:.8rem; color:var(--muted); pointer-events:none; display:flex; align-items:center; gap:.35rem; }
 .sh-gal-ph { aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6rem; background:var(--bg3); }
 .sh-gal-ph span { font-size:.85rem; color:var(--muted); }
 .sh-gal-cap { display:none; }
@@ -762,7 +762,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-back:hover { border-bottom-color:var(--text); }
 .dl-d-title { font-family:var(--fd); font-weight:500; font-size:clamp(2rem,3.8vw,2.8rem); letter-spacing:-.015em; line-height:1.08; color:var(--text); margin:.5rem 0 .75rem; }
 .dl-d-sum { font-size:1.02rem; line-height:1.75; color:var(--muted); max-width:var(--measure); margin-bottom:1.5rem; }
-.dl-d-hero { width:100%; border:1px solid var(--faint); overflow:hidden; margin-bottom:2rem; background:var(--bg3); box-shadow:none; }
+.dl-d-hero { width:100%; border:1px solid var(--faint); overflow:hidden; margin-bottom:2rem; background:var(--card-bg); padding:.45rem; box-shadow:none; }
 .dl-d-hero img, .dl-d-hero video { width:100%; display:block; }
 .dl-share {
   font-size:.88rem; background:none; border:none; border-bottom:1px solid var(--faint); color:var(--text);
@@ -785,7 +785,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-rule { height:0; border-top:1px solid var(--faint); margin:2rem 0; }
 .dl-blk-tags { margin:1.25rem 0; }
 .dl-blk-tags .dl-chips { margin-bottom:0; }
-.dl-blk-fig { border:1px solid var(--faint); overflow:hidden; background:var(--bg3); box-shadow:none; }
+.dl-blk-fig { border:1px solid var(--faint); overflow:hidden; background:var(--card-bg); padding:.45rem; box-shadow:none; }
 .dl-blk-fig img, .dl-blk-fig video { width:100%; display:block; }
 .dl-cap { font-family:var(--fd); font-style:italic; font-size:.95rem; color:var(--muted); margin-top:.5rem; line-height:1.5; }
 .dl-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
@@ -998,13 +998,12 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 .dl-top-actions { display:flex; gap:1rem; flex-wrap:wrap; }
 .dl-top-actions .dl-share { margin-left:0; }
 .proj-back {
-  position:fixed; left:clamp(.75rem,2vw,1.5rem); top:calc(var(--nav-h) + 20px); z-index:60;
-  font-size:.88rem; color:var(--muted);
-  background:var(--bg); border:none; border-bottom:1px solid var(--faint);
-  padding:0 0 .1rem; box-shadow:none; text-decoration:none;
+  display:block; width:min(920px, 100% - clamp(1.5rem,6vw,3rem));
+  margin:calc(var(--nav-h) + 1.5rem) auto 0;
+  font-size:.95rem; color:var(--accent); text-decoration:none;
 }
-.proj-back:hover { color:var(--text); border-bottom-color:var(--text); }
-/* .proj-back is hidden below the `wide` breakpoint — see RESPONSIVE. */
+.proj-back:hover { color:var(--text); }
+.proj-back + .sh-page { margin-top:1rem; }
 
 #cs-edit-notice {
   position:sticky; top:0; z-index:50;
@@ -1045,7 +1044,6 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 
 /* ── wide ─────────────────────────────── */
 @media(max-width:1100px){
-  .proj-back { display:none; }   /* the mobile menu covers back-navigation */
   .sh-content { grid-template-columns:minmax(0,1fr) 190px; gap:2.25rem; }
 }
 
@@ -1053,7 +1051,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 @media(max-width:900px){
   .projects { grid-template-columns:1fr; }
   #about { grid-template-columns:1fr; }
-  .about-right { position:static; order:-1; max-width:300px; }
+  .about-right { position:static; max-width:300px; }
   .photo-wrap { aspect-ratio:4/3; max-height:320px; }
   .channels { grid-template-columns:1fr; gap:1.5rem; }
   .sh-content { grid-template-columns:1fr; gap:0; }
@@ -1103,19 +1101,18 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 @media(max-width:620px){
   :root { --nav-h:52px; }
 
-  /* Work / About / Contact used to just vanish here with nothing to
-     replace them, stranding every section but the hero. */
-  .nav-links a:not(.nav-cv) { display:none; }
-  .nav-burger { display:flex; }
-  .nav-logo { margin-right:auto; }
-  .nav-links { margin-right:.75rem; }
+  /* The same five links as the desktop bar, sized to fit one row at
+     320px. --nav-h stays fixed because navH() reads it for scroll offsets. */
+  #nav { padding:0 1rem; }
+  .nav-logo { font-size:1rem; }
+  .nav-links { gap:.7rem; }
+  .nav-links a { font-size:.82rem; }
 
   .hero-btns { flex-wrap:wrap; }
 
   /* Comfortable touch targets. */
-  .nav-links a, .sh-nav-btn, .ch, .btn { min-height:44px; display:flex; align-items:center; }
+  .nav-links a, .sh-nav-btn, .btn { min-height:44px; display:flex; align-items:center; }
   .nav-links a { justify-content:center; }
-  .ch { display:block; }
 
   /* ── Editor on a phone ──────────────────
      16px is the threshold below which iOS Safari zooms the viewport on
@@ -1149,7 +1146,7 @@ body.editing .project[data-custom-card] .card-del-btn { display:block; }
 
 /* ── small ─────────────────────────────── */
 @media(max-width:420px){
-  .nav-links { gap:1rem; }
+  .nav-links { gap:.55rem; }
   .sh-facts { padding-left:1.1rem; padding-right:1.1rem; }
   .sh-nav { flex-direction:column; align-items:flex-start; gap:.75rem; }
 }

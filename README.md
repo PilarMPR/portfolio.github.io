@@ -248,7 +248,8 @@ Two things worth knowing if you change the layout:
   of step with it. It is deliberately **not** a theme variable — `applyTheme()`
   writes theme vars onto `documentElement.style`, which would override it.
 - The mobile menu's markup is static in all eight pages rather than injected
-  by script. `buildPublishHTML()` serializes the live DOM, so anything the
+  by script — and since the editorial layout it is dormant: the same five nav
+  links show at every width, so the hamburger and its overlay never appear. `buildPublishHTML()` serializes the live DOM, so anything the
   script adds would be baked into the published page and then added again on
   the next load. Any new UI state class needs clearing there too.
 

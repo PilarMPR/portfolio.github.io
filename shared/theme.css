@@ -4,26 +4,26 @@
    and both declare :root, so that link order is what makes
    these win — keep it. */
 :root {
-  --bg: #f7f5f1;
-  --bg2: #ebe9e5;
-  --bg3: #deddd9;
-  --card-bg: #f0eeea;
-  --card-bg2: #e6e4e0;
-  --text: #1c1a17;
-  --white: #1c1a17;
-  --muted: #74726e;
-  --faint: #c6c4c1;
-  --accent: #2f5d50;
-  --accent2: #446d62;
-  --blue: #2f5d50;
-  --yellow: #e9e4d9;
-  --sticky: #ebe6dc;
-  --green: #2f5d50;
-  --grid: rgba(28,26,23,0.05);
-  --grid2: rgba(28,26,23,0.085);
-  --accent-rgb: 47,93,80;
-  --text-rgb: 28,26,23;
-  --yellow-rgb: 233,228,217;
+  --bg: #f6f4ef;
+  --bg2: #eae8e3;
+  --bg3: #dddcd7;
+  --card-bg: #efede8;
+  --card-bg2: #e5e3de;
+  --text: #17150f;
+  --white: #17150f;
+  --muted: #706e69;
+  --faint: #c5c3bf;
+  --accent: #2a5346;
+  --accent2: #3f6459;
+  --blue: #2a5346;
+  --yellow: #e8e3d8;
+  --sticky: #eae5db;
+  --green: #2a5346;
+  --grid: rgba(23,21,15,0.05);
+  --grid2: rgba(23,21,15,0.085);
+  --accent-rgb: 42,83,70;
+  --text-rgb: 23,21,15;
+  --yellow-rgb: 232,227,216;
   --fd: 'Newsreader', Georgia, serif;
   --fb: 'Source Sans 3', sans-serif;
 }

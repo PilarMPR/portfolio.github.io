@@ -1161,3 +1161,46 @@ it last saved until **↺ Reset to default** is pressed in the Design tab.
   visible flaw on the landing page.
 - The AI cards' 3:2 crop cuts the TagOut screenshot's caption; re-cropped card
   art would suit the new grid better. Image content, not ours.
+
+---
+
+## 2026-09-18 · SESSION · Same page on the phone and the desk; plates and rules
+
+**Why.** "Embellécelo con tonos serios … la app móvil y la web han de ser
+idénticas." Two asks: finish the editorial look with more polish, and stop the
+phone being a different page.
+
+**Identical.** Three things used to differ below the breakpoints, and none of
+them does now. The nav showed a hamburger and hid four of its five links — the
+same five links now sit in one row at every width, sized in the phone block so
+they fit a 320px bar (measured: one row, no overflow, burger `display:none`, at
+320/360/390/768/1440 on both page types). `--nav-h` stays fixed because `navH()`
+reads it for scroll offsets, so the bar shrinks its type rather than wrapping.
+The About column (photo, skills) jumped above the heading with `order:-1` — it
+follows the text now, as on the desk. And the case-study back link was
+`position:fixed` and hidden under 1100px — it is in the flow above `.sh-page` at
+every width. The menu markup and its `site.js` handlers stay (R3 sentinels are
+untouched, and nothing there can throw); the overlay is simply `display:none`.
+
+**Polish, serious.** Palette a notch deeper — paper `#f6f4ef`, ink `#17150f`,
+pine `#2a5346` — in the preset, `theme.css` (regenerated from `computeVars()`)
+and the `:root` fallback alike. Every figure sits on a paper mat inside a
+hairline with the image outlined, like a print plate: project cards, the
+portrait, the case-study gallery and hero, dev-log heroes and figures. Contact
+channels and the facts row are columns separated by hairlines. Each top-level
+section opens with one rule; the hero's bottom rule went, or `#work` would have
+had two. All of it is the same rule at every width — that is the point.
+
+R7: `var()` 423 → 427, hex unchanged at 63. README notes the dormant menu.
+
+**Verified.** `checks.sh` exits 0. 104 Chromium assertions across the eight
+pages green (contract, sentinels, warm paper, both faces loaded per
+`document.fonts.check()`, `edChrome()` idempotent, token gate, one webfont
+stylesheet, no errors, no 4xx). Nav measured at five widths as above. Mobile at
+390: no overflow, nothing under 12px.
+
+**Not verified.** `smoke.sh` skips (no `gjs`); Safari/Firefox untested; no
+publish through `ghPublish()`.
+
+**Open.** OPT-22/23/24 stand. The hamburger code path in `site.js` is now dead
+weight — removing it is a candidate, not done (R10 in spirit: not asked).

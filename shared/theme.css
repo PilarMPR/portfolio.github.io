@@ -13,15 +13,15 @@
   --white: #17150f;
   --muted: #706e69;
   --faint: #c5c3bf;
-  --accent: #2a5346;
-  --accent2: #3f6459;
+  --accent: #17150F;
+  --accent2: #2e2c27;
   --blue: #2a5346;
   --yellow: #e8e3d8;
   --sticky: #eae5db;
   --green: #2a5346;
   --grid: rgba(23,21,15,0.05);
   --grid2: rgba(23,21,15,0.085);
-  --accent-rgb: 42,83,70;
+  --accent-rgb: 23,21,15;
   --text-rgb: 23,21,15;
   --yellow-rgb: 232,227,216;
   --fd: 'Newsreader', Georgia, serif;

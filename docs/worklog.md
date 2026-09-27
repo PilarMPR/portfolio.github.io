@@ -1204,3 +1204,62 @@ publish through `ghPublish()`.
 
 **Open.** OPT-22/23/24 stand. The hamburger code path in `site.js` is now dead
 weight — removing it is a candidate, not done (R10 in spirit: not asked).
+
+---
+
+## 2026-09-27 · SESSION · Titles as fields; sections move, hide and come back
+
+**Why.** "I need in the edit mode to be able to edit titles such as Work log, so
+I can choose what goes in italics or what I write. And in edit mode I also need
+to be able to delete sections and reorganize them."
+
+**Titles.** The two-line headings (`#work`, `#ai-work`, `#about`, `#contact`),
+both `.slabel`s and the skills-box title are `data-ed` fields now
+(`work-title`, `ai-title`, `about-title`, `contact-title`, `about-label`,
+`contact-label`, `skills-title`). The contact heading's old `contact-line2`
+field folds into `contact-title`; an unpublished edit of it is carried across
+once in `loadSaved()`. The italic-accent flourish is styled on `em`/`i` as well
+as the authored `span.log`, and the Work/AI headings were rewritten
+`<span class="log">` → `<em>` — markup, not prose, and the format bar's Italic
+now toggles it cleanly instead of fighting a class. Enter in a heading inserts
+`<br>` (the browser default splits an h2 into a `<div>`); in a one-line label it
+ends the edit. The format bar also appears on case-study prose, and the small
+`.sh-sec-lbl` label is editable, keyed `sec{i}/lbl` by name so the numbered keys
+under it did not move.
+
+**Sections.** Every section row in the panel (Hero excepted) has ▲ ▼ 🗑, and
+each section wears the same controls as a pill while editing —
+`decorateSections()`, stripped on exit, on publish and before `__added__` is
+stored. Remove hides (`class="sec-removed" hidden`) and the row keeps
+↩ Restore; a publish is a DOM snapshot, so a real removal would have no way
+back but git. Nav and mobile-menu links hide and reorder with the sections
+(`syncNavLinks()`). Landing order/removals live in `__order__` / `__removed__`;
+case studies in `__secOrder__` / `__secRemoved__` keyed by new `data-sec` ids,
+replayed *before* the positional field keys are restored. Added blocks move
+among themselves; their 🗑 still deletes for real, now behind a confirm. The
+`SECTIONS` registry gained the missing `ai-work` row.
+
+R7: `var()` 427 → 441, hex 63 unchanged (one crept into the panel CSS and was
+rewritten as `:not(:disabled):hover`). R11: 42 → 52 citations, all resolving.
+
+**Verified.** `checks.sh` exits 0. A Playwright/Chromium probe drove the real
+thing with dispatched events, 63 assertions green: all eight pages load, open
+and close the editor without a JS error; pills appear and are stripped; move
+via pill and via panel, remove via pill, restore via panel, nav follows;
+Italic on "Work" writes `<i>` with the accent, Italic on "Log." removes the
+`<em>`; Enter in the heading gives `<br>` with no `<div>`; a case-study label
+and heading edited, the section moved to the top, another removed, and after a
+reload every edit sits on the section it was typed into; a pre-feature draft
+without layout lists leaves the file's order alone; publish output carries no
+pill, no panel, no `contenteditable="true"`, keeps the hidden section and the
+hidden nav item; `contact-line2` migrates; no horizontal overflow at 390px.
+
+**Not verified.** `smoke.sh` skips (no `gjs`); Safari and Firefox untested
+(`insertLineBreak` and the `<i>` from `execCommand('italic')` are Chromium
+observations); nothing published through `ghPublish()`; a drag gesture — there
+is none, moves are buttons only.
+
+**Open.** Project pages still link to `../index.html#about` etc. statically; a
+removed landing section leaves those links landing at the top of the page.
+Two `insertTextBlock()` calls within the same millisecond share an id
+(`'added-' + Date.now()`) — pre-existing, unreachable by hand.

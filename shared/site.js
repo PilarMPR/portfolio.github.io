@@ -194,13 +194,17 @@ document.addEventListener('keydown', e => {
 let editing = false, logoClicks = 0, logoTimer = null;
 let focusedSectionEl = null;
 
-// Section registry — defines what's in the panel
+// Section registry — names and icons for the panel. Order comes from the
+// DOM, not from here: sections can be moved (see SECTION LAYOUT), and a
+// section this list doesn't know is still listed, under its id.
 const SECTIONS = [
   { id:'hero',    icon:'🏠', name:'Hero' },
   { id:'work',    icon:'🎮', name:'Work' },
+  { id:'ai-work', icon:'🤖', name:'Independent AI' },
   { id:'about',   icon:'👤', name:'About' },
   { id:'contact', icon:'✉',  name:'Contact' },
 ];
+const secMeta = id => SECTIONS.find(s => s.id === id) || { id, icon:'§', name:id };
 
 /* Alt + three quick clicks on the logo open the editor. The modifier is what
    does the hiding: an unmodified click is never intercepted, so the logo stays
@@ -552,6 +556,8 @@ function toggleEdit() {
   });
 
   if (IS_PROJECT) { editing ? enableCaseEditing() : disableCaseEditing(); }
+  // The ↑ ↓ 🗑 pill on every section. Strips itself when leaving.
+  decorateSections();
 
   if (editing) {
     buildSectionList();
@@ -594,19 +600,29 @@ let PROJECTS = [
 function buildSectionList() {
   const list = document.getElementById('ep-section-list');
   if (!list) return;
+  // The in-page pills mirror this list — first/last arrows, added blocks,
+  // removed sections — so they are rebuilt whenever it is.
+  decorateSections();
   list.innerHTML = '';
   if (IS_PROJECT) return buildProjectSectionList(list);
 
-  // Fixed sections — each expands to show its editable fields
-  SECTIONS.forEach(sec => {
-    const item = makeSectionItem(sec.id, sec.icon, sec.name, false);
+  // One row per section, in page order — each expands to its editable
+  // fields and carries the controls that move or remove it. The hero is
+  // pinned, so it gets neither. Added blocks are listed where their
+  // container sits, one row each, moved among themselves.
+  const units = secUnits();
+  const addSection = (el, i) => {
+    const meta = secMeta(el.id);
+    const pinned = el.id === SEC_PINNED;
+    const item = makeSectionItem(el.id, meta.icon, meta.name, pinned ? null : {
+      kind:'sec', removed: secIsRemoved(el), first: i <= 0, last: i === units.length - 1 });
     list.appendChild(item);
 
     const sub = document.createElement('div');
-    sub.id = 'ep-sub-' + sec.id;
+    sub.id = 'ep-sub-' + el.id;
     sub.className = 'ep-sub';
-
-    if (sec.id === 'work') {
+    appendFieldItems(sub, el.querySelectorAll('[data-ed]'));
+    if (el.id === 'work') {
       PROJECTS.forEach(p => {
         const pi = document.createElement('div');
         pi.className = 'ep-section-item ep-sub-item';
@@ -614,25 +630,28 @@ function buildSectionList() {
         pi.addEventListener('click', () => openCaseEdit(p.id));
         sub.appendChild(pi);
       });
-    } else {
-      const el = document.getElementById(sec.id);
-      if (el) appendFieldItems(sub, el.querySelectorAll('[data-ed]'));
     }
     list.appendChild(sub);
-  });
+  };
+  const addBlocks = host => {
+    const blocks = [...host.querySelectorAll('.added-block')];
+    blocks.forEach((block, i) => {
+      const id = block.dataset.blockId || ('added-' + i);
+      block.dataset.blockId = id;
+      const h = block.querySelector('h3');
+      const name = h ? (h.textContent.trim().slice(0,22) || 'Custom block') : 'Custom block';
+      list.appendChild(makeSectionItem(id, '📝', name, { kind:'block', first: i === 0, last: i === blocks.length - 1 }));
+      const sub = document.createElement('div');
+      sub.id = 'ep-sub-' + id;
+      sub.className = 'ep-sub';
+      appendFieldItems(sub, block.querySelectorAll('[data-ed]'));
+      list.appendChild(sub);
+    });
+  };
 
-  document.querySelectorAll('.added-block').forEach((block, i) => {
-    const id = block.dataset.blockId || ('added-' + i);
-    block.dataset.blockId = id;
-    const h = block.querySelector('h3');
-    const name = h ? (h.textContent.trim().slice(0,22) || 'Custom block') : 'Custom block';
-    list.appendChild(makeSectionItem(id, '📝', name, true));
-    const sub = document.createElement('div');
-    sub.id = 'ep-sub-' + id;
-    sub.className = 'ep-sub';
-    appendFieldItems(sub, block.querySelectorAll('[data-ed]'));
-    list.appendChild(sub);
-  });
+  const hero = document.getElementById(SEC_PINNED);
+  if (hero) addSection(hero, -1);
+  units.forEach((el, i) => el.id === 'added-blocks' ? addBlocks(el) : addSection(el, i));
 
   const area = document.getElementById('ep-fields-area');
   if (area) area.style.display = 'none';
@@ -647,18 +666,30 @@ function buildProjectSectionList(list) {
   list.appendChild(head);
 
   if (!caseView) return;
-  const secs = [...caseView.querySelectorAll('.sh-sec')];
+  ensureSecIds();
+  const secs = csSecs();
   if (!secs.length) { list.insertAdjacentHTML('beforeend', '<div class="ep-note">No sections on this page.</div>'); return; }
 
-  secs.forEach(sec => {
+  secs.forEach((sec, i) => {
     const lbl = sec.querySelector('.sh-sec-lbl')?.textContent.trim() || '';
     const h   = sec.querySelector('h3')?.textContent.trim() || lbl || 'Section';
+    const id  = sec.dataset.sec;
+    const off = secIsRemoved(sec);
     const item = document.createElement('div');
-    item.className = 'ep-section-item';
-    item.innerHTML = `<span class="ep-section-icon">§</span><span class="ep-section-name">${h}</span><span class="ep-sub-go">Go</span>`;
-    item.addEventListener('click', () => {
+    item.className = 'ep-section-item' + (off ? ' removed' : '');
+    item.innerHTML =
+      `<span class="ep-section-icon">§</span><span class="ep-section-name">${dlEsc(h)}</span>` +
+      `<div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">` +
+        `<button class="ep-arr" title="Move up" ${i === 0 ? 'disabled' : ''} onclick="csSecMove('${id}',-1,event)">▲</button>` +
+        `<button class="ep-arr" title="Move down" ${i === secs.length - 1 ? 'disabled' : ''} onclick="csSecMove('${id}',1,event)">▼</button>` +
+        (off ? `<button class="ep-arr ep-restore" title="Put this section back" onclick="csSecRestore('${id}',event)">↩ Restore</button>`
+             : `<button class="ep-arr" title="Remove this section" onclick="csSecRemove('${id}',event)">🗑</button>`) +
+      `</div>`;
+    item.addEventListener('click', e => {
+      if (e.target.closest('.ep-arr') || off) return;
       document.querySelectorAll('.ep-focused-section').forEach(x => x.classList.remove('ep-focused-section'));
       sec.classList.add('ep-focused-section');
+      if (MQ_STACK.matches) setEditorSheet(false);
       sec.scrollIntoView({ behavior:'smooth', block:'center' });
     });
     list.appendChild(item);
@@ -750,17 +781,31 @@ function appendFieldItems(sub, fields) {
   });
 }
 
-function makeSectionItem(id, icon, name, deletable) {
+/* `ctl` is null for a pinned row, else { kind:'sec'|'block', removed,
+   first, last }: a section moves among the page's sections and is hidden
+   rather than deleted; an added block moves among its siblings and is
+   deleted outright, since it was made here and is stored nowhere else. */
+function makeSectionItem(id, icon, name, ctl) {
   const item = document.createElement('div');
-  item.className = 'ep-section-item';
+  item.className = 'ep-section-item' + (ctl?.removed ? ' removed' : '');
   item.dataset.sectionId = id;
 
   const chevron = `<span class="ep-chevron" style="font-size:.6rem;color:var(--muted);transition:transform .2s;display:inline-block;margin-left:auto">▾</span>`;
+  let buttons = '';
+  if (ctl) {
+    const mv = ctl.kind === 'block' ? 'blockMove' : 'secMove';
+    buttons =
+      `<button class="ep-arr" title="Move up" ${ctl.first ? 'disabled' : ''} onclick="${mv}('${id}',-1,event)">▲</button>` +
+      `<button class="ep-arr" title="Move down" ${ctl.last ? 'disabled' : ''} onclick="${mv}('${id}',1,event)">▼</button>` +
+      (ctl.kind === 'block' ? `<button class="ep-arr" title="Delete this block" onclick="deleteAddedBlock('${id}',event)">🗑</button>`
+       : ctl.removed        ? `<button class="ep-arr ep-restore" title="Put this section back" onclick="secRestore('${id}',event)">↩ Restore</button>`
+                            : `<button class="ep-arr" title="Remove this section" onclick="secRemove('${id}',event)">🗑</button>`);
+  }
   item.innerHTML = `
     <span class="ep-section-icon">${icon}</span>
-    <span class="ep-section-name">${name}</span>
+    <span class="ep-section-name">${dlEsc(name)}</span>
     <div class="ep-section-arrows" style="display:flex;align-items:center;gap:.35rem">
-      ${deletable ? `<button class="ep-arr" onclick="deleteAddedBlock('${id}',event)" title="Delete">🗑</button>` : ''}
+      ${buttons}
       ${chevron}
     </div>`;
 
@@ -769,7 +814,7 @@ function makeSectionItem(id, icon, name, deletable) {
     toggleSubItems(id, item);
     // Also scroll to section
     const el = document.getElementById(id) || document.querySelector(`[data-block-id="${id}"]`);
-    if (el) {
+    if (el && !secIsRemoved(el)) {          // a removed section has nowhere to scroll to
       document.querySelectorAll('.ep-focused-section').forEach(x => x.classList.remove('ep-focused-section'));
       el.classList.add('ep-focused-section');
       if (MQ_STACK.matches) setEditorSheet(false);
@@ -817,7 +862,14 @@ function openCaseEdit(id) {
 
    `.sh-aside` is its own region: the sidebar can be added to and pruned,
    so its widgets are keyed by their own id rather than by position. */
-const CS_EDITABLE = 'h2,h3,p,li,.sh-pull,.sh-widget-lbl,.sh-tool';
+const CS_EDITABLE = 'h2,h3,p,li,.sh-pull,.sh-widget-lbl,.sh-tool,.sh-sec-lbl';
+
+/* The small label above a section's heading ("Context", "How it works")
+   is keyed by name rather than position, so adding it to the editable set
+   did not shift every other key in the section by one and mis-file the
+   drafts already stored under the old numbering. */
+const isSecLabel = el => el.classList.contains('sh-sec-lbl');
+const secPeers = sec => [...sec.querySelectorAll(CS_EDITABLE)].filter(n => !isSecLabel(n));
 
 function csFieldKey(el) {
   const widget = el.closest('.sh-widget');
@@ -829,11 +881,11 @@ function csFieldKey(el) {
   const sec = el.closest('.sh-sec');
   if (sec) {
     const secs = [...caseView.querySelectorAll('.sh-sec')];
-    const peers = [...sec.querySelectorAll(CS_EDITABLE)];
-    return `sec${secs.indexOf(sec)}/${peers.indexOf(el)}`;
+    if (isSecLabel(el)) return `sec${secs.indexOf(sec)}/lbl`;
+    return `sec${secs.indexOf(sec)}/${secPeers(sec).indexOf(el)}`;
   }
   const loose = [...caseView.querySelectorAll(CS_EDITABLE)]
-    .filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget'));
+    .filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget') && !isSecLabel(n));
   return `page/${loose.indexOf(el)}`;
 }
 
@@ -851,7 +903,8 @@ function ensureWidgetIds() {
 function csFields() {
   if (!caseView) return [];
   return [...caseView.querySelectorAll(CS_EDITABLE)]
-    .filter(el => !el.closest('.sh-facts') && !el.closest('.sh-nav') && !el.closest('#dl-wrap'));
+    .filter(el => !el.closest('.sh-facts') && !el.closest('.sh-nav') && !el.closest('#dl-wrap')
+               && !(isSecLabel(el) && !el.closest('.sh-sec')));   // a label outside a section has no key
 }
 
 /* Make the case-study prose directly editable. */
@@ -859,7 +912,9 @@ function enableCaseEditing() {
   if (!caseView || caseView.dataset.editable) return;
   caseView.dataset.editable = '1';
   ensureWidgetIds();
+  ensureSecIds();
   decorateWidgets();
+  decorateSections();
 
   /* The dashed outline and focus highlight are pure CSS —
      `body.editing #case-view [contenteditable="true"]` in portfolio.css.
@@ -1028,7 +1083,7 @@ function decorateWidgets() {
 
 function stripWidgetControls(root) {
   const host = root || caseView;
-  host?.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del').forEach(n => n.remove());
+  host?.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del,.sec-tools').forEach(n => n.remove());
   host?.querySelectorAll('.is-blank').forEach(n => n.classList.remove('is-blank'));
 }
 
@@ -1077,6 +1132,12 @@ function saveCaseStudy(id) {
   // empty aside over a perfectly good one, which is the original bug.
   const aside = caseView.querySelector('.sh-aside');
   if (aside && aside.dataset.touched) data.__widgets__ = cleanAsideHTML(aside);
+
+  // Section order and removals. Field keys are positional, so the order
+  // is replayed *before* the fields on load — see loadSaved().
+  const secs = csSecs();
+  data.__secOrder__   = secs.map(s => s.dataset.sec);
+  data.__secRemoved__ = secs.filter(secIsRemoved).map(s => s.dataset.sec);
 
   data.__savedAt__ = Date.now();        // so a later publish can outrank it
   safeSet('pmpr_cs_fields_' + id, JSON.stringify(data));
@@ -1138,12 +1199,14 @@ function migrateCaseSnapshot(id) {
   const oldSecs  = [...old.querySelectorAll('.sh-sec')];
   liveSecs.forEach((sec, i) => {
     if (!oldSecs[i]) return;
-    const oldEls = [...oldSecs[i].querySelectorAll(CS_EDITABLE)];
-    [...sec.querySelectorAll(CS_EDITABLE)].forEach((el, j) => {
+    const oldEls = secPeers(oldSecs[i]);
+    secPeers(sec).forEach((el, j) => {
       if (oldEls[j]) data[`sec${i}/${j}`] = oldEls[j].innerHTML;
     });
+    const oldLbl = oldSecs[i].querySelector('.sh-sec-lbl');
+    if (oldLbl) data[`sec${i}/lbl`] = oldLbl.innerHTML;
   });
-  const oldLoose = pick(old).filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget'));
+  const oldLoose = pick(old).filter(n => !n.closest('.sh-sec') && !n.closest('.sh-widget') && !isSecLabel(n));
   oldLoose.forEach((el, i) => { data[`page/${i}`] = el.innerHTML; });
 
   // Drop the superseded blob only if the new one actually stored.
@@ -1154,9 +1217,247 @@ function migrateCaseSnapshot(id) {
 }
 
 function deleteAddedBlock(id, e) {
-  e.stopPropagation();
+  e?.preventDefault(); e?.stopPropagation();
   const block = document.querySelector(`[data-block-id="${id}"]`);
-  if (block) { block.remove(); autoSave(); buildSectionList(); }
+  if (!block) return;
+  const name = block.querySelector('h3')?.textContent.trim() || 'this block';
+  // Unlike a section, an added block exists only here — this is for keeps.
+  if (!confirm(`Delete "${name}"? Added blocks are not kept anywhere else.`)) return;
+  block.remove(); autoSave(); buildSectionList();
+}
+
+function blockMove(id, dir, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const block = document.querySelector(`.added-block[data-block-id="${id}"]`);
+  const sib = dir < 0 ? block?.previousElementSibling : block?.nextElementSibling;
+  if (!block || !sib) return;
+  dir < 0 ? sib.before(block) : sib.after(block);
+  decorateSections();
+  autoSave();
+  buildSectionList();
+  block.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+/* ─── SECTION LAYOUT ───────────────────────
+   Sections can be moved and taken off the page — from the panel, or from
+   the ↑ ↓ 🗑 pill each one wears while editing. On the landing page the
+   units are the top-level <section>s plus #added-blocks as one unit (its
+   blocks move among themselves); on a project page they are the .sh-sec
+   blocks of the case study.
+
+   "Remove" hides, it does not delete. A publish is a snapshot of the DOM,
+   so a section really removed would leave the file with no way back but
+   git history; a hidden one publishes as <section hidden class="sec-removed">
+   with its content intact, and the panel keeps a Restore button beside it.
+   The hero is pinned: the nav watches it to go solid, and nothing belongs
+   above it.
+
+   Layout is stored as two small lists next to the fields — `__order__` and
+   `__removed__` in pmpr_portfolio_v2, `__secOrder__` and `__secRemoved__`
+   per case study — and replayed at load before anything reads the DOM. */
+const SEC_PINNED  = 'hero';
+const SEC_REMOVED = 'sec-removed';
+
+const secIsRemoved = el => !!el && el.classList.contains(SEC_REMOVED);
+function secSetRemoved(el, off) {
+  el.classList.toggle(SEC_REMOVED, off);
+  el.hidden = off;                       // the class does the hiding (author CSS beats [hidden]); this says why
+  if (!el.className) el.removeAttribute('class');
+}
+
+/* Landing page: every body-level unit, in page order, hero included. */
+function secAll() {
+  return [...document.body.children].filter(el =>
+    (el.tagName === 'SECTION' && el.id) || el.id === 'added-blocks');
+}
+/* The ones that can move: not the hero, and not an empty block container. */
+function secUnits() {
+  return secAll().filter(el => el.id !== SEC_PINNED && !(el.id === 'added-blocks' && !el.children.length));
+}
+
+function secMove(id, dir, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = document.getElementById(id);
+  const units = secUnits();
+  const i = units.indexOf(el), j = i + dir;
+  if (i < 0 || j < 0 || j >= units.length) return;
+  dir < 0 ? units[j].before(el) : units[j].after(el);
+  secLayoutChanged(el);
+}
+
+function secRemove(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = document.getElementById(id);
+  if (!el || id === SEC_PINNED || secIsRemoved(el)) return;
+  if (!confirm(`Remove the ${secMeta(id).name} section from the page?\n\nNothing is deleted: it stays in the file, hidden, and Restore in the Sections tab brings it back.`)) return;
+  secSetRemoved(el, true);
+  secLayoutChanged();
+}
+
+function secRestore(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = document.getElementById(id);
+  if (!el) return;
+  secSetRemoved(el, false);
+  secLayoutChanged(el);
+}
+
+function secLayoutChanged(scrollTo) {
+  syncNavLinks();
+  decorateSections();
+  autoSave();
+  buildSectionList();
+  if (scrollTo) {
+    const top = scrollTo.getBoundingClientRect().top + window.scrollY - navH() - 24;
+    window.scrollTo({ top, behavior:'smooth' });
+  }
+}
+
+/* Replay a stored layout. Only lists that were actually saved are applied,
+   so a draft from before this existed leaves the file's own order alone. */
+function applySectionLayout(data) {
+  const all = secAll();
+  if (!all.length || !data) return;
+  if (Array.isArray(data.__order__) && data.__order__.length) {
+    const seq = data.__order__.map(id => document.getElementById(id)).filter(el => el && all.includes(el));
+    all.forEach(el => { if (!seq.includes(el)) seq.push(el); });      // a unit the draft never saw goes last
+    const hero = document.getElementById(SEC_PINNED);
+    if (hero && seq.includes(hero)) { seq.splice(seq.indexOf(hero), 1); seq.unshift(hero); }
+    const anchor = all[all.length - 1].nextSibling;
+    seq.forEach(el => document.body.insertBefore(el, anchor));
+  }
+  if (Array.isArray(data.__removed__)) {
+    all.forEach(el => secSetRemoved(el, el.id !== SEC_PINNED && data.__removed__.includes(el.id)));
+  }
+  syncNavLinks();
+}
+
+/* The header and the mobile menu are authored markup with one link per
+   section. Keep them honest: a removed section's link is hidden and the
+   links follow the section order. This is DOM, so it publishes with the
+   page — a visitor never sees a link to a section that isn't there. */
+function syncNavLinks() {
+  const order = secAll().map(el => el.id);
+  ['#nav .nav-links', '#mobile-menu'].forEach(sel => {
+    const host = document.querySelector(sel);
+    if (!host) return;
+    const rows = [...host.children].map(row => {
+      const a = row.matches('a') ? row : row.querySelector('a');
+      const m = /scrollToSection\('([^']+)'\)/.exec(a?.getAttribute('onclick') || '');
+      return { row, id: m ? m[1] : null };
+    }).filter(r => r.id && order.includes(r.id));
+    if (!rows.length) return;
+    rows.forEach(r => { r.row.hidden = secIsRemoved(document.getElementById(r.id)); });
+    const tail = rows[rows.length - 1].row.nextSibling;    // the CV link stays put
+    rows.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+        .forEach(r => host.insertBefore(r.row, tail));
+  });
+}
+
+/* Case-study sections. Ids like the widgets': positional on first load,
+   in the file after the next publish, stable from then on. */
+function ensureSecIds() {
+  csSecs().forEach((s, i) => { if (!s.dataset.sec) s.dataset.sec = 's' + i; });
+}
+function csSecs() {
+  return caseView ? [...caseView.querySelectorAll('.sh-sec')].filter(s => !s.closest('#dl-wrap')) : [];
+}
+function csSecById(id) { return csSecs().find(s => s.dataset.sec === id) || null; }
+
+function csSecMove(id, dir, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const secs = csSecs(), el = csSecById(id);
+  const i = secs.indexOf(el), j = i + dir;
+  if (i < 0 || j < 0 || j >= secs.length) return;
+  dir < 0 ? secs[j].before(el) : secs[j].after(el);
+  csLayoutChanged(el);
+}
+
+function csSecRemove(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = csSecById(id);
+  if (!el || secIsRemoved(el)) return;
+  const name = el.querySelector('h3')?.textContent.trim() || el.querySelector('.sh-sec-lbl')?.textContent.trim() || 'this section';
+  if (!confirm(`Remove "${name}" from the case study?\n\nNothing is deleted: it stays in the file, hidden, and Restore in the Sections tab brings it back.`)) return;
+  secSetRemoved(el, true);
+  csLayoutChanged();
+}
+
+function csSecRestore(id, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = csSecById(id);
+  if (!el) return;
+  secSetRemoved(el, false);
+  csLayoutChanged(el);
+}
+
+function csLayoutChanged(scrollTo) {
+  decorateSections();
+  saveCaseStudy(PAGE.id);
+  buildSectionList();
+  if (scrollTo) scrollTo.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function applyCsLayout(saved) {
+  const secs = csSecs();
+  if (!secs.length || !saved) return;
+  if (Array.isArray(saved.__secOrder__) && saved.__secOrder__.length) {
+    const seq = saved.__secOrder__.map(csSecById).filter(Boolean);
+    secs.forEach(s => { if (!seq.includes(s)) seq.push(s); });
+    const last = secs[secs.length - 1];
+    const parent = last.parentNode, anchor = last.nextSibling;
+    seq.forEach(s => parent.insertBefore(s, anchor));
+  }
+  if (Array.isArray(saved.__secRemoved__)) {
+    secs.forEach(s => secSetRemoved(s, saved.__secRemoved__.includes(s.dataset.sec)));
+  }
+}
+
+/* The in-page pill. Built on entry to edit mode and after every layout
+   change, stripped on exit and on publish — like the sidebar widget
+   tools, it must never reach a published file or a stored blob (autoSave
+   cleans #added-blocks before storing it). */
+function secToolsHTML(label, mv, rm, id, first, last) {
+  return `<div class="sec-tools" contenteditable="false">` +
+    `<span class="sec-tools-lbl">${dlEsc(label)}</span>` +
+    `<button type="button" title="Move up" ${first ? 'disabled' : ''} onclick="${mv}('${id}',-1,event)">↑</button>` +
+    `<button type="button" title="Move down" ${last ? 'disabled' : ''} onclick="${mv}('${id}',1,event)">↓</button>` +
+    `<button type="button" title="${mv === 'blockMove' ? 'Delete this block' : 'Remove this section'}" onclick="${rm}('${id}',event)">🗑</button>` +
+    `</div>`;
+}
+function stripSectionTools(root) {
+  (root || document).querySelectorAll('.sec-tools').forEach(n => n.remove());
+}
+function decorateSections() {
+  stripSectionTools();
+  if (!editing) return;
+  if (IS_PROJECT) {
+    const secs = csSecs();
+    secs.forEach((s, i) => {
+      if (secIsRemoved(s)) return;
+      const name = s.querySelector('.sh-sec-lbl')?.textContent.trim() || s.querySelector('h3')?.textContent.trim() || 'Section';
+      s.insertAdjacentHTML('afterbegin', secToolsHTML(name, 'csSecMove', 'csSecRemove', s.dataset.sec, i === 0, i === secs.length - 1));
+    });
+    return;
+  }
+  const units = secUnits();
+  units.forEach((el, i) => {
+    if (el.id === 'added-blocks') {
+      const blocks = [...el.querySelectorAll('.added-block')];
+      blocks.forEach((b, k) => b.insertAdjacentHTML('afterbegin',
+        secToolsHTML(b.querySelector('h3')?.textContent.trim() || 'Block', 'blockMove', 'deleteAddedBlock', b.dataset.blockId, k === 0, k === blocks.length - 1)));
+      return;
+    }
+    if (secIsRemoved(el)) return;
+    el.insertAdjacentHTML('afterbegin', secToolsHTML(secMeta(el.id).name, 'secMove', 'secRemove', el.id, i === 0, i === units.length - 1));
+  });
+}
+function addedBlocksHTML() {
+  const host = document.getElementById('added-blocks');
+  if (!host) return '';
+  const c = host.cloneNode(true);
+  stripSectionTools(c);
+  return c.innerHTML;
 }
 
 /* ─── FORMATTING TOOLBAR ───────────────── */
@@ -1187,7 +1488,7 @@ document.addEventListener('mouseup', e => {
   if (e.target.closest('#fmt-bar')) return;
   setTimeout(() => {
     const sel = window.getSelection();
-    if (sel && sel.toString().length > 0 && e.target.closest('[data-ed],[data-rich]')) {
+    if (sel && sel.toString().length > 0 && e.target.closest('[data-ed],[data-rich],#case-view [contenteditable="true"]')) {
       showFmtBar(e.clientX, e.clientY);
     } else {
       hideFmtBar();
@@ -1196,6 +1497,19 @@ document.addEventListener('mouseup', e => {
 });
 document.addEventListener('mousedown', e => {
   if (!e.target.closest('#fmt-bar')) hideFmtBar();
+});
+
+/* Enter inside a heading breaks the line instead of opening a new block:
+   "Work / Log." is one h2 with a <br> in it, and the browser default would
+   split it into a <div> the stylesheet knows nothing about. In a one-line
+   label Enter just finishes the edit. Shift+Enter is left to the browser. */
+const ED_ONE_LINE = '.slabel,.sh-sec-lbl,.sh-widget-lbl,.skills-box-title,.sh-tool,.tag,.proj-num';
+document.addEventListener('keydown', e => {
+  if (!editing || e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+  const el = e.target.closest?.('[contenteditable="true"]');
+  if (!el) return;
+  if (/^H[1-4]$/.test(el.tagName)) { e.preventDefault(); document.execCommand('insertLineBreak'); }
+  else if (el.matches(ED_ONE_LINE)) { e.preventDefault(); el.blur(); }
 });
 
 /* ─── ADD BLOCKS ───────────────────────── */
@@ -1498,8 +1812,10 @@ function autoSave() {
     const key = el.dataset.ed || 'field_' + i;
     data[key] = el.innerHTML;
   });
-  data['__added__'] = document.getElementById('added-blocks')?.innerHTML || '';
+  data['__added__'] = addedBlocksHTML();
   data['__edu__'] = eduList()?.innerHTML || '';
+  data['__order__'] = secAll().map(el => el.id);
+  data['__removed__'] = secAll().filter(secIsRemoved).map(el => el.id);
   // Before serializing, not after: outerHTML is what gets stored, so the href
   // has to already match the link field or the link dies on the next reload.
   syncCardLinks();
@@ -1566,9 +1882,13 @@ function showDraftNotice(key) {
 
 function loadSaved() {
   if (IS_PROJECT) {
+    ensureSecIds();
     const saved = loadSavedCaseContent(PAGE.id);
     if (!saved || !caseView) return;
     if (draftIsStale(saved)) { parkStaleDraft('pmpr_cs_fields_' + PAGE.id, saved); return; }
+    // Section order first of all: field keys are positional, so the
+    // sections have to be where they were when the fields were saved.
+    applyCsLayout(saved);
     // Restore the sidebar's own structure first, so the fields inside it
     // exist before their text is put back.
     const aside = caseView.querySelector('.sh-aside');
@@ -1611,12 +1931,27 @@ function loadSaved() {
       edu.querySelectorAll('[data-ed]').forEach(el => { el.contentEditable = String(!!editing); });
     }
 
+    // The contact heading used to expose only its second line as a field
+    // (`contact-line2`); the whole heading is one field now. Carry an
+    // unpublished edit of that line into it, once.
+    if (data['contact-title'] === undefined && data['contact-line2'] !== undefined) {
+      const h = document.querySelector('[data-ed="contact-title"]');
+      const dim = h?.querySelector('.dim');
+      if (dim) {
+        dim.innerHTML = data['contact-line2'];
+        data['contact-title'] = h.innerHTML;
+        delete data['contact-line2'];        // its text lives on inside contact-title
+        safeSet('pmpr_portfolio_v2', JSON.stringify(data));
+      }
+    }
+
     document.querySelectorAll('[data-ed]').forEach((el, i) => {
       const key = el.dataset.ed || 'field_' + i;
       if (data[key] !== undefined) el.innerHTML = data[key];
     });
     const added = document.getElementById('added-blocks');
     if (added && data['__added__']) added.innerHTML = data['__added__'];
+    applySectionLayout(data);
     if (data['__custom_cards__'] && data['__custom_cards__'].length) {
       const mainGrid = document.querySelector('.projects');
       data['__custom_cards__'].forEach(c => {
@@ -2065,7 +2400,7 @@ function buildPublishHTML(opts) {
   clone.querySelector('#case-view')?.removeAttribute('data-editable');
   // Sidebar edit controls are injected, never authored — they must not
   // reach the published file.
-  clone.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del').forEach(n => n.remove());
+  clone.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del,.sec-tools').forEach(n => n.remove());
   clone.querySelectorAll('.is-blank').forEach(el => {
     el.classList.remove('is-blank');
     if (!el.className) el.removeAttribute('class');

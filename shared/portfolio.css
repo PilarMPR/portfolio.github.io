@@ -254,9 +254,12 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   font-family:var(--fd); font-weight:500;
   font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
 }
-/* The second line of each heading is its own span ("Work" / "Log."):
-   italic, in the accent — the one flourish the headings get. */
-.work-head h2 span.log { font-style:italic; color:var(--accent); }
+/* The second line of each heading ("Work" / "Log.") is italic, in the
+   accent — the one flourish the headings get. It is whatever the heading
+   marks as emphasis: <em>, as authored, or the <i> the editor's Italic
+   button writes, so the author picks which words carry it. span.log is
+   the older authored form; pages published by an old browser still have it. */
+.work-head h2 :is(em, i, span.log) { font-style:italic; color:var(--accent); font-family:inherit; font-weight:inherit; }
 .work-head p {
   max-width:34ch; color:var(--muted); font-size:1rem; line-height:1.6;
 }
@@ -334,7 +337,7 @@ body.editing .proj-link:empty::before {
   font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
   margin-bottom:1.5rem;
 }
-.about-left h2 em { font-style:italic; font-family:inherit; color:var(--accent); font-size:inherit; font-weight:inherit; }
+.about-left h2 :is(em, i) { font-style:italic; font-family:inherit; color:var(--accent); font-size:inherit; font-weight:inherit; }
 .about-bio p { color:var(--text); line-height:1.7; font-size:1.05rem; margin-bottom:1rem; max-width:var(--measure); }
 .about-bio p strong { color:var(--text); font-weight:600; background:none; }
 .about-bio p a { color:var(--accent); text-decoration:underline; text-underline-offset:.15em; text-decoration-thickness:1px; }
@@ -408,7 +411,7 @@ body.editing .edu-add { display:block; }
   font-size:clamp(2rem,3.6vw,2.8rem); letter-spacing:-.015em; line-height:1.08;
   margin-bottom:clamp(1.75rem,4vw,2.5rem);
 }
-.contact-h2 .dim { display:inline; font-style:italic; color:var(--accent); background:none; padding:0; transform:none; box-shadow:none; }
+.contact-h2 :is(.dim, em, i) { display:inline; font-style:italic; color:var(--accent); background:none; padding:0; transform:none; box-shadow:none; }
 .channels { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-bottom:2.5rem; }
 .ch { background:none; padding:0 0 0 1.25rem; display:block; border:none; border-left:1px solid var(--faint); box-shadow:none; }
 .ch-lbl { margin-bottom:.4rem; }
@@ -552,6 +555,39 @@ body.editing .sh-widget .is-blank::before {
   content:attr(data-ph); opacity:.5; font-style:italic; pointer-events:none;
 }
 body.editing .sh-tool.is-blank, body.editing .sh-bullets li.is-blank { min-width:4rem; }
+
+/* ── Section layout ────────────────────────
+   A section taken off the page is hidden, not deleted: it publishes with
+   its content intact and can be restored from the panel. !important
+   because the sections have their own display values (grid, flex) that
+   would otherwise beat the [hidden] attribute — see secSetRemoved(). */
+.sec-removed { display:none !important; }
+.nav-links li[hidden], .mobile-menu a[hidden] { display:none !important; }
+
+/* The ↑ ↓ 🗑 pill decorateSections() puts on each section while editing.
+   Injected on entry and stripped on exit and on publish, like the widget
+   tools above, so nothing here is ever seen by a visitor. */
+.sec-tools { display:none; }
+body.editing .sh-sec, body.editing .added-block { position:relative; }
+body.editing .sec-tools {
+  display:flex; align-items:center; gap:.2rem;
+  position:absolute; top:.6rem; right:.6rem; z-index:6;
+  padding:.2rem .25rem .2rem .55rem;
+  background:var(--bg); border:1px solid var(--faint);
+}
+body.editing .sh-sec .sec-tools { top:-.35rem; right:0; }
+body.editing .sec-tools-lbl {
+  font-family:var(--fm); font-size:.56rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); padding-right:.35rem; white-space:nowrap; max-width:11rem; overflow:hidden; text-overflow:ellipsis;
+}
+body.editing .sec-tools button {
+  width:24px; height:24px; line-height:1; padding:0; cursor:pointer;
+  font-size:.8rem;
+  background:var(--bg); color:var(--muted);
+  border:1px solid var(--faint);
+}
+body.editing .sec-tools button:hover { border-color:var(--text); color:var(--text); }
+body.editing .sec-tools button:disabled { opacity:.3; cursor:default; border-color:var(--faint); color:var(--muted); }
 .sh-nav { border-top:1px solid var(--faint); padding:1.5rem clamp(1.5rem,4vw,2.5rem); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; background:none; flex-shrink:0; }
 .sh-nav-btn { font-size:.98rem; padding:0 0 .1rem; border:none; border-bottom:1.5px solid var(--faint); color:var(--text); cursor:pointer; background:none; }
 .sh-nav-btn:hover { color:var(--accent); border-bottom-color:var(--accent); }
@@ -641,7 +677,13 @@ body.editing #edit-panel { transform:none; }
 .ep-section-arrows { display:flex; flex-direction:column; gap:1px; opacity:0; transition:opacity .15s; }
 .ep-section-item:hover .ep-section-arrows { opacity:1; }
 .ep-arr { background:none; border:none; cursor:pointer; color:#b8ad9a; font-size:.7rem; line-height:1; padding:.1rem .25rem; border-radius:2px; transition:all .15s; }
-.ep-arr:hover { background:rgba(var(--accent-rgb),.3); color:var(--accent); }
+.ep-arr:not(:disabled):hover { background:rgba(var(--accent-rgb),.3); color:var(--accent); }
+.ep-arr:disabled { opacity:.25; cursor:default; }
+/* A removed section stays listed, struck through, with its Restore always
+   showing — it is the only way back, so it can't wait for a hover. */
+.ep-section-item.removed .ep-section-name { text-decoration:line-through; opacity:.55; }
+.ep-section-item.removed .ep-section-arrows { opacity:1; }
+.ep-restore { font-family:var(--fm); font-size:.55rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; color:var(--accent); border:1px solid rgba(var(--accent-rgb),.5); padding:.15rem .4rem; }
 .ep-fields { padding:.5rem 0; }
 .ep-field-item { display:flex; align-items:center; gap:.65rem; padding:.55rem .85rem; border-radius:5px; margin-bottom:.2rem; cursor:pointer; transition:background .15s; }
 .ep-field-item:hover { background:#2b271f; }

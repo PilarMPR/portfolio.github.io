@@ -48,18 +48,23 @@ Four of them: **Sections**, **+ Add**, **Dev Log**, **Design**. Save & publish a
 
 ### Sections
 
-On the **landing page**, the four fixed sections — Hero, Work, About, Contact — each expand to the editable fields inside them. Work expands to the four projects instead, with **Open ✏** beside each, which takes you to that project's page already in edit mode.
+On the **landing page**, every section — Hero, Work, Independent AI, About, Contact — is a row, in page order. Expand a row to see the editable fields inside it; Work also lists the case studies with **Open ✏** beside each, which takes you to that project's page already in edit mode.
 
-On a **project page** the panel is a table of contents: click a case-study section to jump to it, or just click any text on the page and type. The sidebar widgets get their own group below it (see [The sidebar](#the-sidebar)), and a link back to the landing page sits at the bottom.
+Every row except Hero carries **▲ ▼** to move the section and **🗑** to take it off the page. The same three controls sit in a small pill at the top-right corner of each section while you edit, so you can work from the page instead of the panel. Removing hides rather than deletes: the section stays in the file, its row is struck through with **↩ Restore** beside it, and the header links follow — a removed section's link disappears, and the links reorder with the sections. Blocks you add from **+ Add** get the same pill, but their 🗑 really deletes (they exist nowhere else), so it asks first.
+
+On a **project page** the panel is a table of contents: click a case-study section to jump to it, or just click any text on the page and type. Each section row, and its pill on the page, carries the same ▲ ▼ 🗑 and Restore. The sidebar widgets get their own group below it (see [The sidebar](#the-sidebar)), and a link back to the landing page sits at the bottom.
+
+**Headings.** The section headings are two lines with the second in italic accent ("Work / *Log.*"). They are ordinary fields: click to rewrite them, select a word and press **I** in the floating format bar to move the italic where you want it — in a heading, italic *is* the accent — and press Enter to break the line. The same bar appears when you select text in a case study, whose small section labels ("Context", "How it works") are editable too.
 
 What you can edit is whatever the markup marks as editable, which on the landing page is:
 
 | Section | Fields |
 |---|---|
 | Hero | Job title + location, name, tagline |
-| Work | The section subtitle; each card's image via its upload button |
-| About | The bio paragraphs, the pull quote, and every education entry (name + detail) |
-| Contact | Heading, email, LinkedIn, Discord, the status line, the footer note |
+| Work | The heading and the subtitle; each card's image via its upload button |
+| Independent AI | The heading and the subtitle |
+| About | The label, the heading, the bio paragraphs, the pull quote, the skills-box title, and every education entry (name + detail) |
+| Contact | The label, the heading, email, LinkedIn, Discord, the status line, the footer note |
 
 Two things on the landing page are **not** editor fields: the skills chips in the About box and the CV link in the header — both are authored in `index.html`. The four project cards are authored too, so their text isn't editable in place and there's no reorder control for them; open a card's case study to edit its content. Cards you add yourself with **+ Add** *are* fully editable, because they're generated with the fields already on them — including where the card points. A generated card carries a **Link URL** field, shown only while you're editing, that becomes the card's destination; leave it blank and the card isn't a link at all. Full `https://` addresses open in a new tab. While edit mode is on, clicking a card does nothing rather than navigating away mid-edit.
 
@@ -78,7 +83,7 @@ Drops new content into the page you're on:
 | 📷 Image block | An image with a caption |
 | — Divider | A rule between blocks |
 
-Added blocks appear in the Sections tab with a 🗑 to remove them. Education rows carry their own ↑ ↓ 🗑 controls in the page.
+Added blocks appear in the Sections tab with ▲ ▼ 🗑, and wear the same pill on the page. Education rows carry their own ↑ ↓ 🗑 controls in the page.
 
 ### Dev Log
 

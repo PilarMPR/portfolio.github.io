@@ -54,6 +54,8 @@ Every row except Hero carries **▲ ▼** to move the section and **🗑** to ta
 
 On a **project page** the panel is a table of contents: click a case-study section to jump to it, or just click any text on the page and type. Each section row, and its pill on the page, carries the same ▲ ▼ 🗑 and Restore. The sidebar widgets get their own group below it (see [The sidebar](#the-sidebar)), and a link back to the landing page sits at the bottom.
 
+**Paragraphs, quotes and bullets.** Click one and a small bar opens above it with the formatting buttons and a **🗑**. That takes the paragraph off the page without deleting it: while you edit it stays where it was, struck through, and clicking it brings the bar back reading **↩ Restore**; a section's field list in the panel shows it struck through with a Restore as well. Visitors never see it. Works on the landing page's About text and on any paragraph, pull quote or bullet inside a case study; the sidebar boxes keep their own × per item.
+
 **Headings.** The section headings are two lines with the second in italic accent ("Work / *Log.*"). They are ordinary fields: click to rewrite them, select a word and press **I** in the floating format bar to move the italic where you want it — in a heading, italic *is* the accent — and press Enter to break the line. The same bar appears when you select text in a case study, whose small section labels ("Context", "How it works") are editable too.
 
 What you can edit is whatever the markup marks as editable, which on the landing page is:

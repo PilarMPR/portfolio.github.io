@@ -564,6 +564,17 @@ body.editing .sh-tool.is-blank, body.editing .sh-bullets li.is-blank { min-width
 .sec-removed { display:none !important; }
 .nav-links li[hidden], .mobile-menu a[hidden] { display:none !important; }
 
+/* A removed paragraph, quote or bullet (fldRemove()). Gone for visitors;
+   while editing it stays where it was, struck through and clipped to one
+   line, so it can be clicked and restored from the field bar. */
+.ed-removed { display:none !important; }
+body.editing .ed-removed {
+  display:block !important; max-height:2em; overflow:hidden;
+  opacity:.45; text-decoration:line-through; text-decoration-color:var(--accent);
+  border-left:3px solid var(--accent); padding-left:.6rem; cursor:pointer;
+}
+body.editing .ed-removed::before { content:none; }
+
 /* The ↑ ↓ 🗑 pill decorateSections() puts on each section while editing.
    Injected on entry and stripped on exit and on publish, like the widget
    tools above, so nothing here is ever seen by a visitor. */
@@ -683,6 +694,7 @@ body.editing #edit-panel { transform:none; }
    showing — it is the only way back, so it can't wait for a hover. */
 .ep-section-item.removed .ep-section-name { text-decoration:line-through; opacity:.55; }
 .ep-section-item.removed .ep-section-arrows { opacity:1; }
+.ep-field-item.removed .ep-field-prev, .ep-field-item.removed .ep-field-lbl { text-decoration:line-through; opacity:.55; }
 .ep-restore { font-family:var(--fm); font-size:.55rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; color:var(--accent); border:1px solid rgba(var(--accent-rgb),.5); padding:.15rem .4rem; }
 .ep-fields { padding:.5rem 0; }
 .ep-field-item { display:flex; align-items:center; gap:.65rem; padding:.55rem .85rem; border-radius:5px; margin-bottom:.2rem; cursor:pointer; transition:background .15s; }
@@ -734,6 +746,8 @@ body.editing [data-ed]:focus::before { opacity:1; }
 .fmt-btn { background:none; border:none; cursor:pointer; width:28px; height:28px; border-radius:4px; font-size:.88rem; color:#b8ad9a; display:flex; align-items:center; justify-content:center; transition:all .15s; }
 .fmt-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
 .fmt-sep { width:1px; height:18px; background:rgba(255,255,255,.15); margin:0 .15rem; }
+.fmt-btn[hidden], .fmt-sep[hidden] { display:none; }
+.fmt-restore { width:auto; padding:0 .55rem; font-family:var(--fm); font-size:.58rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; color:var(--accent); }
 
 /* Added blocks */
 .added-block { padding:4rem clamp(1.5rem,5vw,3.5rem); border-bottom:1px dashed var(--faint); position:relative; z-index:2; }

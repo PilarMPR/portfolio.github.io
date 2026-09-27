@@ -432,6 +432,9 @@ function epFmtBarHTML() {
   <button class="fmt-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
   <div class="fmt-sep"></div>
   <button class="fmt-btn" onclick="fmt('removeFormat')" title="Clear formatting">✕</button>
+  <div class="fmt-sep fmt-fld" id="fmt-fld-sep"></div>
+  <button class="fmt-btn fmt-fld" id="fmt-rm" onclick="fldRemove()" title="Remove this paragraph">🗑</button>
+  <button class="fmt-btn fmt-fld fmt-restore" id="fmt-restore" onclick="fldRestore()" title="Put this paragraph back">↩ Restore</button>
 </div>`;
 }
 
@@ -521,6 +524,9 @@ function toggleEditorSheet() {
 
 /* Wired from edChrome(), because the grip does not exist before it. */
 function edWireSheet() {
+  // Pressing a bar button must not move focus out of the field, or the
+  // selection the formatting acts on — and the field 🗑 acts on — is gone.
+  fmtBarEl()?.addEventListener('mousedown', e => e.preventDefault());
   const grip = document.getElementById('ep-grip');
   if (!grip) return;
   grip.addEventListener('click', toggleEditorSheet);
@@ -760,16 +766,18 @@ function appendFieldItems(sub, fields) {
   fields.forEach((f, i) => {
     const label = f.dataset.label || f.dataset.ed || ('Field ' + (i+1));
     const preview = f.textContent.trim().slice(0,28) || '(empty)';
+    const off = fldIsRemoved(f);
     const fi = document.createElement('div');
-    fi.className = 'ep-section-item ep-field-item';
+    fi.className = 'ep-section-item ep-field-item' + (off ? ' removed' : '');
     fi.innerHTML = `
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
-        <div class="ep-field-lbl">${label}</div>
-        <div class="ep-field-prev">${preview}</div>
+        <div class="ep-field-lbl">${dlEsc(label)}</div>
+        <div class="ep-field-prev">${dlEsc(preview)}</div>
       </div>
-      <span class="ep-sub-go">Edit</span>`;
-    fi.addEventListener('click', () => {
+      ${off ? `<button class="ep-arr ep-restore" title="Put this back" onclick="fldRestoreKey('${f.dataset.ed}',event)">↩ Restore</button>` : '<span class="ep-sub-go">Edit</span>'}`;
+    fi.addEventListener('click', e => {
+      if (e.target.closest('.ep-arr')) return;
       // Get the sheet out of the way first — the point is to see the field.
       if (MQ_STACK.matches) setEditorSheet(false);
       f.focus();
@@ -828,7 +836,10 @@ function makeSectionItem(id, icon, name, ctl) {
 function toggleSubItems(id, itemEl) {
   const sub = document.getElementById('ep-sub-' + id);
   if (!sub) return;
-  const isOpen = sub.style.display !== 'none';
+  // Computed, not inline: .ep-sub starts hidden by the stylesheet with no
+  // inline style at all, which read as "open" and made the first click on
+  // a fresh row close it — every section took two clicks to expand.
+  const isOpen = getComputedStyle(sub).display !== 'none';
   // Close all others
   document.querySelectorAll('[id^="ep-sub-"]').forEach(s => { s.style.display = 'none'; });
   document.querySelectorAll('.ep-section-item').forEach(i => {
@@ -1138,6 +1149,7 @@ function saveCaseStudy(id) {
   const secs = csSecs();
   data.__secOrder__   = secs.map(s => s.dataset.sec);
   data.__secRemoved__ = secs.filter(secIsRemoved).map(s => s.dataset.sec);
+  data.__removedFields__ = csFields().filter(fldIsRemoved).map(csFieldKey);
 
   data.__savedAt__ = Date.now();        // so a later publish can outrank it
   safeSet('pmpr_cs_fields_' + id, JSON.stringify(data));
@@ -1481,15 +1493,86 @@ function showFmtBar(x, y) {
   }
   bar.classList.add('show');
 }
-function hideFmtBar() { fmtBarEl()?.classList.remove('show'); }
+function hideFmtBar() { fmtBarEl()?.classList.remove('show'); fmtAnchor = null; }
+
+/* ─── FIELD TOOLBAR ────────────────────────
+   The same bar doubles as the toolbar of the field that has focus: it
+   opens above the field's top-right corner as soon as one is focused,
+   and jumps to the pointer when text is selected. That is where a
+   paragraph is removed from.
+
+   Removing hides, as with sections: `class="ed-removed"` publishes with
+   the text intact, and while editing the paragraph stays on the page,
+   struck through and clipped to a line, so clicking it brings the bar
+   back reading ↩ Restore. Landing-page keys are named, so a hidden field
+   costs nothing; case-study keys are positional, which is exactly why
+   the element must stay in the DOM rather than be deleted. */
+const ED_FIELD     = '[data-ed],[data-rich],#case-view [contenteditable="true"]';
+const ED_REMOVABLE = 'p,li,.about-pull,.sh-pull';
+const ED_REMOVED   = 'ed-removed';
+let fmtField = null, fmtAnchor = null;
+
+const fldRemovable = el => !!el && el.matches(ED_REMOVABLE) && !el.closest('.sh-widget');
+const fldIsRemoved = el => !!el && el.classList.contains(ED_REMOVED);
+
+function fmtUpdateButtons() {
+  const bar = fmtBarEl();
+  if (!bar) return;
+  const can = fldRemovable(fmtField), off = fldIsRemoved(fmtField);
+  bar.querySelectorAll('.fmt-fld').forEach(b => { b.hidden = !can; });
+  const rm = document.getElementById('fmt-rm'), rs = document.getElementById('fmt-restore');
+  if (rm) rm.hidden = !can || off;
+  if (rs) rs.hidden = !can || !off;
+  const noun = fmtField?.matches('li') ? 'bullet' : fmtField?.matches('.about-pull,.sh-pull') ? 'quote' : 'paragraph';
+  if (rm) rm.title = 'Remove this ' + noun;
+  if (rs) rs.title = 'Put this ' + noun + ' back';
+}
+
+/* Above the field's top-right corner; below it when that would sit under
+   the nav. Fixed positioning, so it is re-placed on scroll. */
+function placeFmtBar(el) {
+  const bar = fmtBarEl();
+  if (!bar || !el) return;
+  if (!MQ_PHONE.matches) {
+    const r = el.getBoundingClientRect();
+    const w = bar.offsetWidth || 240, h = bar.offsetHeight || 40;
+    const above = r.top - h - 8;
+    bar.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
+    bar.style.top  = (above > navH() + 8 ? above : Math.min(r.bottom + 8, window.innerHeight - h - 8)) + 'px';
+  }
+  bar.classList.add('show');
+}
+
+function fmtTrack(el) {
+  fmtField = el;
+  fmtUpdateButtons();
+  fmtAnchor = el;
+  placeFmtBar(el);
+}
+
+document.addEventListener('focusin', e => {
+  if (!editing || !e.target.closest) return;
+  const el = e.target.closest(ED_FIELD);
+  if (el) fmtTrack(el);
+});
+document.addEventListener('focusout', e => {
+  const to = e.relatedTarget;
+  if (to && to.closest && to.closest(ED_FIELD + ',#fmt-bar')) return;
+  hideFmtBar();
+});
+addEventListener('scroll', () => { if (fmtAnchor && fmtBarEl()?.classList.contains('show')) placeFmtBar(fmtAnchor); }, { passive:true });
 
 document.addEventListener('mouseup', e => {
   if (!editing) return;
   if (e.target.closest('#fmt-bar')) return;
   setTimeout(() => {
     const sel = window.getSelection();
-    if (sel && sel.toString().length > 0 && e.target.closest('[data-ed],[data-rich],#case-view [contenteditable="true"]')) {
+    const field = e.target.closest(ED_FIELD);
+    if (field && sel && sel.toString().length > 0) {
+      fmtField = field; fmtUpdateButtons(); fmtAnchor = null;
       showFmtBar(e.clientX, e.clientY);
+    } else if (field) {
+      fmtTrack(field);
     } else {
       hideFmtBar();
     }
@@ -1498,6 +1581,35 @@ document.addEventListener('mouseup', e => {
 document.addEventListener('mousedown', e => {
   if (!e.target.closest('#fmt-bar')) hideFmtBar();
 });
+
+function fldSetRemoved(el, off) {
+  el.classList.toggle(ED_REMOVED, off);
+  if (!el.className) el.removeAttribute('class');
+  if (IS_PROJECT) saveCaseStudy(PAGE.id); else autoSave();
+  buildSectionList();
+}
+function fldRemove() {
+  const el = fmtField;
+  if (!fldRemovable(el) || fldIsRemoved(el)) return;
+  fldSetRemoved(el, true);
+  el.blur();
+  hideFmtBar();
+}
+function fldRestore() {
+  const el = fmtField;
+  if (!fldIsRemoved(el)) return;
+  fldSetRemoved(el, false);
+  fmtUpdateButtons();
+  el.focus();
+}
+/* From the panel's field list, by key — the landing page only. */
+function fldRestoreKey(key, e) {
+  e?.preventDefault(); e?.stopPropagation();
+  const el = document.querySelector(`[data-ed="${key}"]`);
+  if (!el) return;
+  fldSetRemoved(el, false);
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
 
 /* Enter inside a heading breaks the line instead of opening a new block:
    "Work / Log." is one h2 with a <br> in it, and the browser default would
@@ -1816,6 +1928,7 @@ function autoSave() {
   data['__edu__'] = eduList()?.innerHTML || '';
   data['__order__'] = secAll().map(el => el.id);
   data['__removed__'] = secAll().filter(secIsRemoved).map(el => el.id);
+  data['__removedFields__'] = [...document.querySelectorAll('[data-ed].' + ED_REMOVED)].map(el => el.dataset.ed);
   // Before serializing, not after: outerHTML is what gets stored, so the href
   // has to already match the link field or the link dies on the next reload.
   syncCardLinks();
@@ -1898,9 +2011,15 @@ function loadSaved() {
     }
     // Text only. The page keeps the structure its own markup describes —
     // that is what stops a stale copy erasing part of the page.
+    const gone = Array.isArray(saved.__removedFields__) ? saved.__removedFields__ : null;
     csFields().forEach(el => {
-      const v = saved[csFieldKey(el)];
+      const key = csFieldKey(el);
+      const v = saved[key];
       if (v !== undefined) el.innerHTML = v;
+      if (gone) {
+        el.classList.toggle(ED_REMOVED, gone.includes(key));
+        if (!el.className) el.removeAttribute('class');
+      }
     });
     return;
   }
@@ -1952,6 +2071,12 @@ function loadSaved() {
     const added = document.getElementById('added-blocks');
     if (added && data['__added__']) added.innerHTML = data['__added__'];
     applySectionLayout(data);
+    if (Array.isArray(data['__removedFields__'])) {
+      document.querySelectorAll('[data-ed]').forEach(el => {
+        el.classList.toggle(ED_REMOVED, data['__removedFields__'].includes(el.dataset.ed));
+        if (!el.className) el.removeAttribute('class');
+      });
+    }
     if (data['__custom_cards__'] && data['__custom_cards__'].length) {
       const mainGrid = document.querySelector('.projects');
       data['__custom_cards__'].forEach(c => {

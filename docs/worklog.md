@@ -1263,3 +1263,51 @@ is none, moves are buttons only.
 removed landing section leaves those links landing at the top of the page.
 Two `insertTextBlock()` calls within the same millisecond share an id
 (`'added-' + Date.now()`) — pre-existing, unreachable by hand.
+
+---
+
+## 2026-09-27 · SESSION · Paragraphs, quotes and bullets come off the page too
+
+**Why.** "And I should be able to eliminate paragraphs or quotes too." Same
+session as the section work, after it merged (#2) and the browser published
+once more on top.
+
+**What.** The format bar is now also the toolbar of the focused field: it opens
+above the field's top-right corner on focus (`fmtTrack()`, re-placed on scroll
+by `placeFmtBar()`), still jumps to the pointer on a selection, and swallows
+`mousedown` so pressing a button no longer moves focus out of the field. It
+carries a 🗑 for `p`, `li`, `.about-pull` and `.sh-pull` — never inside a
+sidebar widget, which has its own × — that hides the field as
+`class="ed-removed"`: published hidden, text intact. While editing the field
+stays in place, struck through and clipped to a line; click it and the bar
+reads ↩ Restore. The landing page's field list shows removed fields struck
+through with a Restore of their own. Stored as `__removedFields__` beside the
+layout lists in both blobs — `data-ed` names on the landing page, positional
+keys in a case study, which is why the element is hidden rather than deleted.
+
+Also fixed on the way, because the Restore row was unreachable without it:
+`toggleSubItems()` read the *inline* display to decide whether a section's
+field list was open, while `.ep-sub` starts hidden by the stylesheet with no
+inline style — so the first click on any fresh row closed an already-closed
+list, and every section took two clicks to expand. It reads the computed
+style now.
+
+R7: `var()` 441 → 445, hex 63 unchanged. R11: 52 → 56 citations, resolving.
+
+**Verified.** `checks.sh` exits 0. Chromium probes: the earlier 63 still
+green; 22 new — bar opens on focus above the paragraph, follows scroll, shows
+no 🗑 on a heading; quote and paragraph removed from the bar, struck and
+visible while editing, hidden outside it and after reload, stored keys right;
+publish keeps the hidden paragraph and no bar; restore from the bar refocuses
+the field, restore from the panel works on first click; Bold via the bar keeps
+focus in the field; on a case study a bullet and a pull quote removed, a
+sidebar bullet offers no field 🗑, the section moved twice, and after a reload
+the removals sit on the same elements with the neighbouring bullet and heading
+untouched; publish keeps both; phone width shows the docked bar with the 🗑.
+
+**Not verified.** `smoke.sh` skips (no `gjs`); Safari/Firefox untested; nothing
+published through `ghPublish()`.
+
+**Open.** A removed paragraph is still `contenteditable` while editing, so
+typing into the struck-through line is possible (harmless: saved, hidden). No
+undo beyond Restore.

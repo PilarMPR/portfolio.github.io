@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" role="img" aria-labelledby="t d">
+  <title id="t">The Copycat Band — key art placeholder</title>
+  <desc id="d">A fen manor at night under a thin moon, one window lit, mist along the drained marsh. Typographic placeholder drawn for the portfolio while the game is in pre-production.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1613"/>
+      <stop offset=".62" stop-color="#15261f"/>
+      <stop offset="1" stop-color="#1b2f27"/>
+    </linearGradient>
+    <linearGradient id="fen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1a15"/>
+      <stop offset="1" stop-color="#060c0a"/>
+    </linearGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a9b8ae" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#a9b8ae" stop-opacity=".22"/>
+      <stop offset=".7" stop-color="#a9b8ae" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#a9b8ae" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#e9e2cc" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#e9e2cc" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+
+  <!-- sky and land -->
+  <rect width="900" height="600" fill="url(#sky)"/>
+  <rect y="392" width="900" height="208" fill="url(#fen)"/>
+
+  <!-- moon -->
+  <circle cx="712" cy="132" r="110" fill="url(#glow)"/>
+  <circle cx="712" cy="132" r="34" fill="#e9e2cc"/>
+  <circle cx="724" cy="124" r="30" fill="#0f1c18"/>
+
+  <!-- pumping-engine chimney on the far fen -->
+  <rect x="118" y="318" width="9" height="74" fill="#09110e"/>
+  <rect x="104" y="362" width="38" height="30" fill="#09110e"/>
+
+  <!-- Coldharbour Hall -->
+  <g fill="#070e0b">
+    <rect x="536" y="296" width="222" height="96"/>
+    <polygon points="536,296 600,232 664,296"/>
+    <rect x="664" y="262" width="94" height="34"/>
+    <rect x="574" y="214" width="12" height="44"/>
+    <rect x="708" y="236" width="12" height="30"/>
+    <rect x="690" y="258" width="12" height="20"/>
+  </g>
+  <!-- the one lit window: Clara's room -->
+  <rect x="598" y="318" width="14" height="20" fill="#e3b96a"/>
+  <rect x="598" y="318" width="14" height="20" fill="#e3b96a" opacity=".55" filter="url(#soft)"/>
+  <!-- dark windows -->
+  <g fill="#101e19">
+    <rect x="556" y="318" width="14" height="20"/>
+    <rect x="640" y="318" width="14" height="20"/>
+    <rect x="684" y="318" width="14" height="20"/>
+    <rect x="722" y="318" width="14" height="20"/>
+    <rect x="556" y="354" width="14" height="20"/>
+    <rect x="640" y="354" width="14" height="20"/>
+    <rect x="684" y="354" width="14" height="20"/>
+    <rect x="722" y="354" width="14" height="20"/>
+  </g>
+
+  <!-- the laurels, where the baboon is -->
+  <g fill="#060d0a">
+    <ellipse cx="486" cy="384" rx="46" ry="22"/>
+    <ellipse cx="800" cy="386" rx="60" ry="24"/>
+    <ellipse cx="846" cy="378" rx="34" ry="28"/>
+  </g>
+
+  <!-- mist along the drained marsh -->
+  <rect x="0" y="372" width="900" height="30" fill="url(#mist)" filter="url(#soft)"/>
+  <rect x="60" y="398" width="900" height="24" fill="url(#mist)" filter="url(#soft)" opacity=".7"/>
+
+  <!-- dykes across the fen -->
+  <g stroke="#1c2e27" stroke-width="1.5" fill="none" opacity=".8">
+    <path d="M0 448 H900"/>
+    <path d="M0 506 H900"/>
+    <path d="M0 566 H900"/>
+    <path d="M300 392 L120 600"/>
+    <path d="M640 392 L860 600"/>
+  </g>
+
+  <!-- the new ventilator: a grille that should not be there -->
+  <g fill="none" stroke="#9fb3a7" stroke-width="1.6" opacity=".55">
+    <rect x="54" y="52" width="92" height="64" rx="3"/>
+    <g>
+      <circle cx="72" cy="70" r="5"/><circle cx="100" cy="70" r="5"/><circle cx="128" cy="70" r="5"/>
+      <circle cx="72" cy="98" r="5"/><circle cx="100" cy="98" r="5"/><circle cx="128" cy="98" r="5"/>
+    </g>
+  </g>
+
+  <!-- inset frame -->
+  <rect x="22" y="22" width="856" height="556" fill="none" stroke="#9fb3a7" stroke-opacity=".28" stroke-width="1.2"/>
+
+  <!-- title -->
+  <g font-family="Newsreader, 'Iowan Old Style', Georgia, 'Times New Roman', serif" fill="#efe9db">
+    <text x="56" y="500" font-size="46" letter-spacing="1.5">The Copycat Band</text>
+    <text x="57" y="536" font-size="19" font-style="italic" fill="#b6c4ba">1905 · Coldharbour Hall, the Lincolnshire fens</text>
+  </g>
+  <text x="844" y="536" font-family="'Source Sans 3', 'Helvetica Neue', Arial, sans-serif" font-size="13" letter-spacing="3" text-anchor="end" fill="#b6c4ba" opacity=".8">PRE-PRODUCTION</text>
+</svg>

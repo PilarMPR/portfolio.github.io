@@ -306,3 +306,15 @@ Sections tab lists Hero, Work, About and Contact. `#ai-work` has been a real
 section since 2026-08-11 and the nav links to it, but the panel cannot scroll to
 it, so the only way to reach its cards while editing is to scroll by hand. Fix:
 one more entry in whatever array that function walks, pointing at `#ai-work`.
+
+### OPT-25 · The two work-in-progress cards have nowhere to go · impact med · effort med · open
+Evidence: `index.html`, `#wip-projects` (authored 2026-10-19). The Copycat Band
+and Last Instincts are `<div class="project">` with no `href`, because neither
+has a case study and both repos are private. Every other card on the page is a
+link, so these two are the only ones a visitor can hover and get nothing from.
+Fix: a case study each under `projects/` (page contract, nav, dev log all
+exist for free), then turn the `<div>` into an `<a>` and replace `.proj-stage`
+with the usual `.proj-cta`. Catch: adds pages, so `smoke.sh` ("ok 8 pages"),
+R2's "eight HTML files" and the SPEC page count all move with it. The art is a
+drawn SVG placeholder on both; real key art is a separate decision, and the
+bought Last Instincts packs are licensed and must stay out of this public repo.

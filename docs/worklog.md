@@ -1336,3 +1336,66 @@ block (the click path was exercised with a mouse click only).
 fields, so a removed element inside a *removed* section can only be restored
 after the section is. Not filed: the ghost is the restore path everywhere
 else.
+
+## 2026-10-19 · SESSION · Work in progress: a third card grid, two games
+
+**Task.** "Add work in progress and these two game examples": a Work in
+progress section on the landing page carrying The Copycat Band and Last
+Instincts, whose repos were attached to the session.
+
+**R1 exception, on the record again.** Cards and a section heading are page
+content. Done by hand anyway, at the user's direction and in the exact shape of
+the 2026-08-11 AI cards — plain markup, no `data-custom-card`, no `data-ed` on
+the cards, so no field key can collide with a browser draft and no
+`__custom_cards__` record can be restored over them. The heading and subtitle
+*are* fields (`wip-title`, `wip-subtitle`), like the other grids'. Verified
+that a reload beside an unrelated draft in `pmpr_portfolio_v2` keeps both cards.
+
+**What shipped.**
+- `index.html`: `<section id="wip">` between Independent AI and `#added-blocks`,
+  with `#wip-projects` and two authored cards. Both are `<div>`s with no
+  `href` — no case study yet, both repos private — and end on a muted
+  `.proj-stage` line (engine · language · platforms) instead of a call to
+  action, so nothing on the card pretends to be a link. Nav and mobile menu get
+  "In progress" after AI; the seven project pages get `../index.html#wip`.
+- `assets/wip/`: two SVG figures drawn for the cards, 11 KB together. Last
+  Instincts' art is bought and licensed and must never be public, and The
+  Copycat Band has none yet, so neither card carries a screenshot. Abstract,
+  typographic, 900×600: a fen manor at night with one lit window; a bunker
+  cross-section three rooms deep under snow.
+- `portfolio.css`: `#wip` joins the Work/AI padding rule and gets the same
+  fail-open `:not(:has(.project))` gate plus the editing hint; `.proj-stage`;
+  no pointer and no accent on hover for a `.project` with no `href`. No hex.
+- `site.js`: `SECTIONS` entry (🚧 Work in progress) so the panel names it;
+  Add ▸ New work-in-progress card (`insertProjectCard('wip-projects')`).
+- Content came from the repos: the Copycat Band excerpt from its README and
+  `docs/Case_Skeleton.md`, Last Instincts from its `docs/TDD.md` layer 0 and
+  `docs/phases/phase-01-tech-frame.md`. Tags say pre-production and in
+  development respectively, which is where each actually is today.
+- Docs: Architecture section now says three grids; README and SPEC tables;
+  52 CLAUDE.md citations renumbered, `var()` count 454→458; OPT-25 filed.
+
+**Verified.** `checks.sh` exits 0. A Playwright/Chromium probe over
+`http.server`, 35 assertions green: as a visitor the section renders, two
+cards numbered 01–02 as `<div>`s with no href, both figures decode at 900×600
+once scrolled into view (they are `loading="lazy"`), nav and menu read About /
+Work / AI / In progress / Contact / CV on the landing page and Work / AI / In
+progress / About / Contact / CV on all seven project pages, the in-page link
+scrolls to the section under the fixed nav and the cross-page hash link lands
+there too, Work still has four cards and AI three, two columns at 1280px, one
+at 390px with no horizontal overflow, upload buttons hidden. With a dummy token
+stored the editor opens, the Sections tab lists Work in progress with its
+↑ ↓ 🗑 pill, the Add tab offers the new card, a generated card lands in the
+grid as 03 with `grid:'wip-projects'` stored, exit strips the pill, and
+`buildPublishHTML()` keeps both cards with repo-relative `src`, no chrome, no
+pill, `contenteditable="false"`. No JS errors, no failed requests.
+
+**Not verified.** `smoke.sh` skips here (no `gjs`), so WebKit is unproven;
+Safari and Firefox untested; nothing published through `ghPublish()`; the
+mobile burger menu was asserted on markup, not tapped.
+
+**Open / pick up next.**
+- OPT-25: case studies for the two games, so the cards can become links.
+- The browser's next publish will keep all of this only because it is DOM the
+  page loads from the file; if a draft ever stores `wip-title`, the stored
+  value wins over the authored heading, as for every other field.

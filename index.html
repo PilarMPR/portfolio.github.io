@@ -20,7 +20,7 @@
     
     
     
-    <li><a href="javascript:void(0)" onclick="scrollToSection('about')">About</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('ai-work')">AI</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('about')">About</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('ai-work')">AI</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('wip')">In progress</a></li><li><a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a></li>
     <li><a href="assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="nav-cv">CV ↓</a></li>
   </ul>
   <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -36,7 +36,7 @@
   
   
   
-  <a href="javascript:void(0)" onclick="scrollToSection('about')">About</a><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a><a href="javascript:void(0)" onclick="scrollToSection('ai-work')">AI</a><a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a>
+  <a href="javascript:void(0)" onclick="scrollToSection('about')">About</a><a href="javascript:void(0)" onclick="scrollToSection('work')">Work</a><a href="javascript:void(0)" onclick="scrollToSection('ai-work')">AI</a><a href="javascript:void(0)" onclick="scrollToSection('wip')">In progress</a><a href="javascript:void(0)" onclick="scrollToSection('contact')">Contact</a>
   <a href="assets/site/pilar-mpr-cv.pdf" download="CV_Pilar_MPR.pdf" class="mm-cv">CV ↓</a>
 </div>
 
@@ -51,6 +51,12 @@
      (Add ▸ New AI project card), never by hand — the next publish
      rebuilds this file from the browser's DOM and would drop them.
      CSS keeps the whole section hidden until it holds one card.
+───────────────────────────────────────── -->
+
+
+<!-- ═══ WORK IN PROGRESS ═════════════════
+     Two authored cards for games still being made. Same card shape as
+     Work, no link yet. Hidden by CSS while the grid is empty, like #ai-work.
 ───────────────────────────────────────── -->
 
 
@@ -403,6 +409,75 @@
         </div>
       </div>
     </a>
+
+  </div>
+</section><section id="wip">
+  <div class="work-head">
+    <div>
+      <div class="spec-kicker reveal on">// TWO GAMES, STILL BEING MADE</div>
+      <h2 class="reveal on" data-label="Work in progress heading" data-ed="wip-title" contenteditable="false">In<br><em>Progress.</em></h2>
+    </div>
+    <p class="reveal d1 on" data-label="Work in progress subtitle" data-ed="wip-subtitle" contenteditable="false">Two games in early development, designed and built solo in Unity. Neither has a page yet; this is what they are.</p>
+  </div>
+
+  <div class="projects" id="wip-projects">
+
+    <!-- ─ THE COPYCAT BAND ───────────────
+         Written by hand at the user's direction (2026-10-19), in the shape of
+         the authored Work cards: no data-custom-card, no data-ed, so no field
+         key collides with a browser draft. The repo is private and there is no
+         case study yet, so the card is a <div>, not a link. The art is a drawn
+         SVG placeholder (assets/wip/), not a screenshot. -->
+    <div class="project reveal on">
+      <div class="proj-img" data-img-zone="wip-1">
+        <img id="img-wip-1" src="assets/wip/copycat-band-card.svg" alt="The Copycat Band — a fen manor at night, one window lit" width="900" height="600" loading="lazy" decoding="async">
+        <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'wip-1')"></label>
+      </div>
+      <div class="proj-grad"></div>
+      <div class="proj-arrow">↗</div>
+      <div class="proj-body">
+        <div class="proj-top">
+          <span class="proj-num">01</span>
+          <div class="proj-tags">
+            <span class="tag tag-accent">Narrative deduction</span>
+            <span class="tag tag-dim">Pre-production</span>
+          </div>
+        </div>
+        <div class="proj-bottom">
+          <div class="proj-role">Design &amp; writing</div>
+          <div class="proj-name">The Copycat Band</div>
+          <p class="proj-excerpt">1905. Someone stages Watson's <em>Speckled Band</em> at a fen manor to kill a daughter and see her father hanged for it. You play Wiggins, Holmes's former street kid, with Holmes dead and nobody to ask. Clues sit unmarked in the prose, every action costs a quarter-hour, and knowing the book is the trap.</p>
+          <span class="proj-stage">Unity 6 · ink · Windows, Android, iOS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ LAST INSTINCTS ─────────────────
+         Same shape and the same reasons as the card above. The bought art
+         packs are licensed, never public, so the figure is a drawn SVG. -->
+    <div class="project reveal d1 on">
+      <div class="proj-img" data-img-zone="wip-2">
+        <img id="img-wip-2" src="assets/wip/last-instincts-card.svg" alt="Last Instincts — a bunker dug three rooms deep under a snowfield" width="900" height="600" loading="lazy" decoding="async">
+        <label class="img-upload-btn">📷 Upload image<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this,'wip-2')"></label>
+      </div>
+      <div class="proj-grad"></div>
+      <div class="proj-arrow">↗</div>
+      <div class="proj-body">
+        <div class="proj-top">
+          <span class="proj-num">02</span>
+          <div class="proj-tags">
+            <span class="tag tag-accent">Survival manager</span>
+            <span class="tag tag-dim">In development</span>
+          </div>
+        </div>
+        <div class="proj-bottom">
+          <div class="proj-role">Design, code &amp; production</div>
+          <div class="proj-name">Last Instincts</div>
+          <p class="proj-excerpt">Bunker survival manager: dig the shelter room by room, claim the land outside for supplies and keep a small group of survivors together through winters that never stop coming. A ground-up Unity rebuild of my earlier LÖVE prototype, built one layer at a time with tests under each.</p>
+          <span class="proj-stage">Unity 6 · C# · Windows, Android</span>
+        </div>
+      </div>
+    </div>
 
   </div>
 </section><div id="added-blocks"></div><section id="contact">

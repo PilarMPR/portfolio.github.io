@@ -201,6 +201,7 @@ const SECTIONS = [
   { id:'hero',    icon:'🏠', name:'Hero' },
   { id:'work',    icon:'🎮', name:'Work' },
   { id:'ai-work', icon:'🤖', name:'Independent AI' },
+  { id:'wip',     icon:'🚧', name:'Work in progress' },
   { id:'about',   icon:'👤', name:'About' },
   { id:'contact', icon:'✉',  name:'Contact' },
 ];
@@ -350,6 +351,10 @@ function epPanelHTML() {
       <button class="ep-add-btn" onclick="insertProjectCard('ai-projects')">
         <span class="ep-add-btn-icon">🤖</span>
         <span class="ep-add-btn-label">New AI project card</span>
+      </button>
+      <button class="ep-add-btn" onclick="insertProjectCard('wip-projects')">
+        <span class="ep-add-btn-icon">🚧</span>
+        <span class="ep-add-btn-label">New work-in-progress card</span>
       </button>
       <div style="border-top:1px solid var(--faint);margin:.6rem 0"></div>
       <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.25rem .25rem .4rem">About</div>
@@ -1729,8 +1734,9 @@ function insertDividerBlock() {
 }
 
 /* gridId picks which grid the card lands in — 'ai-projects' for the
-   Independent AI section, omitted for the main Work grid. Each grid
-   numbers its own cards, so both categories start at 01. */
+   Independent AI section, 'wip-projects' for Work in progress, omitted for
+   the main Work grid. Each grid numbers its own cards, so every category
+   starts at 01. */
 function insertProjectCard(gridId) {
   const grid = (gridId && document.getElementById(gridId)) || document.querySelector('.projects');
   if (!grid) return;

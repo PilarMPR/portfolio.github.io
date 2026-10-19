@@ -218,7 +218,7 @@ h1.hero-name {
 .reveal, .reveal.on { opacity:1; transform:none; }
 
 /* ── WORK / AI SECTIONS ───────────────── */
-#work, #ai-work {
+#work, #ai-work, #wip {
   padding:clamp(3.5rem,7vw,5.5rem) clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,5vw,6rem);
   position:relative;
   border-top:1px solid var(--faint);
@@ -240,6 +240,18 @@ h1.hero-name {
 body.editing #ai-work { display:block; }
 body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   content:'No cards yet — add them from the panel: Add ▸ New AI project card.';
+  grid-column:1 / -1;
+  font-size:.9rem; line-height:1.7; color:var(--muted);
+  border:1px dashed var(--faint);
+  padding:clamp(2rem,5vw,3.5rem); text-align:center;
+}
+/* ── WORK IN PROGRESS ─────────────────────
+   Third card grid, for games still being made. Same gate as the AI section,
+   written the same fail-open way, for the same reasons. */
+#wip:not(:has(.project)) { display:none; }
+body.editing #wip { display:block; }
+body.editing #wip:not(:has(.project)) #wip-projects::after {
+  content:'No cards yet — add them from the panel: Add ▸ New work-in-progress card.';
   grid-column:1 / -1;
   font-size:.9rem; line-height:1.7; color:var(--muted);
   border:1px dashed var(--faint);
@@ -309,6 +321,16 @@ body.editing #ai-work:not(:has(.project)) #ai-projects::after {
   border-bottom:1.5px solid transparent; padding-bottom:.1rem;
 }
 .project:hover .proj-cta { border-bottom-color:var(--accent); }
+/* A card with nowhere to go yet (a work-in-progress game with no case
+   study) ends on a stage line instead of a call to action: the engine, the
+   language, the platforms. Muted and never underlined, so it does not read
+   as a link on a card that is not one. */
+.proj-stage {
+  align-self:flex-start; font-size:.9rem; color:var(--muted);
+  letter-spacing:.01em; padding-bottom:.1rem;
+}
+.project:not([href]) { cursor:default; }
+.project:not([href]):hover .proj-name { color:var(--text); }
 /* The destination of a generated card, held as text because an editable field
    round-trips innerHTML and cannot reach the anchor's href. Authors see it and
    edit it; visitors never do — syncCardLinks() has already put it on the href. */

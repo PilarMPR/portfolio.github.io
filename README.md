@@ -48,7 +48,7 @@ Four of them: **Sections**, **+ Add**, **Dev Log**, **Design**. Save & publish a
 
 ### Sections
 
-On the **landing page**, every section — Hero, Work, Independent AI, About, Contact — is a row, in page order. Expand a row to see the editable fields inside it; Work also lists the case studies with **Open ✏** beside each, which takes you to that project's page already in edit mode.
+On the **landing page**, every section — Hero, Work, Independent AI, Work in progress, About, Contact — is a row, in page order. Expand a row to see the editable fields inside it; Work also lists the case studies with **Open ✏** beside each, which takes you to that project's page already in edit mode.
 
 Every row except Hero carries **▲ ▼** to move the section and **🗑** to take it off the page. The same three controls sit in a small pill at the top-right corner of each section while you edit, so you can work from the page instead of the panel. Removing hides rather than deletes: the section stays in the file, its row is struck through with **↩ Restore** beside it, and the header links follow — a removed section's link disappears, and the links reorder with the sections. Blocks you add from **+ Add** get the same pill, but their 🗑 really deletes (they exist nowhere else), so it asks first.
 
@@ -65,6 +65,7 @@ What you can edit is whatever the markup marks as editable, which on the landing
 | Hero | Job title + location, name, tagline |
 | Work | The heading and the subtitle; each card's image via its upload button |
 | Independent AI | The heading and the subtitle |
+| Work in progress | The heading and the subtitle; each card's image via its upload button |
 | About | The label, the heading, the bio paragraphs, the pull quote, the skills-box title, and every education entry (name + detail) |
 | Contact | The label, the heading, email, LinkedIn, Discord, the status line, the footer note |
 
@@ -80,6 +81,7 @@ Drops new content into the page you're on:
 |---|---|
 | 🎮 New project card | A fifth (sixth, seventh…) card in the work grid, with editable number, tags, role, name, excerpt, link label and link URL |
 | 🤖 New AI project card | The same card, in the **Independent AI** grid instead — landing page only. That section stays hidden on the live site until it holds at least one card, so it never publishes as an empty heading |
+| 🚧 New work-in-progress card | The same card again, in the **Work in progress** grid — landing page only, hidden while empty in the same way |
 | 🎓 Education entry | One more row in the About timeline — landing page only |
 | 📝 Text section | A heading + paragraph block |
 | 📷 Image block | An image with a caption |

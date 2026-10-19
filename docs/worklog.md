@@ -1277,3 +1277,62 @@ browser serves the new bytes — GitHub Pages may cache the old PDF for a few
 minutes after deploy.
 
 **Open.** Nothing new.
+
+## 2026-10-19 · SESSION · Remove any single element, not just a section
+
+**Why.** The user: "I should be able to delete quotes etc — basically delete
+whatever I want." Until now only sections (hide), added blocks, custom cards,
+education rows, sidebar widgets and their chips could come off a page; a pull
+quote or a paragraph could only be emptied.
+
+**Shipped.** Every editable field on both page types — and on a case study
+the non-text blocks too (`.sh-loop`, `.sh-award`, `.sh-resp`, `.sh-gallery`,
+`.sh-facts`, as `CS_BLOCKS`) — can be removed and restored one at a time.
+Same rule as sections: *remove hides, never deletes*. `fldRemove()` marks the
+element `class="fld-removed" hidden`; the publish keeps its content in the
+file, and the case study's positional keys (`sec{i}/{j}`) do not shift under
+the fields after it — deleting the node would have re-keyed every later field
+in the section. State is one list, `__fldRemoved__`, of `fldKey()` values
+(`csFieldKey()` for a field, `sec{i}/blk{j}` by position for a block) saved
+beside the fields in `pmpr_portfolio_v2` and `pmpr_cs_fields_<id>`, replayed
+by `applyFldRemoved()` at the end of `loadSaved()` — after `#edu-list`,
+`#added-blocks` and the custom cards are put back whole, since that recreates
+the very elements it marks. The trigger is a single pill, `#fld-tools`, that
+appears over whatever removable element is hovered or focused (tapped, for a
+block), named by `data-label` or tag, offering ✕ or ↩ Restore. While editing a
+removed element stays in place, ghosted and struck through, with per-tag
+display rules so `[hidden]` does not collapse it; visitors never see it. The
+pill is built on demand and wired by listener, not by handler name, and is
+stripped by `stripSectionTools()` and by `buildPublishHTML()` like
+`.sec-tools`. The landing page's Sections-tab field rows show the removed
+state and carry their own ↩ Restore. README, SPEC and the Architecture
+section describe it; 41 CLAUDE.md citations renumbered, `var()` count 441→454,
+citation count 52→56.
+
+**Verified.** `checks.sh` exits 0. A Playwright/Chromium probe drove the real
+editor with hover, focus and click events, 45 assertions green: on Hot Potato
+the pull quote, the core-loop strip and a bullet are removed from their pills
+(names Quote / Core loop / Bullet), ghost with the right display (block, flex,
+list-item), three keys of the expected shapes are stored, a paragraph edited
+*after* the removed quote lands on the same paragraph after a reload (the key
+stability this design exists for), the publish snapshot carries
+`class="sh-pull fld-removed" contenteditable="false" hidden=""` with the quote
+text intact and no `#fld-tools`, `.sec-tools` or `#edit-panel`; as a visitor
+all three are `display:none` and no pill node exists; back in edit mode the
+ghost's pill reads Restore and restores, the list shrinks, nothing stored
+mentions the pill, the dev log's own `.sh-pull` gets no pill, exit strips the
+pill and hides the ghosts. On the landing page the about quote's pill uses its
+`data-label`, its panel row is struck through with Restore and that button
+restores; hero tagline and an education field survive a reload hidden with the
+education list intact; stored blobs carry no pill markup; publish serializes
+the tagline hidden. At 390px focusing a field shows the pill and nothing
+overflows. No JS errors on any page.
+
+**Not verified.** `smoke.sh` skips here (no `gjs`); Safari and Firefox
+untested; nothing published through `ghPublish()`; a real touch tap on a
+block (the click path was exercised with a mouse click only).
+
+**Open.** Case-study panel rows are a table of contents and do not list
+fields, so a removed element inside a *removed* section can only be restored
+after the section is. Not filed: the ghost is the restore path everywhere
+else.

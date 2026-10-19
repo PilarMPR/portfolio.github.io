@@ -760,8 +760,9 @@ function appendFieldItems(sub, fields) {
   fields.forEach((f, i) => {
     const label = f.dataset.label || f.dataset.ed || ('Field ' + (i+1));
     const preview = f.textContent.trim().slice(0,28) || '(empty)';
+    const off = fldIsRemoved(f);
     const fi = document.createElement('div');
-    fi.className = 'ep-section-item ep-field-item';
+    fi.className = 'ep-section-item ep-field-item' + (off ? ' removed' : '');
     fi.innerHTML = `
       <span class="ep-dot"></span>
       <div style="flex:1;overflow:hidden">
@@ -769,6 +770,14 @@ function appendFieldItems(sub, fields) {
         <div class="ep-field-prev">${preview}</div>
       </div>
       <span class="ep-sub-go">Edit</span>`;
+    if (off) {
+      // A removed field is put back from here as well as from its pill.
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'ep-arr ep-restore'; b.textContent = '↩ Restore';
+      b.title = 'Put this back on the page';
+      b.addEventListener('click', e => { e.stopPropagation(); fldRestore(f); });
+      fi.querySelector('.ep-sub-go').replaceWith(b);
+    }
     fi.addEventListener('click', () => {
       // Get the sheet out of the way first — the point is to see the field.
       if (MQ_STACK.matches) setEditorSheet(false);
@@ -1138,6 +1147,8 @@ function saveCaseStudy(id) {
   const secs = csSecs();
   data.__secOrder__   = secs.map(s => s.dataset.sec);
   data.__secRemoved__ = secs.filter(secIsRemoved).map(s => s.dataset.sec);
+  // Single elements taken off the page, by field key — see fldRemove().
+  data.__fldRemoved__ = fldAll().filter(fldIsRemoved).map(fldKey);
 
   data.__savedAt__ = Date.now();        // so a later publish can outrank it
   safeSet('pmpr_cs_fields_' + id, JSON.stringify(data));
@@ -1413,6 +1424,161 @@ function applyCsLayout(saved) {
   }
 }
 
+/* ─── REMOVING SINGLE ELEMENTS ─────────────
+   Anything editable can also come off the page one piece at a time: a pull
+   quote, a paragraph, a bullet, a heading, the hero tagline — and on a case
+   study the blocks that hold no text of their own (the core-loop strip,
+   award rows, the responsibilities columns, the gallery, the facts bar).
+   Same rule as sections: remove hides, never deletes. The element stays
+   where it is as `class="fld-removed" hidden`, so a publish keeps its
+   content in the file, and — the real reason — a case study's positional
+   keys (`sec{i}/{j}`) do not shift under the fields after it. Deleting the
+   node would re-key every later field in its section and land stored
+   drafts on the wrong element.
+
+   While editing a removed element stays visible, ghosted and struck
+   through (portfolio.css, "Removed elements"), and the pill that appears
+   over any removable element offers ✕ or ↩ Restore. The pill is one node,
+   #fld-tools, built on first use and stripped on exit and on publish like
+   `.sec-tools`; its buttons are wired here rather than by name, so there
+   is no handler string for R2 to lose. The state is one list of field
+   keys, `__fldRemoved__`, saved beside the fields in both planes and
+   replayed after them on load. */
+const FLD_REMOVED = 'fld-removed';
+const CS_BLOCKS   = '.sh-loop,.sh-award,.sh-resp,.sh-gallery,.sh-facts';
+const FLD_HOVER   = IS_PROJECT ? CS_EDITABLE + ',' + CS_BLOCKS : '[data-ed]';
+
+/* Everything that can be removed, in document order. The dev log renders
+   its own `.sh-pull` and paragraphs from data — those are not fields. */
+function fldAll() {
+  if (!IS_PROJECT) return [...document.querySelectorAll('[data-ed]')].filter(el => el.dataset.ed);
+  if (!caseView) return [];
+  const blocks = [...caseView.querySelectorAll(CS_BLOCKS)].filter(b => !b.closest('#dl-wrap'));
+  return csFields().concat(blocks);
+}
+
+/* A field is keyed as the field it is; a block by its position among the
+   blocks of its section, so editing the prose around it cannot move it. */
+function fldKey(el) {
+  if (!IS_PROJECT) return el.dataset.ed || '';
+  if (el.matches(CS_EDITABLE)) return csFieldKey(el);
+  const sec = el.closest('.sh-sec');
+  const scope = sec || caseView;
+  const peers = [...scope.querySelectorAll(CS_BLOCKS)]
+    .filter(b => (b.closest('.sh-sec') || caseView) === scope && !b.closest('#dl-wrap'));
+  return `${sec ? 'sec' + csSecs().indexOf(sec) : 'page'}/blk${peers.indexOf(el)}`;
+}
+
+const fldIsRemoved = el => !!el && el.classList.contains(FLD_REMOVED);
+function fldSetRemoved(el, off) {
+  el.classList.toggle(FLD_REMOVED, off);
+  el.hidden = off;                       // as secSetRemoved(): the class hides, the attribute says why
+  if (!el.className) el.removeAttribute('class');
+}
+
+function fldRemove(el) {
+  if (!el || fldIsRemoved(el)) return;
+  fldSetRemoved(el, true);
+  if (document.activeElement === el) el.blur();
+  fldChanged(el);
+  dlToast('Removed — hidden, not deleted. Hover it to restore.');
+}
+function fldRestore(el) {
+  if (!el || !fldIsRemoved(el)) return;
+  fldSetRemoved(el, false);
+  fldChanged(el);
+}
+function fldChanged(el) {
+  autoSave();            // saveCaseStudy() on a project page; both store the list
+  buildSectionList();    // the panel's field rows show the struck-through state
+  fldToolsShow(el);      // the pill flips between ✕ and Restore in place
+}
+
+/* Replay the stored list — only when one was saved, so a draft from before
+   this existed leaves the file's own state alone. Runs after the fields are
+   restored, because #edu-list and #added-blocks are put back whole and that
+   recreates the very elements this marks. */
+function applyFldRemoved(data) {
+  if (!data || !Array.isArray(data.__fldRemoved__)) return;
+  fldAll().forEach(el => fldSetRemoved(el, data.__fldRemoved__.includes(fldKey(el))));
+}
+
+/* The pill. One node for the whole page, moved to whatever is hovered or
+   focused; it overlaps the element's top-right corner so the pointer can
+   reach it without crossing a gap that would hide it. */
+const FLD_NAMES = [
+  ['.sh-pull,.about-pull', 'Quote'], ['.sh-sec-lbl', 'Section label'], ['.sh-widget-lbl', 'Box title'],
+  ['.sh-tool', 'Tool'], ['.sh-loop', 'Core loop'], ['.sh-award', 'Award'], ['.sh-resp', 'Responsibilities'],
+  ['.sh-gallery', 'Gallery'], ['.sh-facts', 'Facts'], ['h1,h2,h3', 'Heading'], ['li', 'Bullet'], ['p', 'Paragraph'],
+];
+function fldName(el) {
+  if (el.dataset.label) return el.dataset.label;
+  const hit = FLD_NAMES.find(([sel]) => el.matches(sel));
+  return hit ? hit[1] : 'Element';
+}
+
+let fldCur = null, fldHideT = 0;
+function fldToolsEl() {
+  let t = document.getElementById('fld-tools');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'fld-tools';
+    t.contentEditable = 'false';
+    t.addEventListener('mousedown', e => e.preventDefault());   // leave the field's caret where it is
+    document.body.appendChild(t);
+  }
+  return t;
+}
+function fldToolsShow(el) {
+  clearTimeout(fldHideT);
+  if (!editing || !el) return;
+  fldCur = el;
+  const t = fldToolsEl();
+  const off = fldIsRemoved(el);
+  t.innerHTML = `<span class="fld-tools-lbl">${dlEsc(fldName(el))}${off ? ' · removed' : ''}</span>`;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  if (off) { btn.className = 'fld-restore'; btn.textContent = '↩ Restore'; btn.title = 'Put this back on the page'; }
+  else     { btn.textContent = '✕'; btn.title = 'Remove from the page — hidden, not deleted'; }
+  btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); off ? fldRestore(el) : fldRemove(el); });
+  t.appendChild(btn);
+  t.classList.toggle('removed', off);
+  t.classList.add('show');
+  const r = el.getBoundingClientRect(), w = t.offsetWidth;
+  t.style.top  = Math.max(8, r.top + window.scrollY - 12) + 'px';
+  t.style.left = Math.max(8, Math.min(r.right + window.scrollX - w, window.innerWidth + window.scrollX - w - 8)) + 'px';
+}
+function fldToolsHide(now) {
+  clearTimeout(fldHideT);
+  const go = () => { fldCur = null; document.getElementById('fld-tools')?.classList.remove('show'); };
+  if (now) go(); else fldHideT = setTimeout(go, 160);
+}
+/* The element under the pointer, if it is one of ours. The selector alone
+   is not enough: the panel has paragraphs, the dev log has pull quotes. */
+function fldTarget(node) {
+  const el = node?.closest?.(FLD_HOVER);
+  return el && fldAll().includes(el) ? el : null;
+}
+document.addEventListener('mouseover', e => {
+  if (!editing) return;
+  if (e.target.closest?.('#fld-tools')) { clearTimeout(fldHideT); return; }
+  const el = fldTarget(e.target);
+  if (!el) return fldToolsHide();
+  if (el !== fldCur || !document.getElementById('fld-tools')?.classList.contains('show')) fldToolsShow(el);
+  else clearTimeout(fldHideT);
+});
+document.addEventListener('focusin', e => {
+  if (!editing) return;
+  const el = fldTarget(e.target);
+  if (el) fldToolsShow(el);
+});
+// A block has nothing to focus, so on a touch screen a tap shows its pill.
+document.addEventListener('click', e => {
+  if (!editing || e.target.closest?.('#fld-tools')) return;
+  const el = fldTarget(e.target);
+  if (el && !el.isContentEditable) fldToolsShow(el);
+});
+
 /* The in-page pill. Built on entry to edit mode and after every layout
    change, stripped on exit and on publish — like the sidebar widget
    tools, it must never reach a published file or a stored blob (autoSave
@@ -1426,7 +1592,7 @@ function secToolsHTML(label, mv, rm, id, first, last) {
     `</div>`;
 }
 function stripSectionTools(root) {
-  (root || document).querySelectorAll('.sec-tools').forEach(n => n.remove());
+  (root || document).querySelectorAll('.sec-tools,#fld-tools').forEach(n => n.remove());
 }
 function decorateSections() {
   stripSectionTools();
@@ -1816,6 +1982,7 @@ function autoSave() {
   data['__edu__'] = eduList()?.innerHTML || '';
   data['__order__'] = secAll().map(el => el.id);
   data['__removed__'] = secAll().filter(secIsRemoved).map(el => el.id);
+  data['__fldRemoved__'] = fldAll().filter(fldIsRemoved).map(fldKey);
   // Before serializing, not after: outerHTML is what gets stored, so the href
   // has to already match the link field or the link dies on the next reload.
   syncCardLinks();
@@ -1902,6 +2069,7 @@ function loadSaved() {
       const v = saved[csFieldKey(el)];
       if (v !== undefined) el.innerHTML = v;
     });
+    applyFldRemoved(saved);
     return;
   }
   try {
@@ -1970,6 +2138,9 @@ function loadSaved() {
       });
       syncCardLinks();
     }
+    // Last: the education list, the added blocks and the custom cards above
+    // were just put back whole, and this marks elements inside them.
+    applyFldRemoved(data);
   } catch (e) {}
 }
 
@@ -2400,7 +2571,7 @@ function buildPublishHTML(opts) {
   clone.querySelector('#case-view')?.removeAttribute('data-editable');
   // Sidebar edit controls are injected, never authored — they must not
   // reach the published file.
-  clone.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del,.sec-tools').forEach(n => n.remove());
+  clone.querySelectorAll('.sh-widget-tools,.sh-item-add,.sh-item-del,.sec-tools,#fld-tools').forEach(n => n.remove());
   clone.querySelectorAll('.is-blank').forEach(el => {
     el.classList.remove('is-blank');
     if (!el.className) el.removeAttribute('class');

@@ -101,6 +101,7 @@ Editable:
 - [x] Education list — add, reorder, remove
 - [x] Section headings and labels, with the italic placed from the format bar
 - [x] Sections — reorder, remove and restore, on the landing page and in each case study
+- [x] Single elements — any editable field, and a case study's non-text blocks, removed and restored in place
 - [x] Contact fields and status line
 - [x] Profile photo and all project card images (upload)
 - [x] Full case-study text on each project page

@@ -588,6 +588,45 @@ body.editing .sec-tools button {
 }
 body.editing .sec-tools button:hover { border-color:var(--text); color:var(--text); }
 body.editing .sec-tools button:disabled { opacity:.3; cursor:default; border-color:var(--faint); color:var(--muted); }
+
+/* ── Removed elements ──────────────────────
+   One field or block taken off the page by fldRemove(): hidden, not
+   deleted, like a section, so the file keeps it and a case study's
+   positional keys stay put. Visitors never see it. While editing it stays
+   in place, ghosted, and #fld-tools — the pill that appears over whatever
+   is hovered or focused — puts it back. The per-tag display values are
+   what [hidden] would otherwise collapse; flex and grid blocks keep their
+   own so the ghost holds its shape. */
+.fld-removed { display:none !important; }
+body.editing .fld-removed {
+  display:block !important; opacity:.4; text-decoration:line-through;
+  outline:1px dashed var(--muted) !important; outline-offset:3px; background:none !important;
+}
+body.editing li.fld-removed { display:list-item !important; }
+body.editing span.fld-removed { display:inline-block !important; }
+body.editing .sh-loop.fld-removed, body.editing .sh-award.fld-removed { display:flex !important; }
+body.editing .sh-resp.fld-removed, body.editing .sh-facts.fld-removed { display:grid !important; }
+
+#fld-tools {
+  display:none; position:absolute; z-index:3400;
+  align-items:center; gap:.2rem; padding:.2rem .25rem .2rem .55rem;
+  background:var(--bg); border:1px solid var(--faint); white-space:nowrap;
+}
+body.editing #fld-tools.show { display:flex; }
+#fld-tools .fld-tools-lbl {
+  font-family:var(--fm); font-size:.56rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); padding-right:.35rem; max-width:11rem; overflow:hidden; text-overflow:ellipsis;
+}
+#fld-tools button {
+  height:24px; min-width:24px; line-height:1; padding:0 .3rem; cursor:pointer;
+  font-size:.8rem; background:var(--bg); color:var(--muted); border:1px solid var(--faint);
+}
+#fld-tools button:hover { border-color:var(--text); color:var(--text); }
+#fld-tools .fld-restore {
+  font-family:var(--fm); font-size:.55rem; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent); border-color:rgba(var(--accent-rgb),.5);
+}
+.ep-field-item.removed .ep-field-lbl, .ep-field-item.removed .ep-field-prev { text-decoration:line-through; opacity:.55; }
 .sh-nav { border-top:1px solid var(--faint); padding:1.5rem clamp(1.5rem,4vw,2.5rem); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; background:none; flex-shrink:0; }
 .sh-nav-btn { font-size:.98rem; padding:0 0 .1rem; border:none; border-bottom:1.5px solid var(--faint); color:var(--text); cursor:pointer; background:none; }
 .sh-nav-btn:hover { color:var(--accent); border-bottom-color:var(--accent); }

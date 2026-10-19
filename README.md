@@ -54,6 +54,8 @@ Every row except Hero carries **▲ ▼** to move the section and **🗑** to ta
 
 On a **project page** the panel is a table of contents: click a case-study section to jump to it, or just click any text on the page and type. Each section row, and its pill on the page, carries the same ▲ ▼ 🗑 and Restore. The sidebar widgets get their own group below it (see [The sidebar](#the-sidebar)), and a link back to the landing page sits at the bottom.
 
+Single elements come off the page the same way, on both page types. Hover any editable text — a quote, a paragraph, a bullet, a heading, the hero line — or, on a case study, the core-loop strip, an award row, the responsibilities columns, the gallery or the facts bar, and a small pill appears at its top-right corner with its name and **✕**. Removing hides rather than deletes: while you edit, the element stays in place ghosted and struck through, and the same pill reads **↩ Restore**. Visitors never see it, and it stays in the file. On the landing page the field's row in the Sections tab is struck through too, with **↩ Restore** beside it.
+
 **Headings.** The section headings are two lines with the second in italic accent ("Work / *Log.*"). They are ordinary fields: click to rewrite them, select a word and press **I** in the floating format bar to move the italic where you want it — in a heading, italic *is* the accent — and press Enter to break the line. The same bar appears when you select text in a case study, whose small section labels ("Context", "How it works") are editable too.
 
 What you can edit is whatever the markup marks as editable, which on the landing page is:

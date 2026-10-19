@@ -1263,3 +1263,17 @@ is none, moves are buttons only.
 removed landing section leaves those links landing at the top of the page.
 Two `insertTextBlock()` calls within the same millisecond share an id
 (`'added-' + Date.now()`) — pre-existing, unreachable by hand.
+
+## 2026-10-19 · SESSION · Replace the CV PDF
+
+**Shipped.** `assets/site/pilar-mpr-cv.pdf` replaced with the new English
+CV the user supplied (one page, 89 KB; the old file was 174 KB). Same path,
+so none of the ten `href`s across the eight pages, nor the `download`
+filename `CV_Pilar_MPR.pdf`, needed touching. No markup, CSS or JS changed.
+
+**Verified.** The new file starts with `%PDF-` and ends with `%%EOF`;
+`checks.sh` exits 0. Not verified: `smoke.sh` (no display here), and that the
+browser serves the new bytes — GitHub Pages may cache the old PDF for a few
+minutes after deploy.
+
+**Open.** Nothing new.
